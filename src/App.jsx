@@ -221,15 +221,16 @@ return (
     )}
   </nav>
 
-  {/* BOTÓN HAMBURGUESA PARA MOBILE */}
-{!isMobileMenuOpen && (
-  <button
-    className="mobile-menu-toggle"
-    onClick={() => setIsMobileMenuOpen(true)}
-  >
-    ☰
-  </button>
-)}
+  {/* BOTÓN MENÚ (solo si hay usuario autenticado) */}
+  {user && !isMobileMenuOpen && (
+    <button
+      className="mobile-menu-toggle"
+      onClick={() => setIsMobileMenuOpen(true)}
+    >
+      ☰
+    </button>
+  )}
+
 
 
   {/* ZONA DE USUARIO (SE MANTIENE IGUAL) */}
@@ -247,47 +248,59 @@ return (
 </div>
 
 
-  {/* BACKDROP (OSCURECE EL FONDO) */}
-  <div
-    className={`mobile-backdrop ${isMobileMenuOpen ? 'open' : ''}`}
-    onClick={() => setIsMobileMenuOpen(false)}
-  />
-
-  {/* MENÚ DESLIZABLE DESDE LA DERECHA */}
-<aside className={`mobile-drawer ${isMobileMenuOpen ? 'open' : ''}`}>
-  <button className="drawer-close" onClick={() => setIsMobileMenuOpen(false)}>
-    ✕
-  </button>
-
   {user && (
-    <NavLink
-      to="/cuenta"
-      className="drawer-user"
-      onClick={() => setIsMobileMenuOpen(false)}
-    >
-      <div className="drawer-avatar">
-        {user.name?.charAt(0)?.toUpperCase()}
-      </div>
-      <div className="drawer-user-info">
-        <p className="drawer-username">{user.name}</p>
-        <p className="drawer-email">{user.email}</p>
-      </div>
-    </NavLink>
+    <>
+      {/* BACKDROP (OSCURECE EL FONDO) */}
+      <div
+        className={`mobile-backdrop ${isMobileMenuOpen ? 'open' : ''}`}
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
+
+      {/* MENÚ DESLIZABLE DESDE LA DERECHA */}
+      <aside className={`mobile-drawer ${isMobileMenuOpen ? 'open' : ''}`}>
+        <button
+          className="drawer-close"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          ✕
+        </button>
+
+        <NavLink
+          to="/cuenta"
+          className="drawer-user"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          <div className="drawer-avatar">
+            {user.name?.charAt(0)?.toUpperCase()}
+          </div>
+          <div className="drawer-user-info">
+            <p className="drawer-username">{user.name}</p>
+            <p className="drawer-email">{user.email}</p>
+          </div>
+        </NavLink>
+
+        <nav className="drawer-nav" onClick={() => setIsMobileMenuOpen(false)}>
+          <NavLink to="/" className="drawer-link">Inicio</NavLink>
+          <NavLink to="/cv" className="drawer-link">Crear CV</NavLink>
+          <NavLink to="/comunidad" className="drawer-link">Comunidad</NavLink>
+          <NavLink to="/mis-cvs" className="drawer-link">Mis CVs</NavLink>
+          <NavLink to="/config" className="drawer-link">Configuración</NavLink>
+        </nav>
+
+        <button
+          type="button"
+          className="drawer-link drawer-link-logout"
+          onClick={() => {
+            setIsMobileMenuOpen(false);
+            handleLogout();
+          }}
+        >
+          Cerrar sesión
+        </button>
+      </aside>
+    </>
   )}
 
-  <nav className="drawer-nav" onClick={() => setIsMobileMenuOpen(false)}>
-    <NavLink to="/" className="drawer-link">Inicio</NavLink>
-    <NavLink to="/cv" className="drawer-link">Crear CV</NavLink>
-    <NavLink to="/comunidad" className="drawer-link">Comunidad</NavLink>
-
-    {user && (
-      <>
-        <NavLink to="/mis-cvs" className="drawer-link">Mis CVs</NavLink>
-        <NavLink to="/config" className="drawer-link">Configuración</NavLink>
-      </>
-    )}
-  </nav>
-</aside>
 
 </header>
 
