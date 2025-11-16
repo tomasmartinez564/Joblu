@@ -1,6 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import html2pdf from "html2pdf.js";
 
+
+// 👇 Base de la API
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 // Estado base vacío de un CV
 const emptyCv = {
   // Datos personales
@@ -181,17 +185,17 @@ function CvBuilder({ onSaveCv, initialData, user, settings }) {
     setAiSuggestion("");
 
     try {
-      const response = await fetch("http://localhost:3000/api/optimizar-cv", {
+      const response = await fetch(`${API_BASE_URL}/api/optimizar-cv`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          section: aiSection,              // "perfil", "experiencia", etc.
-          content: cvData[aiSection],      // texto actual de esa sección
-          jobDescription: jobDesc,         // lo que el user pegó
-          language: cvLanguage,            // "es" o "en"
-          targetIndustry,                  // viene de settings
+          section: aiSection,
+          content: cvData[aiSection],
+          jobDescription: jobDesc,
+          language: cvLanguage,
+          targetIndustry,
         }),
       });
 
@@ -220,6 +224,7 @@ function CvBuilder({ onSaveCv, initialData, user, settings }) {
       setAiLoading(false);
     }
   };
+
 
 
 

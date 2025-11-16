@@ -3,6 +3,9 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 
 const STORAGE_KEY = "joblu_liked_posts";
 
+// 👇 Base de la API
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 const getInitialLikedPosts = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -11,7 +14,6 @@ const getInitialLikedPosts = () => {
     return [];
   }
 };
-
 
 function PostDetail({ user }) {
   const { id } = useParams();
@@ -22,7 +24,6 @@ function PostDetail({ user }) {
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
 
-  // Estado para comentarios
   const [commentContent, setCommentContent] = useState("");
   const [commentError, setCommentError] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
@@ -39,7 +40,7 @@ function PostDetail({ user }) {
     const fetchPost = async () => {
       try {
         const res = await fetch(
-          `http://localhost:3000/api/community/posts/${id}`
+          `${API_BASE_URL}/api/community/posts/${id}`
         );
         if (!res.ok) {
           throw new Error("No se pudo obtener el post.");
@@ -66,7 +67,6 @@ function PostDetail({ user }) {
     });
   };
 
-  // Puede borrar si su email coincide con el del autor
   const canDelete =
     user && post && post.authorEmail && user.email && user.email === post.authorEmail;
 
@@ -76,13 +76,12 @@ function PostDetail({ user }) {
     setDeleting(true);
     try {
       const res = await fetch(
-        `http://localhost:3000/api/community/posts/${id}`,
+        `${API_BASE_URL}/api/community/posts/${id}`,
         {
           method: "DELETE",
         }
       );
       if (!res.ok) throw new Error("No se pudo borrar el post.");
-      // Volver a la lista de comunidad
       navigate("/comunidad");
     } catch (err) {
       console.error(err);
@@ -108,7 +107,7 @@ function PostDetail({ user }) {
       setCommentLoading(true);
 
       const res = await fetch(
-        `http://localhost:3000/api/community/posts/${id}/comments`,
+        `${API_BASE_URL}/api/community/posts/${id}/comments`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -127,7 +126,6 @@ function PostDetail({ user }) {
 
       const newComment = await res.json();
 
-      // Actualizamos el estado local del post con el nuevo comentario
       setPost((prev) =>
         prev
           ? { ...prev, comments: [...(prev.comments || []), newComment] }
@@ -143,7 +141,7 @@ function PostDetail({ user }) {
     }
   };
 
-    const handleToggleLike = async () => {
+  const handleToggleLike = async () => {
     if (!post) return;
 
     const alreadyLiked = likedPosts.includes(post._id);
@@ -151,7 +149,7 @@ function PostDetail({ user }) {
 
     try {
       const res = await fetch(
-        `http://localhost:3000/api/community/posts/${post._id}/like`,
+        `${API_BASE_URL}/api/community/posts/${post._id}/like`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -165,12 +163,10 @@ function PostDetail({ user }) {
 
       const updatedPost = await res.json();
 
-      // Actualizar el post con el nuevo número de likes
       setPost((prev) =>
         prev ? { ...prev, likes: updatedPost.likes } : prev
       );
 
-      // Actualizar qué posts están likeados en este navegador
       setLikedPosts((prev) =>
         alreadyLiked
           ? prev.filter((id) => id !== post._id)
