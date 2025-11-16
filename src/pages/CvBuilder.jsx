@@ -1,0 +1,916 @@
+import { useState, useRef, useEffect } from "react";
+import html2pdf from "html2pdf.js";
+
+// Estado base vacío de un CV
+const emptyCv = {
+  // Datos personales
+  nombre: "",
+  puesto: "",
+  email: "",
+  telefono: "",
+  ubicacion: "",
+  sitioWeb: "",
+  linkedin: "",
+  github: "",
+
+  // Contenido del CV
+  perfil: "",
+  experiencia: "",
+  educacion: "",
+  habilidades: "",
+  idiomas: "",
+  proyectos: "",
+  otros: "",
+
+  // Foto en base64
+  foto: "",
+};
+
+function CvBuilder({ onSaveCv, initialData, user, settings }) {
+  const isLogged = !!user;
+
+  // Preferencias del usuario (con defaults por si no vienen)
+  const {
+    cvLanguage = "es",
+    cvStyle = "ats",
+    includePhoto = true,
+    showTips = true,
+    targetIndustry = "",
+  } = settings || {};
+
+  const [cvData, setCvData] = useState(initialData || emptyCv);
+
+  const [sectionsVisible, setSectionsVisible] = useState({
+    perfil: true,
+    experiencia: true,
+    educacion: true,
+    habilidades: true,
+    idiomas: false,
+    proyectos: true,
+    otros: true,
+  });
+
+  const cvRef = useRef(null);
+
+  // 🧠 Estado para el panel de IA
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiSection, setAiSection] = useState("perfil");
+  const [jobDesc, setJobDesc] = useState("");
+  const [aiSuggestion, setAiSuggestion] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+
+  // Cuando cambia el CV activo (desde "Mis CVs"), actualizamos el formulario
+  useEffect(() => {
+    if (initialData) {
+      setCvData(initialData);
+    } else {
+      setCvData(emptyCv);
+    }
+  }, [initialData]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCvData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDownloadPDF = () => {
+    if (!cvRef.current) return;
+
+    const element = cvRef.current;
+    const opt = {
+      margin: 0,
+      filename: `${cvData.nombre || "mi_cv"}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    };
+
+    html2pdf().set(opt).from(element).save();
+  };
+
+  const toggleSection = (key) => {
+    setSectionsVisible((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const handleSave = () => {
+    if (!isLogged) {
+      alert("Tenés que iniciar sesión para guardar tus CVs.");
+      return;
+    }
+    onSaveCv?.(cvData);
+  };
+
+  // 📸 subir foto
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setCvData((prev) => ({
+        ...prev,
+        foto: reader.result, // base64
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = () => {
+    setCvData((prev) => ({
+      ...prev,
+      foto: "",
+    }));
+  };
+
+  const contactoLinea1 =
+    [cvData.email, cvData.telefono, cvData.ubicacion].filter(Boolean).join(" · ") ||
+    (cvLanguage === "en"
+      ? "email@example.com · +54 9 11 0000-0000 · Buenos Aires, Argentina"
+      : "email@ejemplo.com · +54 9 11 0000-0000 · Buenos Aires, Argentina");
+
+  const contactoLinea2 =
+    [cvData.linkedin, cvData.github, cvData.sitioWeb].filter(Boolean).join(" · ") ||
+    (cvLanguage === "en"
+      ? "linkedin.com/in/user · github.com/user · portfolio.com"
+      : "linkedin.com/in/usuario · github.com/usuario · portfolio.com");
+
+  // Títulos de secciones según idioma
+  const sectionLabels = {
+    perfil: cvLanguage === "en" ? "Profile" : "Perfil",
+    experiencia: cvLanguage === "en" ? "Experience" : "Experiencia",
+    educacion: cvLanguage === "en" ? "Education" : "Educación",
+    habilidades: cvLanguage === "en" ? "Skills" : "Habilidades",
+    idiomas: cvLanguage === "en" ? "Languages" : "Idiomas",
+    proyectos: cvLanguage === "en" ? "Projects" : "Proyectos",
+    otros: cvLanguage === "en" ? "Additional information" : "Información adicional",
+  };
+
+  // Clase según estilo del CV
+  const previewPaperClass = (() => {
+    if (cvStyle === "visual") return "cv-preview-paper cv-preview-paper-visual";
+    if (cvStyle === "balanceado") return "cv-preview-paper cv-preview-paper-balanced";
+    return "cv-preview-paper cv-preview-paper-ats";
+  })();
+
+  // Pequeño resumen de preferencias
+  const settingsSummary = (() => {
+    const langLabel = cvLanguage === "en" ? "Inglés" : "Español";
+    const styleLabel =
+      cvStyle === "visual"
+        ? "Visual"
+        : cvStyle === "balanceado"
+        ? "Balanceado"
+        : "Compatibilidad ATS";
+
+    let base = `Idioma: ${langLabel} · Estilo: ${styleLabel}`;
+    if (targetIndustry) {
+      base += ` · Rubro: ${targetIndustry}`;
+    }
+    return base;
+  })();
+
+
+  // 🧠 IA real: llamada al backend
+  const handleAskAi = async () => {
+    setAiLoading(true);
+    setAiError("");
+    setAiSuggestion("");
+
+    try {
+      const response = await fetch("http://localhost:3000/api/optimizar-cv", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          section: aiSection,              // "perfil", "experiencia", etc.
+          content: cvData[aiSection],      // texto actual de esa sección
+          jobDescription: jobDesc,         // lo que el user pegó
+          language: cvLanguage,            // "es" o "en"
+          targetIndustry,                  // viene de settings
+        }),
+      });
+
+      const text = await response.text();
+      console.log("📩 Respuesta cruda del backend:", response.status, text);
+
+      if (!response.ok) {
+        throw new Error(`Respuesta no OK del servidor: ${response.status}`);
+      }
+
+      const data = JSON.parse(text);
+
+      if (!data.suggestion) {
+        throw new Error("La respuesta no contiene 'suggestion'");
+      }
+
+      setAiSuggestion(data.suggestion);
+    } catch (err) {
+      console.error("Error en handleAskAi:", err);
+      setAiError(
+        cvLanguage === "en"
+          ? "There was a problem connecting to the AI."
+          : "Hubo un problema al conectarse con la IA."
+      );
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+
+
+  const applyAiSection = () => {
+    if (!aiSuggestion) return;
+    setCvData((prev) => ({
+      ...prev,
+      [aiSection]: aiSuggestion,
+    }));
+    setAiOpen(false);
+  };
+
+  const closeAiPanel = () => {
+    if (aiLoading) return;
+    setAiOpen(false);
+  };
+
+  return (
+    <section className="cv-builder">
+      {/* 📝 Columna izquierda - Formulario */}
+      <div className="cv-column">
+        <h2>Completa tu CV</h2>
+
+        {showTips && (
+          <div className="cv-settings-tip">
+            <strong>Preferencias Joblu: </strong>
+            <span>{settingsSummary}</span>
+          </div>
+        )}
+
+        <form className="cv-form">
+          {/* DATOS PERSONALES */}
+          <h3 className="cv-form-sectionTitle">Datos personales</h3>
+
+          <div className="cv-form-group-inline">
+            <label>
+              {cvLanguage === "en" ? "Full name:" : "Nombre completo:"}
+              <input
+                type="text"
+                name="nombre"
+                value={cvData.nombre}
+                onChange={handleChange}
+                placeholder={
+                  cvLanguage === "en"
+                    ? "e.g. Sofia Martinez"
+                    : "Ej: Sofía Martínez"
+                }
+              />
+            </label>
+
+            <label>
+              {cvLanguage === "en"
+                ? "Job title / role:"
+                : "Puesto o título profesional:"}
+              <input
+                type="text"
+                name="puesto"
+                value={cvData.puesto}
+                onChange={handleChange}
+                placeholder={
+                  cvLanguage === "en"
+                    ? "e.g. Frontend Developer"
+                    : "Ej: Desarrolladora Frontend"
+                }
+              />
+            </label>
+          </div>
+
+          <div className="cv-form-group-inline">
+            <label>
+              Email:
+              <input
+                type="email"
+                name="email"
+                value={cvData.email}
+                onChange={handleChange}
+                placeholder={
+                  cvLanguage === "en"
+                    ? "e.g. sofia.martinez@mail.com"
+                    : "Ej: sofi.martinez@mail.com"
+                }
+              />
+            </label>
+
+            <label>
+              {cvLanguage === "en" ? "Phone:" : "Teléfono:"}
+              <input
+                type="text"
+                name="telefono"
+                value={cvData.telefono}
+                onChange={handleChange}
+                placeholder={
+                  cvLanguage === "en"
+                    ? "e.g. +54 9 11 0000-0000"
+                    : "Ej: +54 9 11 0000-0000"
+                }
+              />
+            </label>
+          </div>
+
+          <div className="cv-form-group-inline">
+            <label>
+              {cvLanguage === "en" ? "Location:" : "Ubicación:"}
+              <input
+                type="text"
+                name="ubicacion"
+                value={cvData.ubicacion}
+                onChange={handleChange}
+                placeholder={
+                  cvLanguage === "en"
+                    ? "e.g. Buenos Aires, Argentina"
+                    : "Ej: Buenos Aires, Argentina"
+                }
+              />
+            </label>
+
+            <label>
+              {cvLanguage === "en" ? "Website / Portfolio:" : "Sitio web / Portfolio:"}
+              <input
+                type="text"
+                name="sitioWeb"
+                value={cvData.sitioWeb}
+                onChange={handleChange}
+                placeholder={
+                  cvLanguage === "en"
+                    ? "e.g. myportfolio.com"
+                    : "Ej: miportfolio.com"
+                }
+              />
+            </label>
+          </div>
+
+          <div className="cv-form-group-inline">
+            <label>
+              LinkedIn:
+              <input
+                type="text"
+                name="linkedin"
+                value={cvData.linkedin}
+                onChange={handleChange}
+                placeholder={
+                  cvLanguage === "en"
+                    ? "e.g. linkedin.com/in/user"
+                    : "Ej: linkedin.com/in/usuario"
+                }
+              />
+            </label>
+
+            <label>
+              GitHub:
+              <input
+                type="text"
+                name="github"
+                value={cvData.github}
+                onChange={handleChange}
+                placeholder={
+                  cvLanguage === "en"
+                    ? "e.g. github.com/user"
+                    : "Ej: github.com/usuario"
+                }
+              />
+            </label>
+          </div>
+
+          {/* FOTO */}
+          {includePhoto && (
+            <div className="cv-form-photo">
+              <label>
+                {cvLanguage === "en" ? "Profile picture:" : "Foto de perfil:"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                />
+              </label>
+
+              {cvData.foto && (
+                <button
+                  type="button"
+                  className="cv-photo-remove-btn"
+                  onClick={handleRemovePhoto}
+                >
+                  {cvLanguage === "en" ? "Remove photo" : "Quitar foto"}
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* PERFIL */}
+          <div className="cv-form-sectionHeader">
+            <h3 className="cv-form-sectionTitle">
+              {cvLanguage === "en" ? "Professional profile" : "Perfil profesional"}
+            </h3>
+            <button
+              type="button"
+              className="cv-section-toggle"
+              onClick={() => toggleSection("perfil")}
+            >
+              {sectionsVisible.perfil
+                ? "− Ocultar del CV"
+                : "+ Mostrar en el CV"}
+            </button>
+          </div>
+
+          <label>
+            {cvLanguage === "en" ? "Summary:" : "Resumen:"}
+            <textarea
+              name="perfil"
+              value={cvData.perfil}
+              onChange={handleChange}
+              placeholder={
+                cvLanguage === "en"
+                  ? "Write a short summary about your background, experience and goals..."
+                  : "Escribe una breve descripción sobre vos, tu experiencia y objetivos..."
+              }
+              rows="3"
+            ></textarea>
+          </label>
+
+          {/* EXPERIENCIA */}
+          <div className="cv-form-sectionHeader">
+            <h3 className="cv-form-sectionTitle">
+              {cvLanguage === "en" ? "Work experience" : "Experiencia laboral"}
+            </h3>
+            <button
+              type="button"
+              className="cv-section-toggle"
+              onClick={() => toggleSection("experiencia")}
+            >
+              {sectionsVisible.experiencia
+                ? "− Ocultar del CV"
+                : "+ Mostrar en el CV"}
+            </button>
+          </div>
+
+          <label>
+            {cvLanguage === "en" ? "Details:" : "Detalle:"}
+            <textarea
+              name="experiencia"
+              value={cvData.experiencia}
+              onChange={handleChange}
+              placeholder={
+                cvLanguage === "en"
+                  ? `e.g.:
+Company X · Frontend Developer · 2023 - Present
+- Responsibility or achievement 1
+- Responsibility or achievement 2`
+                  : `Ej:
+Empresa X · Desarrollador Frontend · 2023 - Actualidad
+- Responsabilidad o logro 1
+- Responsabilidad o logro 2`
+              }
+              rows="4"
+            ></textarea>
+          </label>
+
+          {/* EDUCACIÓN */}
+          <div className="cv-form-sectionHeader">
+            <h3 className="cv-form-sectionTitle">
+              {cvLanguage === "en" ? "Education" : "Educación"}
+            </h3>
+            <button
+              type="button"
+              className="cv-section-toggle"
+              onClick={() => toggleSection("educacion")}
+            >
+              {sectionsVisible.educacion
+                ? "− Ocultar del CV"
+                : "+ Mostrar en el CV"}
+            </button>
+          </div>
+
+          <label>
+            {cvLanguage === "en" ? "Details:" : "Detalle:"}
+            <textarea
+              name="educacion"
+              value={cvData.educacion}
+              onChange={handleChange}
+              placeholder={
+                cvLanguage === "en"
+                  ? `e.g.:
+University X · Web Development · 2022 - Present`
+                  : `Ej:
+Universidad X · Tecnicatura en Desarrollo Web · 2022 - Actualidad`
+              }
+              rows="3"
+            ></textarea>
+          </label>
+
+          {/* HABILIDADES */}
+          <div className="cv-form-sectionHeader">
+            <h3 className="cv-form-sectionTitle">
+              {cvLanguage === "en" ? "Skills" : "Habilidades"}
+            </h3>
+            <button
+              type="button"
+              className="cv-section-toggle"
+              onClick={() => toggleSection("habilidades")}
+            >
+              {sectionsVisible.habilidades
+                ? "− Ocultar del CV"
+                : "+ Mostrar en el CV"}
+            </button>
+          </div>
+
+          <label>
+            {cvLanguage === "en"
+              ? "Skills (comma or dash separated):"
+              : "Habilidades (separadas por coma o guiones):"}
+            <input
+              type="text"
+              name="habilidades"
+              value={cvData.habilidades}
+              onChange={handleChange}
+              placeholder={
+                cvLanguage === "en"
+                  ? "e.g.: HTML, CSS, JavaScript, React, Git, teamwork..."
+                  : "Ej: HTML, CSS, JavaScript, React, Git, trabajo en equipo..."
+              }
+            />
+          </label>
+
+          {/* IDIOMAS */}
+          <div className="cv-form-sectionHeader">
+            <h3 className="cv-form-sectionTitle">
+              {cvLanguage === "en" ? "Languages" : "Idiomas"}
+            </h3>
+            <button
+              type="button"
+              className="cv-section-toggle"
+              onClick={() => toggleSection("idiomas")}
+            >
+              {sectionsVisible.idiomas
+                ? "− Ocultar del CV"
+                : "+ Mostrar en el CV"}
+            </button>
+          </div>
+
+          <label>
+            {cvLanguage === "en" ? "Details:" : "Detalle:"}
+            <input
+              type="text"
+              name="idiomas"
+              value={cvData.idiomas}
+              onChange={handleChange}
+              placeholder={
+                cvLanguage === "en"
+                  ? "e.g.: Native Spanish · English B2 · Portuguese A2"
+                  : "Ej: Español nativo · Inglés B2 · Portugués A2"
+              }
+            />
+          </label>
+
+          {/* PROYECTOS */}
+          <div className="cv-form-sectionHeader">
+            <h3 className="cv-form-sectionTitle">
+              {cvLanguage === "en" ? "Projects" : "Proyectos"}
+            </h3>
+            <button
+              type="button"
+              className="cv-section-toggle"
+              onClick={() => toggleSection("proyectos")}
+            >
+              {sectionsVisible.proyectos
+                ? "− Ocultar del CV"
+                : "+ Mostrar en el CV"}
+            </button>
+          </div>
+
+          <label>
+            {cvLanguage === "en" ? "Details:" : "Detalle:"}
+            <textarea
+              name="proyectos"
+              value={cvData.proyectos}
+              onChange={handleChange}
+              placeholder={
+                cvLanguage === "en"
+                  ? `e.g.:
+Personal portfolio · React · 2024
+- Responsive website to showcase my work`
+                  : `Ej:
+Proyecto portafolio personal · React · 2024
+- Sitio web responsive para mostrar mis trabajos`
+              }
+              rows="3"
+            ></textarea>
+          </label>
+
+          {/* OTROS */}
+          <div className="cv-form-sectionHeader">
+            <h3 className="cv-form-sectionTitle">
+              {cvLanguage === "en" ? "Additional information" : "Información adicional"}
+            </h3>
+            <button
+              type="button"
+              className="cv-section-toggle"
+              onClick={() => toggleSection("otros")}
+            >
+              {sectionsVisible.otros
+                ? "− Ocultar del CV"
+                : "+ Mostrar en el CV"}
+            </button>
+          </div>
+
+          <label>
+            {cvLanguage === "en"
+              ? "Courses, certifications, interests, etc.:"
+              : "Cursos, certificaciones, intereses, etc.:"}
+            <textarea
+              name="otros"
+              value={cvData.otros}
+              onChange={handleChange}
+              placeholder={
+                cvLanguage === "en"
+                  ? "e.g.: online courses, certifications, volunteering, relevant interests..."
+                  : "Ej: Cursos online, certificaciones, voluntariados, intereses relevantes..."
+              }
+              rows="3"
+            ></textarea>
+          </label>
+        </form>
+
+        <div className="cv-actions">
+          <button type="button" className="save-btn" onClick={handleSave}>
+            {cvLanguage === "en" ? "Save CV" : "Guardar CV"}
+          </button>
+
+          <button
+            type="button"
+            className="download-btn"
+            onClick={handleDownloadPDF}
+          >
+            {cvLanguage === "en" ? "Download PDF" : "Descargar PDF"}
+          </button>
+
+          <button
+            type="button"
+            className="ai-btn"
+            onClick={() => setAiOpen(true)}
+          >
+            💡 {cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
+          </button>
+        </div>
+      </div>
+
+      {/* 👀 Columna derecha - Vista previa */}
+      <div className="cv-column">
+        <h2>{cvLanguage === "en" ? "Preview" : "Vista previa"}</h2>
+        <div className="cv-preview-wrapper">
+          <div className={previewPaperClass} ref={cvRef}>
+            <div className="cv-preview-header">
+              <div>
+                <h1>
+                  {cvData.nombre ||
+                    (cvLanguage === "en" ? "Name Surname" : "Nombre Apellido")}
+                </h1>
+                <h3 style={{ color: "#6b7280", marginTop: "0.25rem" }}>
+                  {cvData.puesto ||
+                    (cvLanguage === "en"
+                      ? "Desired role / Job title"
+                      : "Puesto deseado / Rol profesional")}
+                </h3>
+              </div>
+
+              {includePhoto &&
+                (cvData.foto ? (
+                  <img
+                    src={cvData.foto}
+                    alt="Foto de perfil"
+                    className="cv-photo-preview"
+                  />
+                ) : (
+                  <div className="cv-photo-placeholder">
+                    {cvLanguage === "en" ? "Photo" : "Foto"}
+                  </div>
+                ))}
+            </div>
+
+            <section
+              style={{
+                marginTop: "0.75rem",
+                fontSize: "0.9rem",
+                color: "#4b5563",
+              }}
+            >
+              <p>{contactoLinea1}</p>
+              <p>{contactoLinea2}</p>
+            </section>
+
+            <hr style={{ margin: "1rem 0", borderColor: "#e5e7eb" }} />
+
+            {sectionsVisible.perfil && (
+              <section>
+                <h4>{sectionLabels.perfil}</h4>
+                <p style={{ marginTop: "0.25rem" }}>
+                  {cvData.perfil ||
+                    (cvLanguage === "en"
+                      ? "Short introduction about your profile and goals..."
+                      : "Texto de presentación breve sobre tu perfil profesional...")}
+                </p>
+              </section>
+            )}
+
+            {sectionsVisible.experiencia && (
+              <section style={{ marginTop: "1rem" }}>
+                <h4>{sectionLabels.experiencia}</h4>
+                <p style={{ marginTop: "0.25rem", whiteSpace: "pre-line" }}>
+                  {cvData.experiencia ||
+                    (cvLanguage === "en"
+                      ? "Work experience details..."
+                      : "Detalle de tu experiencia laboral...")}
+                </p>
+              </section>
+            )}
+
+            {sectionsVisible.educacion && (
+              <section style={{ marginTop: "1rem" }}>
+                <h4>{sectionLabels.educacion}</h4>
+                <p style={{ marginTop: "0.25rem", whiteSpace: "pre-line" }}>
+                  {cvData.educacion ||
+                    (cvLanguage === "en"
+                      ? "Main academic background..."
+                      : "Formación académica principal...")}
+                </p>
+              </section>
+            )}
+
+            {sectionsVisible.habilidades && (
+              <section style={{ marginTop: "1rem" }}>
+                <h4>{sectionLabels.habilidades}</h4>
+                <p style={{ marginTop: "0.25rem" }}>
+                  {cvData.habilidades ||
+                    (cvLanguage === "en"
+                      ? "e.g.: HTML · CSS · JavaScript · React · Teamwork"
+                      : "Ej: HTML · CSS · JavaScript · React · Trabajo en equipo")}
+                </p>
+              </section>
+            )}
+
+            {sectionsVisible.idiomas && (
+              <section style={{ marginTop: "1rem" }}>
+                <h4>{sectionLabels.idiomas}</h4>
+                <p style={{ marginTop: "0.25rem" }}>
+                  {cvData.idiomas ||
+                    (cvLanguage === "en"
+                      ? "e.g.: Native Spanish · English B2"
+                      : "Ej: Español nativo · Inglés B2")}
+                </p>
+              </section>
+            )}
+
+            {sectionsVisible.proyectos && (
+              <section style={{ marginTop: "1rem" }}>
+                <h4>{sectionLabels.proyectos}</h4>
+                <p style={{ marginTop: "0.25rem", whiteSpace: "pre-line" }}>
+                  {cvData.proyectos ||
+                    (cvLanguage === "en"
+                      ? "Relevant projects you want to highlight..."
+                      : "Proyectos relevantes que quieras destacar...")}
+                </p>
+              </section>
+            )}
+
+            {sectionsVisible.otros && (
+              <section style={{ marginTop: "1rem" }}>
+                <h4>{sectionLabels.otros}</h4>
+                <p style={{ marginTop: "0.25rem", whiteSpace: "pre-line" }}>
+                  {cvData.otros ||
+                    (cvLanguage === "en"
+                      ? "Courses, certifications, volunteering, interests..."
+                      : "Cursos, certificaciones, voluntariados, intereses...")}
+                </p>
+              </section>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 🧠 Panel lateral de IA */}
+      {aiOpen && (
+        <>
+          <div className="cv-ai-backdrop" onClick={closeAiPanel} />
+          <div className="cv-ai-panel">
+            <div className="cv-ai-header">
+              <h3>Joblu IA</h3>
+              <button
+                type="button"
+                className="cv-ai-close"
+                onClick={closeAiPanel}
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="cv-ai-tagline">
+              {cvLanguage === "en"
+                ? "Simulated assistant to improve your CV. Later this will call the real AI backend."
+                : "Asistente simulado para mejorar tu CV. Más adelante acá se conectará la IA real."}
+            </p>
+
+            <div className="cv-ai-body">
+              <label>
+                {cvLanguage === "en"
+                  ? "Job description (optional, paste the job ad):"
+                  : "Descripción del puesto (opcional, pega la oferta de trabajo):"}
+                <textarea
+                  rows="4"
+                  value={jobDesc}
+                  onChange={(e) => setJobDesc(e.target.value)}
+                  placeholder={
+                    cvLanguage === "en"
+                      ? "Paste here the job description or main requirements..."
+                      : "Pegá acá la descripción del puesto o los requisitos principales..."
+                  }
+                ></textarea>
+              </label>
+
+              <label>
+                {cvLanguage === "en"
+                  ? "Which section do you want to improve?"
+                  : "¿Qué sección querés mejorar?"}
+                <select
+                  value={aiSection}
+                  onChange={(e) => setAiSection(e.target.value)}
+                >
+                  <option value="perfil">
+                    {cvLanguage === "en" ? "Profile" : "Perfil profesional"}
+                  </option>
+                  <option value="experiencia">
+                    {cvLanguage === "en" ? "Experience" : "Experiencia laboral"}
+                  </option>
+                  <option value="educacion">
+                    {cvLanguage === "en" ? "Education" : "Educación"}
+                  </option>
+                  <option value="habilidades">
+                    {cvLanguage === "en" ? "Skills" : "Habilidades"}
+                  </option>
+                  <option value="otros">
+                    {cvLanguage === "en"
+                      ? "Additional information"
+                      : "Información adicional"}
+                  </option>
+                </select>
+              </label>
+
+              <button
+                type="button"
+                className="cv-ai-generate"
+                onClick={handleAskAi}
+                disabled={aiLoading}
+              >
+                {aiLoading
+                  ? cvLanguage === "en"
+                    ? "Thinking..."
+                    : "Pensando..."
+                  : cvLanguage === "en"
+                  ? "Generate suggestion (mock)"
+                  : "Generar sugerencia (simulada)"}
+              </button>
+
+              {aiError && <p className="cv-ai-error">{aiError}</p>}
+
+              {aiSuggestion && (
+                <div className="cv-ai-suggestion">
+                  <h4>
+                    {cvLanguage === "en"
+                      ? "Suggested text"
+                      : "Texto sugerido"}
+                  </h4>
+                  <pre>{aiSuggestion}</pre>
+                </div>
+              )}
+            </div>
+
+            <div className="cv-ai-footer">
+              <button
+                type="button"
+                className="cv-ai-apply"
+                onClick={applyAiSection}
+                disabled={!aiSuggestion}
+              >
+                {cvLanguage === "en"
+                  ? "Apply suggestion to CV"
+                  : "Aplicar sugerencia al CV"}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
+export default CvBuilder;
