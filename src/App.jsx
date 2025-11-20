@@ -9,6 +9,8 @@ import MyCvs from './pages/MyCvs.jsx'
 import Settings from './pages/Settings.jsx'
 import AccountSettings from './pages/AccountSettings.jsx'
 import PostDetail from "./pages/PostDetail";
+import "./styles/header.css";
+
 
 
 

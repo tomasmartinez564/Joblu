@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import "../styles/account.css";
+
 
 function AccountSettings({ user, onUpdateUser, theme, onChangeTheme }) {
   if (!user) {

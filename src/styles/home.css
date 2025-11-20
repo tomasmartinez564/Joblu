@@ -1,0 +1,33 @@
+/* Página Home */
+.home-hero {
+  background: var(--joblu-surface);
+  border-radius: 1rem;
+  padding: 2rem;
+  background: transparent; /* deja ver el fondo general */
+  border: none;
+}
+
+.home-title {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.home-subtitle {
+  color: #4b5563;
+  margin-bottom: 1.5rem;
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.home-card {
+  background: #f9fafb;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+}
+

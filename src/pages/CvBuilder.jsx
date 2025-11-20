@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import html2pdf from "html2pdf.js";
+import "../styles/cvbuilder.css";
+
 
 
 // 👇 Base de la API
@@ -63,6 +65,9 @@ function CvBuilder({ onSaveCv, initialData, user, settings }) {
   const [aiSuggestion, setAiSuggestion] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
+  const [saveError, setSaveError] = useState("");
+  const [saveSuccess, setSaveSuccess] = useState("");
+
 
   // Cuando cambia el CV activo (desde "Mis CVs"), actualizamos el formulario
   useEffect(() => {
@@ -101,12 +106,28 @@ function CvBuilder({ onSaveCv, initialData, user, settings }) {
   };
 
   const handleSave = () => {
+    // limpiar mensajes anteriores
+    setSaveError("");
+    setSaveSuccess("");
+
     if (!isLogged) {
-      alert("Tenés que iniciar sesión para guardar tus CVs.");
+      setSaveError(
+        cvLanguage === "en"
+          ? "You need to log in to save your CVs."
+          : "Tenés que iniciar sesión para guardar tus CVs."
+      );
       return;
     }
+
     onSaveCv?.(cvData);
+
+    setSaveSuccess(
+      cvLanguage === "en"
+        ? 'CV saved in "My CVs".'
+        : 'CV guardado en "Mis CVs".'
+    );
   };
+
 
   // 📸 subir foto
   const handlePhotoChange = (e) => {
@@ -667,6 +688,20 @@ Proyecto portafolio personal · React · 2024
           >
             💡 {cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
           </button>
+          
+          {(saveError || saveSuccess) && (
+            <p
+              className={
+                "cv-save-message " +
+                (saveError
+                  ? "cv-save-message--error"
+                  : "cv-save-message--success")
+              }
+            >
+              {saveError || saveSuccess}
+            </p>
+          )}
+
         </div>
       </div>
 
@@ -804,101 +839,108 @@ Proyecto portafolio personal · React · 2024
       </div>
 
       {/* 🧠 Panel lateral de IA */}
-      {aiOpen && (
+            {aiOpen && (
         <>
           <div className="cv-ai-backdrop" onClick={closeAiPanel} />
+
           <div className="cv-ai-panel">
-            <div className="cv-ai-header">
-              <h3>Joblu IA</h3>
-              <button
-                type="button"
-                className="cv-ai-close"
-                onClick={closeAiPanel}
-              >
-                ✕
-              </button>
-            </div>
-
-            <p className="cv-ai-tagline">
-              {cvLanguage === "en"
-                ? "Simulated assistant to improve your CV. Later this will call the real AI backend."
-                : "Asistente simulado para mejorar tu CV. Más adelante acá se conectará la IA real."}
-            </p>
-
-            <div className="cv-ai-body">
-              <label>
-                {cvLanguage === "en"
-                  ? "Job description (optional, paste the job ad):"
-                  : "Descripción del puesto (opcional, pega la oferta de trabajo):"}
-                <textarea
-                  rows="4"
-                  value={jobDesc}
-                  onChange={(e) => setJobDesc(e.target.value)}
-                  placeholder={
-                    cvLanguage === "en"
-                      ? "Paste here the job description or main requirements..."
-                      : "Pegá acá la descripción del puesto o los requisitos principales..."
-                  }
-                ></textarea>
-              </label>
-
-              <label>
-                {cvLanguage === "en"
-                  ? "Which section do you want to improve?"
-                  : "¿Qué sección querés mejorar?"}
-                <select
-                  value={aiSection}
-                  onChange={(e) => setAiSection(e.target.value)}
+            {/* Contenido scrollable del panel */}
+            <div className="cv-ai-content">
+              <div className="cv-ai-header">
+                <h3>Joblu IA</h3>
+                <button
+                  type="button"
+                  className="cv-ai-close"
+                  onClick={closeAiPanel}
                 >
-                  <option value="perfil">
-                    {cvLanguage === "en" ? "Profile" : "Perfil profesional"}
-                  </option>
-                  <option value="experiencia">
-                    {cvLanguage === "en" ? "Experience" : "Experiencia laboral"}
-                  </option>
-                  <option value="educacion">
-                    {cvLanguage === "en" ? "Education" : "Educación"}
-                  </option>
-                  <option value="habilidades">
-                    {cvLanguage === "en" ? "Skills" : "Habilidades"}
-                  </option>
-                  <option value="otros">
-                    {cvLanguage === "en"
-                      ? "Additional information"
-                      : "Información adicional"}
-                  </option>
-                </select>
-              </label>
+                  ✕
+                </button>
+              </div>
 
-              <button
-                type="button"
-                className="cv-ai-generate"
-                onClick={handleAskAi}
-                disabled={aiLoading}
-              >
-                {aiLoading
-                  ? cvLanguage === "en"
-                    ? "Thinking..."
-                    : "Pensando..."
-                  : cvLanguage === "en"
-                  ? "Generate suggestion (mock)"
-                  : "Generar sugerencia (simulada)"}
-              </button>
+              <p className="cv-ai-tagline">
+                {cvLanguage === "en"
+                  ? "Simulated assistant to improve your CV. Later this will call the real AI backend."
+                  : "Asistente simulado para mejorar tu CV. Más adelante acá se conectará la IA real."}
+              </p>
 
-              {aiError && <p className="cv-ai-error">{aiError}</p>}
+              <div className="cv-ai-body">
+                <label>
+                  {cvLanguage === "en"
+                    ? "Job description (optional, paste the job ad):"
+                    : "Descripción del puesto (opcional, pega la oferta de trabajo):"}
+                  <textarea
+                    rows="4"
+                    value={jobDesc}
+                    onChange={(e) => setJobDesc(e.target.value)}
+                    placeholder={
+                      cvLanguage === "en"
+                        ? "Paste here the job description or main requirements..."
+                        : "Pegá acá la descripción del puesto o los requisitos principales..."
+                    }
+                  ></textarea>
+                </label>
 
-              {aiSuggestion && (
-                <div className="cv-ai-suggestion">
-                  <h4>
-                    {cvLanguage === "en"
-                      ? "Suggested text"
-                      : "Texto sugerido"}
-                  </h4>
-                  <pre>{aiSuggestion}</pre>
-                </div>
-              )}
+                <label>
+                  {cvLanguage === "en"
+                    ? "Which section do you want to improve?"
+                    : "¿Qué sección querés mejorar?"}
+                  <select
+                    value={aiSection}
+                    onChange={(e) => setAiSection(e.target.value)}
+                  >
+                    <option value="perfil">
+                      {cvLanguage === "en" ? "Profile" : "Perfil profesional"}
+                    </option>
+                    <option value="experiencia">
+                      {cvLanguage === "en"
+                        ? "Experience"
+                        : "Experiencia laboral"}
+                    </option>
+                    <option value="educacion">
+                      {cvLanguage === "en" ? "Education" : "Educación"}
+                    </option>
+                    <option value="habilidades">
+                      {cvLanguage === "en" ? "Skills" : "Habilidades"}
+                    </option>
+                    <option value="otros">
+                      {cvLanguage === "en"
+                        ? "Additional information"
+                        : "Información adicional"}
+                    </option>
+                  </select>
+                </label>
+
+                <button
+                  type="button"
+                  className="cv-ai-generate"
+                  onClick={handleAskAi}
+                  disabled={aiLoading}
+                >
+                  {aiLoading
+                    ? cvLanguage === "en"
+                      ? "Thinking..."
+                      : "Pensando..."
+                    : cvLanguage === "en"
+                    ? "Generate suggestion (mock)"
+                    : "Generar sugerencia (simulada)"}
+                </button>
+
+                {aiError && <p className="cv-ai-error">{aiError}</p>}
+
+                {aiSuggestion && (
+                  <div className="cv-ai-suggestion">
+                    <h4>
+                      {cvLanguage === "en"
+                        ? "Suggested text"
+                        : "Texto sugerido"}
+                    </h4>
+                    <pre>{aiSuggestion}</pre>
+                  </div>
+                )}
+              </div>
             </div>
 
+            {/* Footer fijo con el botón de aplicar */}
             <div className="cv-ai-footer">
               <button
                 type="button"
@@ -917,5 +959,6 @@ Proyecto portafolio personal · React · 2024
     </section>
   );
 }
+
 
 export default CvBuilder;

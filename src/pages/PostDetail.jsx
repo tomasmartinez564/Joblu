@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import "../styles/postdetail.css";
+
 
 const STORAGE_KEY = "joblu_liked_posts";
 
-// 👇 Base de la API
+// Base de la API
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 const getInitialLikedPosts = () => {
@@ -28,6 +30,8 @@ function PostDetail({ user }) {
   const [commentError, setCommentError] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
 
+  const [actionError, setActionError] = useState("");
+
   const [likedPosts, setLikedPosts] = useState(() => getInitialLikedPosts());
 
   useEffect(() => {
@@ -39,9 +43,7 @@ function PostDetail({ user }) {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const res = await fetch(
-          `${API_BASE_URL}/api/community/posts/${id}`
-        );
+        const res = await fetch(`${API_BASE_URL}/api/community/posts/${id}`);
         if (!res.ok) {
           throw new Error("No se pudo obtener el post.");
         }
@@ -73,20 +75,19 @@ function PostDetail({ user }) {
   const handleDelete = async () => {
     if (!window.confirm("¿Seguro que querés eliminar este post?")) return;
 
+      setActionError("");
+
     setDeleting(true);
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/api/community/posts/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/api/community/posts/${id}`, {
+        method: "DELETE",
+      });
       if (!res.ok) throw new Error("No se pudo borrar el post.");
       navigate("/comunidad");
-    } catch (err) {
-      console.error(err);
-      alert("Hubo un problema al borrar el post.");
-    } finally {
+      } catch (err) {
+        console.error(err);
+        setActionError("Hubo un problema al borrar el post.");
+      } finally {
       setDeleting(false);
     }
   };
@@ -144,6 +145,8 @@ function PostDetail({ user }) {
   const handleToggleLike = async () => {
     if (!post) return;
 
+      setActionError("");
+
     const alreadyLiked = likedPosts.includes(post._id);
     const action = alreadyLiked ? "unlike" : "like";
 
@@ -172,26 +175,29 @@ function PostDetail({ user }) {
           ? prev.filter((id) => id !== post._id)
           : [...prev, post._id]
       );
-    } catch (err) {
-      console.error(err);
-      alert("Hubo un problema al actualizar el like.");
-    }
+      } catch (err) {
+        console.error(err);
+        setActionError("Hubo un problema al actualizar el like.");
+      }
+
   };
 
-
+  // Estados de carga y error
   if (loading) {
     return (
-      <section className="community">
-        <p>Cargando post...</p>
+      <section className="community postdetail">
+        <p className="postdetail-status">Cargando post...</p>
       </section>
     );
   }
 
   if (error || !post) {
     return (
-      <section className="community">
-        <p>{error || "Post no encontrado."}</p>
-        <Link to="/comunidad" style={{ fontSize: "0.9rem" }}>
+      <section className="community postdetail">
+        <p className="postdetail-status">
+          {error || "Post no encontrado."}
+        </p>
+        <Link to="/comunidad" className="postdetail-back-link">
           ← Volver a la comunidad
         </Link>
       </section>
@@ -199,126 +205,74 @@ function PostDetail({ user }) {
   }
 
   return (
-    <section className="community">
-      <Link
-        to="/comunidad"
-        style={{ fontSize: "0.9rem", color: "#6b7280", textDecoration: "none" }}
-      >
-        ← Volver a la comunidad
-      </Link>
+    <section className="community postdetail">
+      {/* Botón claro para volver */}
+      <div className="postdetail-back">
+        <Link to="/comunidad" className="postdetail-back-link">
+          ← Volver a la comunidad
+        </Link>
+      </div>
 
-      <h2 style={{ marginTop: "0.75rem" }}>{post.title}</h2>
+      {/* Título y meta */}
+      <h2 className="postdetail-title">{post.title}</h2>
 
-      <p
-        style={{
-          margin: "0.25rem 0 0.75rem",
-          fontSize: "0.9rem",
-          color: "#6b7280",
-        }}
-      >
+      <p className="postdetail-meta">
         por {post.authorName || "Usuario"} · {formatDate(post.createdAt)}
       </p>
 
-            <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
-          marginBottom: "0.75rem",
-        }}
-      >
+      {/* Likes */}
+      <div className="postdetail-like-row">
         <button
           type="button"
           onClick={handleToggleLike}
-          style={{
-            border: "none",
-            background: "transparent",
-            cursor: "pointer",
-            padding: 0,
-            fontSize: "0.95rem",
-          }}
+          className="postdetail-like-button"
         >
           {isLiked ? "💙 Quitar like" : "🤍 Me gusta"}
         </button>
 
-        <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>
+        <span className="postdetail-like-count">
           {(post.likes ?? 0)} like{(post.likes ?? 0) === 1 ? "" : "s"}
         </span>
       </div>
 
+      {actionError && (
+        <p className="postdetail-action-error">{actionError}</p>
+      )}
 
-      <div
-        style={{
-          padding: "1rem",
-          borderRadius: "0.75rem",
-          border: "1px solid #e5e7eb",
-          background: "#ffffff",
-          whiteSpace: "pre-wrap",
-        }}
-      >
+      {/* Contenido principal del post */}
+      <div className="postdetail-content">
         {post.content}
       </div>
 
+      {/* Botón de borrar (solo autor) */}
       {canDelete && (
         <button
           onClick={handleDelete}
           disabled={deleting}
-          style={{
-            marginTop: "1rem",
-            padding: "0.45rem 0.9rem",
-            borderRadius: "999px",
-            border: "none",
-            background: "#b91c1c",
-            color: "#ffffff",
-            fontSize: "0.9rem",
-            cursor: "pointer",
-          }}
+          className="postdetail-delete-btn"
         >
           {deleting ? "Eliminando..." : "Eliminar post"}
         </button>
       )}
 
       {/* Sección de comentarios */}
-      <section style={{ marginTop: "1.5rem" }}>
-        <h3 style={{ marginBottom: "0.5rem", fontSize: "1rem" }}>Comentarios</h3>
+      <section className="postdetail-comments">
+        <h3 className="postdetail-comments-title">Comentarios</h3>
 
         {/* Lista de comentarios */}
         {(!post.comments || post.comments.length === 0) ? (
-          <p style={{ fontSize: "0.9rem", color: "#6b7280" }}>
-            Todavía no hay comentarios. ¡Sé la primera persona en comentar! 😊
+          <p className="postdetail-comments-empty">
+            Todavía no hay comentarios. ¡Sé la primera persona en comentar!
           </p>
         ) : (
-          <ul
-            style={{
-              listStyle: "none",
-              padding: 0,
-              margin: 0,
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.5rem",
-            }}
-          >
+          <ul className="postdetail-comments-list">
             {post.comments.map((c, index) => (
-              <li
-                key={index}
-                style={{
-                  padding: "0.5rem 0.75rem",
-                  borderRadius: "0.5rem",
-                  border: "1px solid #e5e7eb",
-                  background: "#f9fafb",
-                }}
-              >
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "0.85rem",
-                    color: "#4b5563",
-                    fontWeight: 600,
-                  }}
-                >
-                  {c.authorName || "Usuario anónimo"}
-                  {" · "}
-                  <span style={{ fontWeight: 400, color: "#6b7280" }}>
+              <li key={index} className="postdetail-comment">
+                <p className="postdetail-comment-header">
+                  <span className="postdetail-comment-author">
+                    {c.authorName || "Usuario anónimo"}
+                  </span>
+                  <span className="postdetail-comment-meta">
                     {c.createdAt
                       ? new Date(c.createdAt).toLocaleString("es-AR", {
                           dateStyle: "short",
@@ -327,14 +281,7 @@ function PostDetail({ user }) {
                       : ""}
                   </span>
                 </p>
-                <p
-                  style={{
-                    margin: "0.25rem 0 0",
-                    fontSize: "0.9rem",
-                  }}
-                >
-                  {c.content}
-                </p>
+                <p className="postdetail-comment-body">{c.content}</p>
               </li>
             ))}
           </ul>
@@ -367,7 +314,6 @@ function PostDetail({ user }) {
             {commentLoading ? "Publicando..." : "Publicar comentario"}
           </button>
         </form>
-
       </section>
     </section>
   );

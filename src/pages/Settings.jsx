@@ -1,3 +1,5 @@
+import "../styles/settings.css";
+
 function Settings({ user, settings, onChangeSettings }) {
   if (!user) {
     return (

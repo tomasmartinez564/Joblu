@@ -1,3 +1,6 @@
+import "../styles/mycvs.css";
+
+
 function formatDate(dateString) {
   try {
     const d = new Date(dateString);

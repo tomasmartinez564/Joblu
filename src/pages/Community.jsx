@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import "../styles/community.css";
+
 
 // 👇 Base de la API: en desarrollo = localhost, en producción = VITE_API_URL
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -101,7 +103,7 @@ function Community({ user }) {
         {!isLogged && (
           <p className="community-helper-text">
             Para publicar con tu nombre, iniciá sesión en Joblu. Si no, se usará
-            "Usuario anónimo".
+            &nbsp;&quot;Usuario anónimo&quot;.
           </p>
         )}
 
@@ -131,13 +133,13 @@ function Community({ user }) {
       </div>
 
       {/* Lista de posteos */}
-      <h3 style={{ marginTop: "0.5rem" }}>Últimos posteos</h3>
+      <h3 className="community-list-title">Últimos posteos</h3>
 
       {loading ? (
-        <p style={{ fontSize: "0.9rem", color: "#6b7280" }}>Cargando posteos...</p>
+        <p className="community-status-text">Cargando posteos...</p>
       ) : posts.length === 0 ? (
-        <p style={{ fontSize: "0.9rem", color: "#6b7280" }}>
-          Todavía no hay posteos. ¡Sé la primera persona en compartir algo! 😊
+        <p className="community-status-text">
+          Todavía no hay posteos. ¡Sé la primera persona en compartir algo!
         </p>
       ) : (
         <div className="community-list">
@@ -145,28 +147,16 @@ function Community({ user }) {
             <article key={post._id} className="community-post">
               <Link
                 to={`/comunidad/${post._id}`}
-                style={{
-                  fontWeight: "600",
-                  textDecoration: "none",
-                  color: "inherit",
-                  display: "inline-block",
-                  marginBottom: "0.25rem",
-                }}
+                className="community-post-title"
               >
                 {post.title}
               </Link>
 
-              <p
-                style={{
-                  margin: "0.25rem 0",
-                  fontSize: "0.9rem",
-                  color: "#6b7280",
-                }}
-              >
+              <p className="community-post-meta">
                 por {post.authorName || "Usuario"} · {formatDate(post.createdAt)}
               </p>
 
-              <p style={{ margin: 0, fontSize: "0.9rem", color: "#374151" }}>
+              <p className="community-post-excerpt">
                 {post.content.length > 120
                   ? post.content.slice(0, 120) + "..."
                   : post.content}

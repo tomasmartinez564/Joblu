@@ -1,3 +1,5 @@
+import "../styles/home.css";
+
 function Home() {
   return (
     <section className="home-hero">

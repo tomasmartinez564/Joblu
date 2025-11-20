@@ -1,20 +1,22 @@
-import { useState } from 'react'
+import { useState } from "react";
 
 function Login({ onLogin }) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!email || !password) {
-      alert('Completá email y contraseña')
-      return
+      setError("Completá email y contraseña.");
+      return;
     }
 
-    // Llamamos al manejador que viene desde App
-    onLogin({ email })
-  }
+    // Si está todo bien, limpiamos el error y llamamos al manejador que viene desde App
+    setError("");
+    onLogin({ email });
+  };
 
   return (
     <section className="login">
@@ -30,7 +32,10 @@ function Login({ onLogin }) {
             type="email"
             placeholder="ejemplo@mail.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (error) setError("");
+            }}
           />
         </label>
 
@@ -40,7 +45,10 @@ function Login({ onLogin }) {
             type="password"
             placeholder="Tu contraseña"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (error) setError("");
+            }}
           />
         </label>
 
@@ -49,11 +57,13 @@ function Login({ onLogin }) {
         </button>
       </form>
 
+      {error && <p className="login-error">{error}</p>}
+
       <p className="login-hint">
         Más adelante podés agregar registro, recuperación de contraseña, etc.
       </p>
     </section>
-  )
+  );
 }
 
-export default Login
+export default Login;
