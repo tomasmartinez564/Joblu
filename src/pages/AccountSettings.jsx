@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import "../styles/account.css";
 
 
-function AccountSettings({ user, onUpdateUser, theme, onChangeTheme }) {
+function AccountSettings({ user, onUpdateUser }) {
   if (!user) {
     return (
       <section className="account">
@@ -21,6 +21,13 @@ function AccountSettings({ user, onUpdateUser, theme, onChangeTheme }) {
   const [newPassword, setNewPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
 
+  const [profileError, setProfileError] = useState("");
+  const [profileSuccess, setProfileSuccess] = useState("");
+
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+
+
   useEffect(() => {
     setDisplayName(user.name || "");
     setEmail(user.email || "");
@@ -29,40 +36,45 @@ function AccountSettings({ user, onUpdateUser, theme, onChangeTheme }) {
   const handleProfileSubmit = (e) => {
     e.preventDefault();
 
+    // limpiar mensajes previos
+    setProfileError("");
+    setProfileSuccess("");
+
     if (!displayName || !email) {
-      alert("Completá nombre y email.");
+      setProfileError("Completá nombre y email.");
       return;
     }
 
     onUpdateUser({ name: displayName, email });
-    alert("Datos de cuenta actualizados (solo frontend, sin backend).");
+    setProfileSuccess("Datos de cuenta actualizados (solo frontend, sin backend).");
   };
+
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
 
+    // limpiar mensajes previos
+    setPasswordError("");
+    setPasswordSuccess("");
+
     if (!currentPassword || !newPassword || !repeatPassword) {
-      alert("Completá todos los campos de contraseña.");
+      setPasswordError("Completá todos los campos de contraseña.");
       return;
     }
 
     if (newPassword !== repeatPassword) {
-      alert("La nueva contraseña y la repetición no coinciden.");
+      setPasswordError("La nueva contraseña y la repetición no coinciden.");
       return;
     }
 
     // En una app real acá llamarías al backend
-    alert("Cambio de contraseña simulado (en un backend real se aplicaría).");
+    setPasswordSuccess("Cambio de contraseña simulado (en un backend real se aplicaría).");
 
     setCurrentPassword("");
     setNewPassword("");
     setRepeatPassword("");
   };
-
-  const handleThemeChange = (e) => {
-    onChangeTheme(e.target.value);
-  };
-
+  
   return (
     <section className="account">
       <h2>Cuenta</h2>
@@ -103,7 +115,20 @@ function AccountSettings({ user, onUpdateUser, theme, onChangeTheme }) {
             <button type="submit" className="account-btn primary">
               Guardar cambios
             </button>
+
+            {profileError && (
+              <p className="account-message account-message--error">
+                {profileError}
+              </p>
+            )}
+
+            {profileSuccess && (
+              <p className="account-message account-message--success">
+                {profileSuccess}
+              </p>
+            )}
           </form>
+
         </div>
 
         {/* Contraseña */}
@@ -145,45 +170,20 @@ function AccountSettings({ user, onUpdateUser, theme, onChangeTheme }) {
             <button type="submit" className="account-btn">
               Cambiar contraseña
             </button>
+
+            {passwordError && (
+              <p className="account-message account-message--error">
+                {passwordError}
+              </p>
+            )}
+
+            {passwordSuccess && (
+              <p className="account-message account-message--success">
+                {passwordSuccess}
+              </p>
+            )}
           </form>
-        </div>
 
-        {/* Apariencia */}
-        <div className="account-card">
-          <h3>Apariencia</h3>
-          <p className="account-hint">
-            Elegí entre modo claro u oscuro. Más adelante podrías agregar “usar
-            tema del sistema”.
-          </p>
-
-          <div className="account-theme-options">
-            <label className="account-radio">
-              <input
-                type="radio"
-                name="theme"
-                value="light"
-                checked={theme === "light"}
-                onChange={handleThemeChange}
-              />
-              <span>Modo claro</span>
-            </label>
-
-            <label className="account-radio">
-              <input
-                type="radio"
-                name="theme"
-                value="dark"
-                checked={theme === "dark"}
-                onChange={handleThemeChange}
-              />
-              <span>Modo oscuro</span>
-            </label>
-          </div>
-
-          <p className="account-hint">
-            El modo oscuro afecta al fondo, tarjetas y texto principal de la
-            app.
-          </p>
         </div>
       </div>
     </section>

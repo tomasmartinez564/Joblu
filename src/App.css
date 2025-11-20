@@ -322,33 +322,6 @@
   color: #f9fafb;
 }
 
-/* Versión dark del dropdown */
-body.theme-dark .app-user-dropdown {
-  background: #020617;
-  border-color: #1e293b;
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.9);
-}
-
-body.theme-dark .app-user-dropdown-name {
-  color: #e5e7eb;
-}
-
-body.theme-dark .app-user-dropdown-email {
-  color: #9ca3af;
-}
-
-body.theme-dark .app-user-dropdown-item {
-  color: #e5e7eb;
-}
-
-body.theme-dark .app-user-dropdown-item:hover {
-  background: #1e293b;
-}
-
-body.theme-dark .app-user-dropdown-section {
-  background: #020617;
-}
-
 .app-user-name {
   display: flex;
   align-items: center;
@@ -406,32 +379,6 @@ body.theme-dark .app-user-dropdown-section {
 .mycvs-card-btn.primary:hover {
   background-color: var(--joblu-secondary);
   border-color: var(--joblu-secondary);
-}
-
-
-
-
-body.theme-dark .cv-photo-preview {
-  border-color: #1f2937;
-}
-
-/* Modo oscuro para el panel */
-body.theme-dark .cv-ai-panel {
-  background: #020617;
-  border-left-color: #1e293b;
-}
-
-body.theme-dark .cv-ai-body textarea,
-body.theme-dark .cv-ai-body select {
-  background: #020617;
-  border-color: #334155;
-  color: #e5e7eb;
-}
-
-body.theme-dark .cv-ai-suggestion {
-  background: #020617;
-  border-color: #1e293b;
-  color: #e5e7eb;
 }
 
 /* ------------------------------

@@ -110,3 +110,10 @@
   background: #fee2e2;
   border-color: #fecaca;
 }
+
+.mycvs-confirm-hint {
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: #b91c1c;
+}
+

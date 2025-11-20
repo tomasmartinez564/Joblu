@@ -15,7 +15,6 @@ import "./styles/header.css";
 
 
 const LS_USER_KEY = 'joblu_user'
-const LS_THEME_KEY = 'joblu_theme'
 const LS_SETTINGS_KEY = 'joblu_settings'
 const LS_CVS_KEY = 'joblu_savedCvs'
 
@@ -65,23 +64,8 @@ function AppLayout() {
     }
   })
 
-  // 🎨 Tema de la app
-  const [theme, setTheme] = useState(() => {
-    const stored = localStorage.getItem(LS_THEME_KEY)
-    return stored === 'dark' || stored === 'light' ? stored : 'light'
-  })
-
   // 🔽 Menú desplegable de cuenta
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
-
-  // Aplicar clase al body para modo oscuro
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.body.classList.add('theme-dark')
-    } else {
-      document.body.classList.remove('theme-dark')
-    }
-  }, [theme])
 
   // 💾 Guardar en localStorage cuando cambian
   useEffect(() => {
@@ -93,12 +77,6 @@ function AppLayout() {
       }
     } catch {}
   }, [user])
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(LS_THEME_KEY, theme)
-    } catch {}
-  }, [theme])
 
   useEffect(() => {
     try {
@@ -142,8 +120,8 @@ function AppLayout() {
     }
 
     setSavedCvs((prev) => [newCv, ...prev])
-    alert('CV guardado en "Mis CVs".')
   }
+
 
   const handleOpenCv = (id) => {
     const found = savedCvs.find((cv) => cv.id === id)
@@ -153,9 +131,9 @@ function AppLayout() {
   }
 
   const handleDeleteCv = (id) => {
-    if (!confirm('¿Seguro que querés eliminar este CV?')) return
     setSavedCvs((prev) => prev.filter((cv) => cv.id !== id))
   }
+
 
   // 🧑‍💻 Actualizar datos del usuario (nombre, email) desde "Cuenta"
   const handleUpdateUser = (updates) => {
@@ -164,10 +142,6 @@ function AppLayout() {
       ...prev,
       ...updates,
     }))
-  }
-
-  const handleThemeChange = (newTheme) => {
-    setTheme(newTheme)
   }
 
   const goToAccount = () => {
@@ -356,11 +330,10 @@ return (
               <AccountSettings
                 user={user}
                 onUpdateUser={handleUpdateUser}
-                theme={theme}
-                onChangeTheme={handleThemeChange}
               />
             }
           />
+
         </Routes>
       </main>
     </div>

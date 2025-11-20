@@ -119,3 +119,16 @@
   width: 16px;
   height: 16px;
 }
+
+.account-message {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.account-message--error {
+  color: #b91c1c;
+}
+
+.account-message--success {
+  color: #166534;
+}

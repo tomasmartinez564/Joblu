@@ -1,4 +1,5 @@
 import "../styles/mycvs.css";
+import { useState } from "react";
 
 
 function formatDate(dateString) {
@@ -17,6 +18,7 @@ function formatDate(dateString) {
 }
 
 function MyCvs({ user, savedCvs, onOpenCv, onDeleteCv }) {
+  const [cvToConfirm, setCvToConfirm] = useState(null);
   if (!user) {
     return (
       <section className="mycvs">
@@ -66,14 +68,29 @@ function MyCvs({ user, savedCvs, onOpenCv, onDeleteCv }) {
                 >
                   Ver / editar
                 </button>
+
                 <button
                   type="button"
                   className="mycvs-card-btn danger"
-                  onClick={() => onDeleteCv(cv.id)}
+                  onClick={() => {
+                    if (cvToConfirm === cv.id) {
+                      onDeleteCv(cv.id);
+                      setCvToConfirm(null);
+                    } else {
+                      setCvToConfirm(cv.id);
+                    }
+                  }}
                 >
-                  Eliminar
+                  {cvToConfirm === cv.id ? "Confirmar eliminación" : "Eliminar"}
                 </button>
+
               </div>
+
+              {cvToConfirm === cv.id && (
+                <p className="mycvs-confirm-hint">
+                  Volvé a hacer clic para eliminar este CV.
+                </p>
+              )}
             </article>
           ))}
         </div>

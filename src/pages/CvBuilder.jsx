@@ -163,6 +163,16 @@ function CvBuilder({ onSaveCv, initialData, user, settings }) {
       ? "linkedin.com/in/user · github.com/user · portfolio.com"
       : "linkedin.com/in/usuario · github.com/usuario · portfolio.com");
 
+      const socialLinks = [
+        { type: "linkedin", value: cvData.linkedin },
+        { type: "github", value: cvData.github },
+        {
+          type: "web",
+          value: cvData.sitioWeb,
+        },
+      ].filter((link) => !!link.value && link.value.trim() !== "");
+    
+
   // Títulos de secciones según idioma
   const sectionLabels = {
     perfil: cvLanguage === "en" ? "Profile" : "Perfil",
@@ -716,7 +726,7 @@ Proyecto portafolio personal · React · 2024
                   {cvData.nombre ||
                     (cvLanguage === "en" ? "Name Surname" : "Nombre Apellido")}
                 </h1>
-                <h3 style={{ color: "#6b7280", marginTop: "0.25rem" }}>
+                <h3 className="cv-preview-job-title">
                   {cvData.puesto ||
                     (cvLanguage === "en"
                       ? "Desired role / Job title"
@@ -738,23 +748,47 @@ Proyecto portafolio personal · React · 2024
                 ))}
             </div>
 
-            <section
-              style={{
-                marginTop: "0.75rem",
-                fontSize: "0.9rem",
-                color: "#4b5563",
-              }}
-            >
+            <section className="cv-preview-contact">
               <p>{contactoLinea1}</p>
-              <p>{contactoLinea2}</p>
+
+              {socialLinks.length > 0 ? (
+                <div className="cv-contact-social">
+                  {socialLinks.map((link) => {
+                    const raw = link.value.trim();
+                    const needsProtocol = !raw.startsWith("http://") && !raw.startsWith("https://");
+                    const url = needsProtocol ? `https://${raw}` : raw;
+
+                    let iconLabel = "";
+                    if (link.type === "linkedin") iconLabel = "in";
+                    else if (link.type === "github") iconLabel = "<>";
+                    else iconLabel = "🌐";
+
+                    return (
+                      <a
+                        key={link.type}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="cv-contact-link"
+                      >
+                        <span className="cv-contact-icon">{iconLabel}</span>
+                        <span className="cv-contact-text">{raw}</span>
+                      </a>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p>{contactoLinea2}</p>
+              )}
             </section>
 
-            <hr style={{ margin: "1rem 0", borderColor: "#e5e7eb" }} />
+
+            <hr className="cv-preview-divider" />
 
             {sectionsVisible.perfil && (
               <section>
                 <h4>{sectionLabels.perfil}</h4>
-                <p style={{ marginTop: "0.25rem" }}>
+                <p className="cv-preview-paragraph">
                   {cvData.perfil ||
                     (cvLanguage === "en"
                       ? "Short introduction about your profile and goals..."
@@ -764,9 +798,9 @@ Proyecto portafolio personal · React · 2024
             )}
 
             {sectionsVisible.experiencia && (
-              <section style={{ marginTop: "1rem" }}>
+              <section className="cv-preview-section">
                 <h4>{sectionLabels.experiencia}</h4>
-                <p style={{ marginTop: "0.25rem", whiteSpace: "pre-line" }}>
+                <p className="cv-preview-paragraph-preline">
                   {cvData.experiencia ||
                     (cvLanguage === "en"
                       ? "Work experience details..."
@@ -776,9 +810,9 @@ Proyecto portafolio personal · React · 2024
             )}
 
             {sectionsVisible.educacion && (
-              <section style={{ marginTop: "1rem" }}>
+              <section className="cv-preview-section">
                 <h4>{sectionLabels.educacion}</h4>
-                <p style={{ marginTop: "0.25rem", whiteSpace: "pre-line" }}>
+                <p className="cv-preview-paragraph-preline">
                   {cvData.educacion ||
                     (cvLanguage === "en"
                       ? "Main academic background..."
@@ -788,9 +822,9 @@ Proyecto portafolio personal · React · 2024
             )}
 
             {sectionsVisible.habilidades && (
-              <section style={{ marginTop: "1rem" }}>
+              <section className="cv-preview-section">
                 <h4>{sectionLabels.habilidades}</h4>
-                <p style={{ marginTop: "0.25rem" }}>
+                <p className="cv-preview-paragraph">
                   {cvData.habilidades ||
                     (cvLanguage === "en"
                       ? "e.g.: HTML · CSS · JavaScript · React · Teamwork"
@@ -800,9 +834,9 @@ Proyecto portafolio personal · React · 2024
             )}
 
             {sectionsVisible.idiomas && (
-              <section style={{ marginTop: "1rem" }}>
+              <section className="cv-preview-section">
                 <h4>{sectionLabels.idiomas}</h4>
-                <p style={{ marginTop: "0.25rem" }}>
+                <p className="cv-preview-paragraph">
                   {cvData.idiomas ||
                     (cvLanguage === "en"
                       ? "e.g.: Native Spanish · English B2"
@@ -812,9 +846,9 @@ Proyecto portafolio personal · React · 2024
             )}
 
             {sectionsVisible.proyectos && (
-              <section style={{ marginTop: "1rem" }}>
+              <section className="cv-preview-section">
                 <h4>{sectionLabels.proyectos}</h4>
-                <p style={{ marginTop: "0.25rem", whiteSpace: "pre-line" }}>
+                <p className="cv-preview-paragraph-preline">
                   {cvData.proyectos ||
                     (cvLanguage === "en"
                       ? "Relevant projects you want to highlight..."
@@ -824,9 +858,9 @@ Proyecto portafolio personal · React · 2024
             )}
 
             {sectionsVisible.otros && (
-              <section style={{ marginTop: "1rem" }}>
+              <section className="cv-preview-section">
                 <h4>{sectionLabels.otros}</h4>
-                <p style={{ marginTop: "0.25rem", whiteSpace: "pre-line" }}>
+                <p className="cv-preview-paragraph-preline">
                   {cvData.otros ||
                     (cvLanguage === "en"
                       ? "Courses, certifications, volunteering, interests..."
@@ -859,8 +893,8 @@ Proyecto portafolio personal · React · 2024
 
               <p className="cv-ai-tagline">
                 {cvLanguage === "en"
-                  ? "Simulated assistant to improve your CV. Later this will call the real AI backend."
-                  : "Asistente simulado para mejorar tu CV. Más adelante acá se conectará la IA real."}
+                  ? "Simulated assistant to improve your CV."
+                  : "Asistente simulado para mejorar tu CV."}
               </p>
 
               <div className="cv-ai-body">

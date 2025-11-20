@@ -74,59 +74,6 @@ button {
   font-family: inherit;
 }
 
-/* =========================
-   Modo oscuro (body.theme-dark)
-   ========================= */
-
-body.theme-dark {
-  background-color: #0f172a;
-  color: #e5e7eb;
-}
-
-body.theme-dark .app {
-  background-color: #020617;
-  color: #e5e7eb;
-}
-
-body.theme-dark .app-header {
-  background-color: #020617;
-  border-color: #1e293b;
-}
-
-body.theme-dark .app-main {
-  background-color: #020617;
-}
-
-/* Tarjetas / secciones principales en oscuro */
-body.theme-dark .cv-column,
-body.theme-dark .home-hero,
-body.theme-dark .community,
-body.theme-dark .mycvs,
-body.theme-dark .settings,
-body.theme-dark .login,
-body.theme-dark .account {
-  background-color: #020617;
-  border-color: #1e293b;
-}
-
-/* Formularios en oscuro */
-body.theme-dark input,
-body.theme-dark textarea,
-body.theme-dark select {
-  background-color: #020617;
-  color: #e5e7eb;
-  border-color: #334155;
-}
-
-body.theme-dark .nav-link {
-  color: #e5e7eb;
-}
-
-body.theme-dark .nav-link-active {
-  background-color: #2563eb;
-  color: #f9fafb;
-}
-
 /* Animación suave de entrada para secciones Joblu */
 @keyframes joblu-fade-in-up {
   from {

@@ -452,3 +452,67 @@
 .cv-save-message--success {
   color: #166534;
 }
+
+.cv-contact-social {
+  margin-top: 0.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cv-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--joblu-primary);
+  text-decoration: none;
+}
+
+.cv-contact-link:hover {
+  text-decoration: underline;
+}
+
+.cv-contact-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+}
+
+/* ====== CV Preview inline styles => clases ====== */
+
+.cv-preview-job-title {
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.cv-preview-contact {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.cv-preview-divider {
+  margin: 1rem 0;
+  border: 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cv-preview-section {
+  margin-top: 1rem;
+}
+
+.cv-preview-paragraph {
+  margin-top: 0.25rem;
+}
+
+.cv-preview-paragraph-preline {
+  margin-top: 0.25rem;
+  white-space: pre-line;
+}
+
