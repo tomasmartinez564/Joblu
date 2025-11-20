@@ -1,4 +1,6 @@
 import { useState } from "react";
+import "../styles/login.css";
+
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState("");
