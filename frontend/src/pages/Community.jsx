@@ -19,7 +19,7 @@ function Community({ user }) {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/community/posts`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/community/posts`);
 
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
@@ -53,7 +53,7 @@ function Community({ user }) {
     const authorEmail = user?.email || "";
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/community/posts`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/community/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

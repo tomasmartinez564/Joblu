@@ -43,7 +43,7 @@ function PostDetail({ user }) {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/community/posts/${id}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/community/posts/${id}`);
         if (!res.ok) {
           throw new Error("No se pudo obtener el post.");
         }
@@ -79,7 +79,7 @@ function PostDetail({ user }) {
 
     setDeleting(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/community/posts/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/community/posts/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("No se pudo borrar el post.");
@@ -108,7 +108,7 @@ function PostDetail({ user }) {
       setCommentLoading(true);
 
       const res = await fetch(
-        `${API_BASE_URL}/api/community/posts/${id}/comments`,
+        `${import.meta.env.VITE_API_URL}/api/community/posts/${id}/comments`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -151,8 +151,8 @@ function PostDetail({ user }) {
     const action = alreadyLiked ? "unlike" : "like";
 
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/api/community/posts/${post._id}/like`,
+        const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/community/posts/${post._id}/like`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

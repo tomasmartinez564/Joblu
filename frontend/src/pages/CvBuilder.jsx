@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import html2pdf from "html2pdf.js";
 import "../styles/cvbuilder.css";
+import Settings from "./Settings";
 
 
 
@@ -21,7 +22,7 @@ const emptyCv = {
 
   // Contenido del CV
   perfil: "",
-  experiencia: "",
+  experiencias: "",
   educacion: "",
   habilidades: "",
   idiomas: "",
@@ -32,7 +33,7 @@ const emptyCv = {
   foto: "",
 };
 
-function CvBuilder({ onSaveCv, initialData, user, settings }) {
+function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) {
   const isLogged = !!user;
 
   // Preferencias del usuario (con defaults por si no vienen)
@@ -46,9 +47,11 @@ function CvBuilder({ onSaveCv, initialData, user, settings }) {
 
   const [cvData, setCvData] = useState(initialData || emptyCv);
 
+  const [showSettings, setShowSettings] = useState(false);
+
   const [sectionsVisible, setSectionsVisible] = useState({
     perfil: true,
-    experiencia: true,
+    experiencias: true,
     educacion: true,
     habilidades: true,
     idiomas: false,
@@ -176,7 +179,7 @@ function CvBuilder({ onSaveCv, initialData, user, settings }) {
   // Títulos de secciones según idioma
   const sectionLabels = {
     perfil: cvLanguage === "en" ? "Profile" : "Perfil",
-    experiencia: cvLanguage === "en" ? "Experience" : "Experiencia",
+    experiencias: cvLanguage === "en" ? "Experience" : "Experiencias",
     educacion: cvLanguage === "en" ? "Education" : "Educación",
     habilidades: cvLanguage === "en" ? "Skills" : "Habilidades",
     idiomas: cvLanguage === "en" ? "Languages" : "Idiomas",
@@ -216,7 +219,7 @@ function CvBuilder({ onSaveCv, initialData, user, settings }) {
     setAiSuggestion("");
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/optimizar-cv`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/optimizar-cv`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -277,6 +280,29 @@ function CvBuilder({ onSaveCv, initialData, user, settings }) {
     <section className="cv-builder">
       {/* 📝 Columna izquierda - Formulario */}
       <div className="cv-column">
+
+        <div className="cv-settings-toggle">
+          <button
+            type="button"
+            className="cv-settings-toggle-btn"
+            onClick={() => setShowSettings((prev) => !prev)}
+          >
+            {showSettings
+              ? "Ocultar configuración de CV"
+              : "Mostrar configuración de CV"}
+          </button>
+
+          {showSettings && (
+            <div className="cv-settings-panel">
+              <Settings
+                user={user}
+                settings={settings}
+                onChangeSettings={onChangeSettings}
+              />
+            </div>
+          )}
+        </div>
+
         <h2>Completa tu CV</h2>
 
         {showTips && (
@@ -483,19 +509,18 @@ function CvBuilder({ onSaveCv, initialData, user, settings }) {
             <button
               type="button"
               className="cv-section-toggle"
-              onClick={() => toggleSection("experiencia")}
+              onClick={() => toggleSection("experiencias")}
             >
-              {sectionsVisible.experiencia
+              {sectionsVisible.experiencias
                 ? "− Ocultar del CV"
                 : "+ Mostrar en el CV"}
             </button>
           </div>
 
           <label>
-            {cvLanguage === "en" ? "Details:" : "Detalle:"}
             <textarea
-              name="experiencia"
-              value={cvData.experiencia}
+              name="experiencias"
+              value={cvData.experiencias}
               onChange={handleChange}
               placeholder={
                 cvLanguage === "en"
@@ -529,7 +554,6 @@ Empresa X · Desarrollador Frontend · 2023 - Actualidad
           </div>
 
           <label>
-            {cvLanguage === "en" ? "Details:" : "Detalle:"}
             <textarea
               name="educacion"
               value={cvData.educacion}
@@ -595,7 +619,6 @@ Universidad X · Tecnicatura en Desarrollo Web · 2022 - Actualidad`
           </div>
 
           <label>
-            {cvLanguage === "en" ? "Details:" : "Detalle:"}
             <input
               type="text"
               name="idiomas"
@@ -626,7 +649,6 @@ Universidad X · Tecnicatura en Desarrollo Web · 2022 - Actualidad`
           </div>
 
           <label>
-            {cvLanguage === "en" ? "Details:" : "Detalle:"}
             <textarea
               name="proyectos"
               value={cvData.proyectos}
@@ -797,14 +819,14 @@ Proyecto portafolio personal · React · 2024
               </section>
             )}
 
-            {sectionsVisible.experiencia && (
+            {sectionsVisible.experiencias && (
               <section className="cv-preview-section">
-                <h4>{sectionLabels.experiencia}</h4>
+                <h4>{sectionLabels.experiencias}</h4>
                 <p className="cv-preview-paragraph-preline">
-                  {cvData.experiencia ||
+                  {cvData.experiencias ||
                     (cvLanguage === "en"
-                      ? "Work experience details..."
-                      : "Detalle de tu experiencia laboral...")}
+                      ? "Mian work experience..."
+                      : "Tu experiencia laboral...")}
                 </p>
               </section>
             )}
@@ -925,7 +947,7 @@ Proyecto portafolio personal · React · 2024
                     <option value="perfil">
                       {cvLanguage === "en" ? "Profile" : "Perfil profesional"}
                     </option>
-                    <option value="experiencia">
+                    <option value="experiencias">
                       {cvLanguage === "en"
                         ? "Experience"
                         : "Experiencia laboral"}

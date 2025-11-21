@@ -2,7 +2,8 @@
 
 .cv-builder {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  /* Formulario un poco más chico, vista previa un poco más grande */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
   gap: 1.5rem;
 }
 
@@ -26,6 +27,14 @@
   padding: 1rem;
   border-radius: 0.75rem;
 }
+
+/*.cv-preview-wrapper {
+  position: sticky;
+  top: 1.5rem;          
+  height: fit-content;  
+}
+*/
+
 
 .cv-preview-paper {
   background: white;
@@ -137,6 +146,15 @@
   background: #f9fafb;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
+
+/* Limitar crecimiento de los textarea del CV */
+.cv-form textarea {
+  max-height: 220px;      /* altura máxima del campo */
+  min-height: 90px;       /* altura mínima cómoda */
+  overflow-y: auto;       /* aparece scroll interno si se pasa */
+  resize: vertical;       /* permite ajustar pero dentro del límite */
+}
+
 
 .cv-form input:focus,
 .cv-form textarea:focus {
@@ -515,4 +533,49 @@
   margin-top: 0.25rem;
   white-space: pre-line;
 }
+
+/* Toggle de configuración dentro de Crear CV */
+.cv-settings-toggle {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cv-settings-toggle-btn {
+  align-self: flex-start;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--joblu-primary);
+  background: #ffffff;
+  color: var(--joblu-primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease,
+    transform 0.1s ease;
+}
+
+.cv-settings-toggle-btn:hover {
+  background: var(--joblu-primary);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+  transform: translateY(-1px);
+}
+
+.cv-settings-toggle-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.1);
+}
+
+.cv-settings-panel {
+  border-radius: 0.75rem;
+  background: #f9fafb;
+  padding: 0.75rem 0.75rem 0.25rem;
+}
+
 

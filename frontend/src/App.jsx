@@ -187,12 +187,6 @@ return (
         }>
           Mis CVs
         </NavLink>
-
-        <NavLink to="/config" className={({ isActive }) =>
-          'nav-link' + (isActive ? ' nav-link-active' : '')
-        }>
-          Configuración CV
-        </NavLink>
       </>
     )}
   </nav>
@@ -260,7 +254,6 @@ return (
           <NavLink to="/cv" className="drawer-link">Crear CV</NavLink>
           <NavLink to="/comunidad" className="drawer-link">Comunidad</NavLink>
           <NavLink to="/mis-cvs" className="drawer-link">Mis CVs</NavLink>
-          <NavLink to="/config" className="drawer-link">Configuración</NavLink>
         </nav>
 
         <button
@@ -292,10 +285,11 @@ return (
                 initialData={activeCvData}
                 user={user}
                 settings={settings}
-                // settings={settings}  // más adelante para IA / formato
+                onChangeSettings={setSettings}
               />
             }
           />
+
 
           <Route path="/comunidad" element={<Community user={user} />} />
           <Route path="/comunidad/:id" element={<PostDetail user={user} />} />
@@ -309,17 +303,6 @@ return (
                 savedCvs={savedCvs}
                 onOpenCv={handleOpenCv}
                 onDeleteCv={handleDeleteCv}
-              />
-            }
-          />
-
-          <Route
-            path="/config"
-            element={
-              <Settings
-                user={user}
-                settings={settings}
-                onChangeSettings={setSettings}
               />
             }
           />
