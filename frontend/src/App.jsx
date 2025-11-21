@@ -4,10 +4,12 @@ import './App.css'
 import Home from './pages/Home.jsx'
 import CvBuilder from './pages/CvBuilder.jsx'
 import Community from './pages/Community.jsx'
+import Jobs from './pages/Jobs.jsx'
 import Login from './pages/Login.jsx'
 import MyCvs from './pages/MyCvs.jsx'
 import Settings from './pages/Settings.jsx'
 import AccountSettings from './pages/AccountSettings.jsx'
+import JobDetail from './pages/JobDetail.jsx'
 import PostDetail from "./pages/PostDetail";
 import "./styles/header.css";
 
@@ -180,6 +182,12 @@ return (
       Comunidad
     </NavLink>
 
+    <NavLink to="/jobs" className={({ isActive }) =>
+      'nav-link' + (isActive ? ' nav-link-active' : '')
+    }>
+      Bolsa de trabajo
+    </NavLink>
+
     {user && (
       <>
         <NavLink to="/mis-cvs" className={({ isActive }) =>
@@ -190,6 +198,7 @@ return (
       </>
     )}
   </nav>
+
 
   {/* BOTÓN MENÚ (solo si hay usuario autenticado) */}
   {user && !isMobileMenuOpen && (
@@ -253,6 +262,7 @@ return (
           <NavLink to="/" className="drawer-link">Inicio</NavLink>
           <NavLink to="/cv" className="drawer-link">Crear CV</NavLink>
           <NavLink to="/comunidad" className="drawer-link">Comunidad</NavLink>
+          <NavLink to="/jobs" className="drawer-link">Bolsa de trabajo</NavLink>
           <NavLink to="/mis-cvs" className="drawer-link">Mis CVs</NavLink>
         </nav>
 
@@ -293,6 +303,10 @@ return (
 
           <Route path="/comunidad" element={<Community user={user} />} />
           <Route path="/comunidad/:id" element={<PostDetail user={user} />} />
+
+          <Route path="/jobs" element={<Jobs />} />
+          <Route path="/jobs/:id" element={<JobDetail />} />
+
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
 
           <Route
