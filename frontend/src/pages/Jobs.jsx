@@ -147,7 +147,7 @@ function Jobs() {
         <aside className="jobs-filters">
 
         {/* Tipo de empleo */}
-        <details className="jobs-filter-section" open>
+        <details className="jobs-filter-section">
             <summary className="jobs-filter-title">Tipo de empleo</summary>
             <div className="jobs-filter-content">
             <label>
@@ -187,7 +187,7 @@ function Jobs() {
 
 
         {/* Modalidad */}
-        <details className="jobs-filter-section" open>
+        <details className="jobs-filter-section">
             <summary className="jobs-filter-title">Modalidad</summary>
             <div className="jobs-filter-content">
             <label>
@@ -219,7 +219,7 @@ function Jobs() {
 
 
         {/* Experiencia */}
-        <details className="jobs-filter-section" open>
+        <details className="jobs-filter-section">
             <summary className="jobs-filter-title">Experiencia</summary>
             <div className="jobs-filter-content">
             <label>
@@ -259,7 +259,7 @@ function Jobs() {
 
 
         {/* Ubicación */}
-        <details className="jobs-filter-section" open>
+        <details className="jobs-filter-section">
             <summary className="jobs-filter-title">Ubicación</summary>
             <div className="jobs-filter-content">
             <label>
@@ -299,7 +299,7 @@ function Jobs() {
 
 
         {/* Categorías → chips activables */}
-        <details className="jobs-filter-section" open>
+        <details className="jobs-filter-section">
             <summary className="jobs-filter-title">Categorías</summary>
                 <div className="jobs-filter-chips">
                 {[
@@ -328,6 +328,38 @@ function Jobs() {
 
 
         <section className="jobs-list-area">
+          <div className="jobs-tabs-mobile">
+            <div className="jobs-list-tabs">
+              <button
+                type="button"
+                className={
+                  "jobs-tab" + (activeTab === "all" ? " jobs-tab-active" : "")
+                }
+                onClick={() => setActiveTab("all")}
+              >
+                Todos los empleos
+              </button>
+              <button
+                type="button"
+                className={
+                  "jobs-tab" + (activeTab === "featured" ? " jobs-tab-active" : "")
+                }
+                onClick={() => setActiveTab("featured")}
+              >
+                Destacados
+              </button>
+              <button
+                type="button"
+                className={
+                  "jobs-tab" + (activeTab === "recent" ? " jobs-tab-active" : "")
+                }
+                onClick={() => setActiveTab("recent")}
+              >
+                Recientes
+              </button>
+            </div>
+          </div>
+
           <div className="jobs-list">
             {filteredJobs.length === 0 && (
               <p className="jobs-empty">

@@ -23,6 +23,11 @@
   align-items: flex-end;
 }
 
+.jobs-tabs-mobile {
+  display: none;
+}
+
+
 
 .jobs-title {
   margin: 0;
@@ -55,10 +60,12 @@
 }
 
 .jobs-list-tabs {
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem;
 }
+
 
 .jobs-tab {
   border-radius: 999px;
@@ -275,16 +282,80 @@
   color: #fff;
 }
 
-/* Opcional para que en mobile no se rompa del todo */
+/* =======================
+   Responsive Bolsa de trabajo
+   ======================= */
 @media (max-width: 768px) {
-  .jobs-header-top {
-    flex-direction: column;
-    align-items: stretch;
+  .jobs-page {
+    padding: 1rem;
+    margin: 1.5rem auto;
+    overflow-x: hidden;
+  }
+
+  .jobs-layout {
+    grid-template-columns: 1fr;
     gap: 1rem;
   }
 
+  /* Filtros arriba de los posteos */
+  .jobs-filters {
+    order: 1;
+  }
+
+  .jobs-list-area {
+    order: 2;
+  }
+
+  .jobs-search-bar {
+    width: 100%;
+  }
+
+  .jobs-search-input {
+    font-size: 0.85rem;
+  }
+
+  /* Tabs: se ocultan en el header y se muestran debajo de los filtros */
   .jobs-header-tabs {
-    justify-content: flex-start;
+    display: none;
+  }
+
+  .jobs-tabs-mobile {
+    display: flex;
+    margin-bottom: 0.5rem;
+  }
+
+  .jobs-tabs-mobile .jobs-list-tabs {
+    width: 100%;
+  }
+
+  .jobs-tabs-mobile .jobs-tab {
+    flex: 1;
+    text-align: center;
+  }
+
+  .jobs-tab {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.7rem;
+  }
+
+  .job-card {
+    padding: 0.9rem;
+  }
+
+  .job-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .job-card-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .job-card-footer-left {
+    order: 2;
   }
 }
+
+
 

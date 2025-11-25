@@ -166,3 +166,38 @@
 .community-form--compact {
   margin-top: 0.75rem;
 }
+
+  /* Comunidad: ocupar casi todo el ancho y bajar un poco la sombra */
+  .community {
+    margin: 1rem 0.5rem;
+    padding: 1rem;
+    border-radius: 0.8rem;
+  }
+
+  .community-create-card {
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .community-post {
+    padding: 0.8rem 0.9rem;
+  }
+
+  .community-input {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .community-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .community-post-excerpt,
+  .community-post-meta {
+    font-size: 0.85rem;
+  }
+
+  .community-create-card {
+    padding: 0.9rem 1rem;
+  }
+

@@ -578,4 +578,64 @@
   padding: 0.75rem 0.75rem 0.25rem;
 }
 
+/* ===========================
+   Responsive Crear CV
+   =========================== */
+
+/* Tablet / iPad, etc. */
+@media (max-width: 1024px) {
+  .cv-builder {
+    grid-template-columns: 1fr;        /* una columna */
+    gap: 1.25rem;
+    max-width: 760px;                  /* no ocupa todo el ancho */
+    margin: 0 auto;
+  }
+
+  .cv-column {
+    padding: 1rem 0.75rem;
+  }
+
+  .cv-column h2 {
+    margin-bottom: 0.6rem;
+  }
+
+  .cv-section-toggle {
+    margin-top: 0.75rem;
+  }
+}
+
+/* Mobile chico */
+@media (max-width: 640px) {
+  .cv-column {
+    padding: 0.75rem 0.5rem;
+  }
+
+  /* Inputs en una sola columna */
+  .cv-form-group-inline {
+    grid-template-columns: 1fr;
+  }
+
+  .cv-form label {
+    font-size: 0.85rem;
+  }
+
+  .cv-form input,
+  .cv-form textarea {
+    font-size: 0.9rem;
+  }
+
+  .cv-preview-wrapper {
+    padding: 0.75rem 0.5rem 1rem;
+  }
+
+  .cv-preview-paper {
+    padding: 1.25rem;
+  }
+
+  .cv-actions {
+    justify-content: flex-start;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+}
 
