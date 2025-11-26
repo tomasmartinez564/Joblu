@@ -19,6 +19,7 @@ import "./styles/header.css";
 const LS_USER_KEY = 'joblu_user'
 const LS_SETTINGS_KEY = 'joblu_settings'
 const LS_CVS_KEY = 'joblu_savedCvs'
+const LS_ONBOARDING_KEY = 'joblu_onboarding_done'
 
 const defaultSettings = {
   cvLanguage: 'es',
@@ -96,6 +97,15 @@ function AppLayout() {
     const username = email ? email.split('@')[0] : 'Usuario'
     setUser({ email, name: username })
     setIsAccountMenuOpen(false)
+
+    try {
+      const done = localStorage.getItem(LS_ONBOARDING_KEY) === 'done'
+      if (!done) {
+        setOnboardingStep(0)
+        setShowOnboarding(true)
+      }
+    } catch {}
+
     navigate('/cv')
   }
 
@@ -104,6 +114,7 @@ function AppLayout() {
     setSavedCvs([])
     setActiveCvData(null)
     setIsAccountMenuOpen(false)
+    setShowOnboarding(false)
     navigate('/')
   }
 
@@ -151,7 +162,46 @@ function AppLayout() {
     navigate('/cuenta')
   }
 
+    const finishOnboarding = () => {
+    setShowOnboarding(false)
+    try {
+      localStorage.setItem(LS_ONBOARDING_KEY, 'done')
+    } catch {}
+  }
+
+  const handleNextOnboarding = () => {
+    if (onboardingStep + 1 < onboardingSteps.length) {
+      setOnboardingStep(onboardingStep + 1)
+    } else {
+      finishOnboarding()
+    }
+  }
+
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState(0);
+
+  const onboardingSteps = [
+    {
+      title: "Bienvenido a Joblu",
+      text: "Acá vas a poder crear tu currículum de forma rápida, con vista previa y ayuda de inteligencia artificial.",
+    },
+    {
+      title: "Crear CV y Mis CVs",
+      text: "En la sección “Crear CV” completás tus datos. En “Mis CVs” vas a ver y gestionar los CVs que guardes.",
+    },
+    {
+      title: "Comunidad",
+      text: "En la Comunidad podés compartir experiencias, hacer preguntas y leer posteos de otros usuarios.",
+    },
+    {
+      title: "Bolsa de trabajo",
+      text: "En la Bolsa de trabajo vas a encontrar empleos filtrados por tipo, modalidad y categoría para postular con tu CV.",
+    },
+  ];
+
 
 // ----------------------------------------------------------- HEADER -----------------------------------------------------------
   
@@ -159,7 +209,7 @@ return (
     <div className="app">
 <header className="app-header">
   <div className="app-logo">
-    Job<span>lu</span>
+    <img src="/logo2.png" alt="Joblu" className="app-logo-img" />
   </div>
 
   {/* NAV ESCRITORIO (se oculta en mobile por CSS) */}
@@ -204,7 +254,10 @@ return (
   {user && !isMobileMenuOpen && (
     <button
       className="mobile-menu-toggle"
-      onClick={() => setIsMobileMenuOpen(true)}
+      onClick={() => {
+        setIsAccountMenuOpen(false);
+        setIsMobileMenuOpen(true);
+      }}
     >
       ☰
     </button>
@@ -212,19 +265,66 @@ return (
 
 
 
-  {/* ZONA DE USUARIO (SE MANTIENE IGUAL) */}
-<div className="app-user-area">
-  {!user && (
-    <NavLink
-      to="/login"
-      className={({ isActive }) =>
-        'nav-link' + (isActive ? ' nav-link-active' : '')
-      }
-    >
-      Iniciar sesión
-    </NavLink>
-  )}
-</div>
+  {/* ZONA DE USUARIO */}
+  <div className="app-user-area">
+    {!user && (
+      <NavLink
+        to="/login"
+        className={({ isActive }) =>
+          'nav-link' + (isActive ? ' nav-link-active' : '')
+        }
+      >
+        Iniciar sesión
+      </NavLink>
+    )}
+
+    {user && (
+      <div className="desktop-user-menu">
+        <button
+          type="button"
+          className="account-avatar-button"
+          onClick={() => setIsAccountMenuOpen((prev) => !prev)}
+        >
+          {user.name?.charAt(0)?.toUpperCase()}
+        </button>
+
+        <div className={`account-menu ${isAccountMenuOpen ? 'open' : ''}`}>
+          <button
+            type="button"
+            className="account-menu-item"
+            onClick={() => {
+              setIsAccountMenuOpen(false);
+              navigate('/configuracion');
+            }}
+          >
+            Configuración
+          </button>
+
+          <button
+            type="button"
+            className="account-menu-item"
+            onClick={() => {
+              setIsAccountMenuOpen(false);
+              handleLogout();
+            }}
+          >
+            Cerrar sesión
+          </button>
+
+          <button
+            type="button"
+            className="account-menu-item"
+            onClick={() => {
+              goToAccount();
+            }}
+          >
+            Mi cuenta
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+
 
 
   {user && (
@@ -283,6 +383,51 @@ return (
 
 </header>
 
+      {user && showOnboarding && (
+        <div className="onboarding-backdrop">
+          <div className="onboarding-modal">
+            <h2 className="onboarding-title">
+              {onboardingSteps[onboardingStep].title}
+            </h2>
+            <p className="onboarding-text">
+              {onboardingSteps[onboardingStep].text}
+            </p>
+
+            <div className="onboarding-actions">
+              <button
+                type="button"
+                className="onboarding-secondary"
+                onClick={finishOnboarding}
+              >
+                Cerrar
+              </button>
+              <button
+                type="button"
+                className="onboarding-primary"
+                onClick={handleNextOnboarding}
+              >
+                {onboardingStep + 1 < onboardingSteps.length
+                  ? 'Siguiente'
+                  : 'Empezar a usar Joblu'}
+              </button>
+            </div>
+
+            <div className="onboarding-dots">
+              {onboardingSteps.map((_, index) => (
+                <span
+                  key={index}
+                  className={
+                    'onboarding-dot' +
+                    (index === onboardingStep ? ' onboarding-dot-active' : '')
+                  }
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+
       <main className="app-main">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -308,6 +453,8 @@ return (
           <Route path="/jobs/:id" element={<JobDetail />} />
 
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
+
+          <Route path="/configuracion" element={<Settings />} />
 
           <Route
             path="/mis-cvs"

@@ -5,9 +5,6 @@ import "../styles/postdetail.css";
 
 const STORAGE_KEY = "joblu_liked_posts";
 
-// Base de la API
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-
 const getInitialLikedPosts = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);

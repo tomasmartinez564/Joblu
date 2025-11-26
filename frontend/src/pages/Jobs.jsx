@@ -393,7 +393,6 @@ function Jobs() {
                       type="button"
                       className="job-card-secondary-btn"
                       onClick={() => {
-                        console.log("Guardar empleo", job.id);
                       }}
                     >
                       Guardar
@@ -402,7 +401,6 @@ function Jobs() {
                       type="button"
                       className="job-card-secondary-btn"
                       onClick={() => {
-                        console.log("Compartir empleo", job.id);
                       }}
                     >
                       Compartir
@@ -413,7 +411,6 @@ function Jobs() {
                     type="button"
                     className="job-card-cta"
                     onClick={() => {
-                      console.log("Enviar CV a empleo", job.id);
                     }}
                   >
                     Enviar CV

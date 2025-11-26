@@ -61,7 +61,7 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
 
   const cvRef = useRef(null);
 
-  // 🧠 Estado para el panel de IA
+  
   const [aiOpen, setAiOpen] = useState(false);
   const [aiSection, setAiSection] = useState("perfil");
   const [jobDesc, setJobDesc] = useState("");
@@ -109,7 +109,7 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
   };
 
   const handleSave = () => {
-    // limpiar mensajes anteriores
+    
     setSaveError("");
     setSaveSuccess("");
 
@@ -132,7 +132,7 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
   };
 
 
-  // 📸 subir foto
+  //  subir foto
   const handlePhotoChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;

@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import "../styles/community.css";
 
 
-// 👇 Base de la API: en desarrollo = localhost, en producción = VITE_API_URL
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function Community({ user }) {
@@ -19,7 +18,7 @@ function Community({ user }) {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/community/posts`);
+        const res = await fetch(`${API_BASE_URL}/api/community/posts`);
 
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
