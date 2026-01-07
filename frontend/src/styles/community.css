@@ -3,7 +3,7 @@
   padding: 1.5rem;
   max-width: 1120px;
   margin: 2rem auto;
-  background: transparent; /* deja ver el fondo general */
+  background: transparent; 
   border: none;
   animation: joblu-fade-in-up 0.35s ease;
 }
@@ -161,7 +161,7 @@
   min-height: 3.5rem;
 }
 
-/* Formulario de comentarios compacto reutiliza estilos de Community */
+
 
 .community-form--compact {
   margin-top: 0.75rem;

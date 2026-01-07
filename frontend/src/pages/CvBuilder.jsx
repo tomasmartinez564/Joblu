@@ -701,13 +701,13 @@ Proyecto portafolio personal · React · 2024
         </form>
 
         <div className="cv-actions">
-          <button type="button" className="save-btn" onClick={handleSave}>
+          <button type="button" className="cv-actions-btn save-btn" onClick={handleSave}>
             {cvLanguage === "en" ? "Save CV" : "Guardar CV"}
           </button>
 
           <button
             type="button"
-            className="download-btn"
+            className="cv-actions-btn download-btn"
             onClick={handleDownloadPDF}
           >
             {cvLanguage === "en" ? "Download PDF" : "Descargar PDF"}
@@ -715,7 +715,7 @@ Proyecto portafolio personal · React · 2024
 
           <button
             type="button"
-            className="ai-btn"
+            className="cv-actions-btn ai-btn"
             onClick={() => setAiOpen(true)}
           >
             💡 {cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}

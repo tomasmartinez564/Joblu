@@ -36,7 +36,7 @@ function AccountSettings({ user, onUpdateUser }) {
   const handleProfileSubmit = (e) => {
     e.preventDefault();
 
-    // limpiar mensajes previos
+    
     setProfileError("");
     setProfileSuccess("");
 
@@ -53,7 +53,7 @@ function AccountSettings({ user, onUpdateUser }) {
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
 
-    // limpiar mensajes previos
+    
     setPasswordError("");
     setPasswordSuccess("");
 
@@ -67,7 +67,7 @@ function AccountSettings({ user, onUpdateUser }) {
       return;
     }
 
-    // En una app real acá llamarías al backend
+    
     setPasswordSuccess("Cambio de contraseña simulado (en un backend real se aplicaría).");
 
     setCurrentPassword("");

@@ -200,61 +200,65 @@
   gap: 0.75rem;
 }
 
+/* --- INICIO DEL CAMBIO --- */
+
 .cv-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
   margin-top: 1.5rem;
+  /* Opcional: si querés que ocupen todo el ancho en móviles */
+  /* justify-content: stretch; */
 }
 
-.save-btn {
+/* Clase común para que todos los botones sean gemelos en tamaño */
+.cv-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   padding: 0.6rem 1.2rem;
-  background-color: #10b981;
-  color: #f9fafb;
-  border: none;
   border-radius: 0.5rem;
-  font-size: 0.95rem;
+  font-size: 0.95rem; /* Unificamos tamaño de letra */
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: all 0.2s ease;
+  min-height: 42px; /* Forzamos altura mínima igual para todos */
+  border: none;
 }
 
+/* 1. Botón Guardar (Verde) */
+.save-btn {
+  background-color: #10b981;
+  color: #f9fafb;
+}
 .save-btn:hover {
   background-color: #059669;
+  transform: translateY(-1px);
 }
 
-/* Botón descargar principal */
+/* 2. Botón Descargar (Violeta/Principal) */
 .download-btn {
-  padding: 0.6rem 1.2rem;
-  background-color: var(--joblu-secondary);
+  background-color: var(--joblu-secondary); /* Ojo: asegurate que esta variable exista, sino usá #6366f1 */
   color: white;
-  border: none;
-  border-radius: 0.5rem;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
 }
-
 .download-btn:hover {
   background-color: var(--joblu-primary);
+  transform: translateY(-1px);
 }
 
-/* Botón descargar dentro del form (si se usa ahí) */
-.download-btn {
-  margin-top: 1.5rem;
-  padding: 0.6rem 1.2rem;
-  background-color: var(--joblu-primary);
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+/* 3. Botón IA (Claro con borde) */
+.ai-btn {
+  background: #e7fdfb;
+  color: #065f46;
+  border: 1px solid var(--joblu-primary-accent);
+}
+.ai-btn:hover {
+  background: #ccfbf5;
+  transform: translateY(-1px);
 }
 
-.download-btn:hover {
-  background-color: var(--joblu-secondary);
-}
+/* --- FIN DEL CAMBIO --- */
 
 /* Tip con resumen de preferencias */
 .cv-settings-tip {
