@@ -1,0 +1,203 @@
+/* Página Comunidad */
+.community {
+  padding: 1.5rem;
+  max-width: 1120px;
+  margin: 2rem auto;
+  background: transparent; /* deja ver el fondo general */
+  border: none;
+  animation: joblu-fade-in-up 0.35s ease;
+}
+
+.community-list {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* Tarjeta de cada post en la lista */
+.community-post {
+  padding: 0.9rem 1.1rem;
+  border-radius: 0.8rem;
+  background: #ffffff;
+  border: 1px solid var(--joblu-border-soft);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease,
+    background-color 0.16s ease;
+  animation: joblu-fade-in-up 0.35s ease;
+}
+
+.community-post:hover {
+  transform: translateY(-2px);
+  background: #f9fafb;
+  border-color: var(--joblu-primary-accent);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+}
+
+.community-create-card {
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--joblu-border-soft);
+  background: #f9fafb;
+}
+
+.community-create-title {
+  margin: 0;
+  font-family: var(--font-subtitle);
+  font-size: 1rem;
+}
+
+.community-helper-text {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--joblu-text-muted);
+}
+
+.community-error-text {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: #b91c1c;
+}
+
+.community-subtitle {
+  margin-top: 0.35rem;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: var(--joblu-text-muted);
+  max-width: 52rem;
+}
+
+.community-list-title {
+  margin-top: 1.5rem;
+  margin-bottom: 0.25rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.community-status-text {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--joblu-text-muted);
+}
+
+/* Enlaces y texto dentro de cada post de la lista */
+
+.community-post-title {
+  font-weight: 600;
+  text-decoration: none;
+  color: inherit;
+  display: inline-block;
+  margin-bottom: 0.25rem;
+}
+
+.community-post-title:hover {
+  color: var(--joblu-primary);
+}
+
+.community-post-meta {
+  margin: 0.15rem 0 0.35rem;
+  font-size: 0.85rem;
+  color: var(--joblu-text-muted);
+}
+
+.community-post-excerpt {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+/* Formulario base para crear post / comentar */
+.community-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.55rem;
+  margin-top: 0.6rem;
+}
+
+/* Variante más compacta (para comentarios) */
+.community-form--compact {
+  margin-top: 0.75rem;
+}
+
+/* Inputs y textareas de Comunidad */
+.community-input {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--joblu-border-soft);
+  background-color: #f9fafb;
+  color: var(--joblu-text-main);
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background-color 0.16s ease,
+    transform 0.12s ease;
+}
+
+.community-input::placeholder {
+  color: var(--joblu-text-muted);
+}
+
+.community-input:focus {
+  outline: none;
+  border-color: var(--joblu-primary-accent);
+  background-color: #ffffff;
+  box-shadow:
+    0 0 0 1px rgba(33, 219, 210, 0.35),
+    0 6px 18px rgba(15, 23, 42, 0.12);
+  transform: translateY(-1px);
+}
+
+.community-textarea {
+  resize: vertical;
+  min-height: 3.5rem;
+}
+
+/* Formulario de comentarios compacto reutiliza estilos de Community */
+
+.community-form--compact {
+  margin-top: 0.75rem;
+}
+
+  /* Comunidad: ocupar casi todo el ancho y bajar un poco la sombra */
+  .community {
+    margin: 1rem 0.5rem;
+    padding: 1rem;
+    border-radius: 0.8rem;
+  }
+
+  .community-create-card {
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .community-post {
+    padding: 0.8rem 0.9rem;
+  }
+
+  .community-input {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .community-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .community-post-excerpt,
+  .community-post-meta {
+    font-size: 0.85rem;
+  }
+
+  .community-create-card {
+    padding: 0.9rem 1rem;
+  }
+

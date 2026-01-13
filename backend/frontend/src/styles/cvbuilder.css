@@ -200,74 +200,65 @@
   gap: 0.75rem;
 }
 
-/* ===== FIX DEFINITIVO BOTONES CV (al final del CSS) ===== */
+/* --- INICIO DEL CAMBIO --- */
 
 .cv-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.25rem;          /* separación real */
+  gap: 0.75rem;
   margin-top: 1.5rem;
-  align-items: center;
+  /* Opcional: si querés que ocupen todo el ancho en móviles */
+  /* justify-content: stretch; */
 }
 
-/* Base común */
-.cv-actions .cv-action-btn {
-  appearance: none;
-  -webkit-appearance: none;
-  box-sizing: border-box;
-
+/* Clase común para que todos los botones sean gemelos en tamaño */
+.cv-action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
-  height: 44px;
-  padding: 0 1.25rem;
-  line-height: 1;
-
-  border-radius: 10px;
-  border: 1px solid transparent;
-  background: transparent;
-
-  font-size: 0.95rem;
-  font-weight: 600;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.5rem;
+  font-size: 0.95rem; /* Unificamos tamaño de letra */
+  font-weight: 500;
   cursor: pointer;
-  white-space: nowrap;
-
-  flex: 0 0 auto;        /* 🔑 permite que el gap se vea */
-  transition: background-color 0.2s ease, transform 0.15s ease;
+  transition: all 0.2s ease;
+  min-height: 42px; /* Forzamos altura mínima igual para todos */
+  border: none;
 }
 
-/* Guardar CV – Verde */
-.cv-actions .save-btn {
+/* 1. Botón Guardar (Verde) */
+.save-btn {
   background-color: #10b981;
-  color: #ffffff;
+  color: #f9fafb;
 }
-.cv-actions .save-btn:hover {
+.save-btn:hover {
   background-color: #059669;
   transform: translateY(-1px);
 }
 
-/* Descargar PDF – Violeta */
-.cv-actions .download-btn {
-  background-color: var(--joblu-secondary, #6366f1);
-  color: #ffffff;
+/* 2. Botón Descargar (Violeta/Principal) */
+.download-btn {
+  background-color: var(--joblu-secondary); /* Ojo: asegurate que esta variable exista, sino usá #6366f1 */
+  color: white;
 }
-.cv-actions .download-btn:hover {
-  background-color: var(--joblu-primary, #4f46e5);
+.download-btn:hover {
+  background-color: var(--joblu-primary);
   transform: translateY(-1px);
 }
 
-/* Mejorar con IA */
-.cv-actions .ai-btn {
-  background-color: #e7fdfb;
+/* 3. Botón IA (Claro con borde) */
+.ai-btn {
+  background: #e7fdfb;
   color: #065f46;
-  border-color: var(--joblu-primary-accent, #10b981);
+  border: 1px solid var(--joblu-primary-accent);
 }
-.cv-actions .ai-btn:hover {
-  background-color: #ccfbf5;
+.ai-btn:hover {
+  background: #ccfbf5;
   transform: translateY(-1px);
 }
 
+/* --- FIN DEL CAMBIO --- */
 
 /* Tip con resumen de preferencias */
 .cv-settings-tip {
@@ -278,6 +269,24 @@
   background: #e7fdfb;
   color: var(--joblu-primary);
   border: 1px solid var(--joblu-primary-accent);
+}
+
+/* Botón IA */
+.ai-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--joblu-primary-accent);
+  background: #e7fdfb;
+  color: #065f46;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.ai-btn:hover {
+  background: #ccfbf5;
 }
 
 /* Panel de IA (overlay lateral) */

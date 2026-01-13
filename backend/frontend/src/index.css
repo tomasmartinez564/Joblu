@@ -1,0 +1,89 @@
+:root {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #111827;
+  background-color: #f3f4f6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+   --joblu-primary: #6337b7;        /* violeta principal */
+  --joblu-primary-accent: #21dbd2; /* acento turquesa */
+  --joblu-secondary: #3c74c2;      /* azul secundario */
+
+  --joblu-bg-main: #ededed;        /* fondo app */
+  --joblu-bg-muted: #9d9191;       /* fondo alternativo / footers */
+  --joblu-surface: #ffffff;        /* tarjetas / paneles */
+
+  --joblu-text-main: #111827;
+  --joblu-text-muted: #6b7280;
+  --joblu-border-soft: #e5e7eb;
+
+  /* Tipos de letra Joblu */
+  --font-title: "Gabriela", serif;
+  --font-subtitle: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: "Nunito", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  background-color: var(--joblu-bg-main);
+  color: var(--joblu-text-main);
+}
+
+h1,
+h2,
+.app-logo {
+  font-family: var(--font-title);
+}
+
+h3,
+h4,
+.settings-subtitle,
+.account-subtitle,
+.mycvs-subtitle,
+.login-subtitle,
+.community-subtitle {
+  font-family: var(--font-subtitle);
+}
+
+.community-subtitle {
+  margin-top: 0.3rem;
+  margin-bottom: 1.2rem;
+  font-size: 0.95rem;
+  color: var(--joblu-text-muted);
+  max-width: 48rem;
+}
+
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* Animación suave de entrada para secciones Joblu */
+@keyframes joblu-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { NavLink, Route, Routes, useNavigate, Link } from 'react-router-dom'
+import { NavLink, Route, Routes, useNavigate } from 'react-router-dom'
 import './App.css'
 import Home from './pages/Home.jsx'
 import CvBuilder from './pages/CvBuilder.jsx'
@@ -12,7 +12,6 @@ import AccountSettings from './pages/AccountSettings.jsx'
 import JobDetail from './pages/JobDetail.jsx'
 import PostDetail from "./pages/PostDetail";
 import "./styles/header.css";
-import Navbar from "./components/Navbar";
 
 
 
@@ -208,18 +207,181 @@ function AppLayout() {
   
 return (
     <div className="app">
+<header className="app-header">
+  <div className="app-logo">
+    <img src="/logo2.png" alt="Joblu" className="app-logo-img" />
+  </div>
 
-      <Navbar
-        user={user}
-        isMobileMenuOpen={isMobileMenuOpen}
-        setIsMobileMenuOpen={setIsMobileMenuOpen}
-        isAccountMenuOpen={isAccountMenuOpen}
-        setIsAccountMenuOpen={setIsAccountMenuOpen}
-        navigate={navigate}
-        handleLogout={handleLogout}
-        goToAccount={goToAccount}
+  {/* NAV ESCRITORIO (se oculta en mobile por CSS) */}
+  <nav className="nav nav-desktop">
+    <NavLink to="/" end className={({ isActive }) =>
+      'nav-link' + (isActive ? ' nav-link-active' : '')
+    }>
+      Inicio
+    </NavLink>
+
+    <NavLink to="/cv" className={({ isActive }) =>
+      'nav-link' + (isActive ? ' nav-link-active' : '')
+    }>
+      Crear CV
+    </NavLink>
+
+    <NavLink to="/comunidad" className={({ isActive }) =>
+      'nav-link' + (isActive ? ' nav-link-active' : '')
+    }>
+      Comunidad
+    </NavLink>
+
+    <NavLink to="/jobs" className={({ isActive }) =>
+      'nav-link' + (isActive ? ' nav-link-active' : '')
+    }>
+      Bolsa de trabajo
+    </NavLink>
+
+    {user && (
+      <>
+        <NavLink to="/mis-cvs" className={({ isActive }) =>
+          'nav-link' + (isActive ? ' nav-link-active' : '')
+        }>
+          Mis CVs
+        </NavLink>
+      </>
+    )}
+  </nav>
+
+
+  {/* BOTÓN MENÚ (solo si hay usuario autenticado) */}
+  {user && !isMobileMenuOpen && (
+    <button
+      className="mobile-menu-toggle"
+      onClick={() => {
+        setIsAccountMenuOpen(false);
+        setIsMobileMenuOpen(true);
+      }}
+    >
+      ☰
+    </button>
+  )}
+
+
+
+  {/* ZONA DE USUARIO */}
+  <div className="app-user-area">
+    {!user && (
+      <NavLink
+        to="/login"
+        className={({ isActive }) =>
+          'nav-link' + (isActive ? ' nav-link-active' : '')
+        }
+      >
+        Iniciar sesión
+      </NavLink>
+    )}
+
+    {user && (
+      <div className="desktop-user-menu">
+        <button
+          type="button"
+          className="account-avatar-button"
+          onClick={() => setIsAccountMenuOpen((prev) => !prev)}
+        >
+          {user.name?.charAt(0)?.toUpperCase()}
+        </button>
+
+        <div className={`account-menu ${isAccountMenuOpen ? 'open' : ''}`}>
+          <button
+            type="button"
+            className="account-menu-item"
+            onClick={() => {
+              setIsAccountMenuOpen(false);
+              navigate('/configuracion');
+            }}
+          >
+            Configuración
+          </button>
+
+          <button
+            type="button"
+            className="account-menu-item"
+            onClick={() => {
+              setIsAccountMenuOpen(false);
+              handleLogout();
+            }}
+          >
+            Cerrar sesión
+          </button>
+
+          <button
+            type="button"
+            className="account-menu-item"
+            onClick={() => {
+              goToAccount();
+            }}
+          >
+            Mi cuenta
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+
+
+
+  {user && (
+    <>
+      {/* BACKDROP (OSCURECE EL FONDO) */}
+      <div
+        className={`mobile-backdrop ${isMobileMenuOpen ? 'open' : ''}`}
+        onClick={() => setIsMobileMenuOpen(false)}
       />
 
+      {/* MENÚ DESLIZABLE DESDE LA DERECHA */}
+      <aside className={`mobile-drawer ${isMobileMenuOpen ? 'open' : ''}`}>
+        <button
+          className="drawer-close"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          ✕
+        </button>
+
+        <NavLink
+          to="/cuenta"
+          className="drawer-user"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          <div className="drawer-avatar">
+            {user.name?.charAt(0)?.toUpperCase()}
+          </div>
+          <div className="drawer-user-info">
+            <p className="drawer-username">{user.name}</p>
+            <p className="drawer-email">{user.email}</p>
+          </div>
+        </NavLink>
+
+        <nav className="drawer-nav" onClick={() => setIsMobileMenuOpen(false)}>
+          <NavLink to="/" className="drawer-link">Inicio</NavLink>
+          <NavLink to="/cv" className="drawer-link">Crear CV</NavLink>
+          <NavLink to="/comunidad" className="drawer-link">Comunidad</NavLink>
+          <NavLink to="/jobs" className="drawer-link">Bolsa de trabajo</NavLink>
+          <NavLink to="/mis-cvs" className="drawer-link">Mis CVs</NavLink>
+        </nav>
+
+        <button
+          type="button"
+          className="drawer-link drawer-link-logout"
+          onClick={() => {
+            setIsMobileMenuOpen(false);
+            handleLogout();
+          }}
+        >
+          Cerrar sesión
+        </button>
+      </aside>
+    </>
+  )}
+
+
+</header>
 
       {user && showOnboarding && (
         <div className="onboarding-backdrop">
@@ -268,7 +430,8 @@ return (
 
       <main className="app-main">
         <Routes>
-        <Route path="/" element={<Home user={user} />} />
+          <Route path="/" element={<Home />} />
+
           <Route
             path="/cv"
             element={
