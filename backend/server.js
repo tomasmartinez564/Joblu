@@ -227,6 +227,7 @@ const openai = new OpenAI({
 });
 
 // Endpoint para optimizar una sección del CV
+// Endpoint para optimizar una sección del CV (CÓDIGO COMPLETO)
 app.post("/api/optimizar-cv", async (req, res) => {
   const {
     section,
@@ -234,13 +235,86 @@ app.post("/api/optimizar-cv", async (req, res) => {
     jobDescription,
     language,
     targetIndustry,
+    tone,   // Nuevo parámetro
+    goal    // Nuevo parámetro
   } = req.body || {};
 
-  console.log("📥 Body recibido en /api/optimizar-cv:", req.body);
+  console.log("📥 Optimizando CV con parámetros:", { section, tone, goal });
 
   const safeSection = section || "perfil";
   const safeContent = content || "";
   const safeLang = language === "en" ? "en" : "es";
+
+  // 1. Definimos instrucciones específicas por SECCIÓN
+  const sectionRules = {
+    perfil: safeLang === "en" 
+      ? "Create a compelling professional summary. Highlight unique value proposition."
+      : "Crea un perfil profesional impactante. Resalta la propuesta de valor única del candidato.",
+    experiencias: safeLang === "en"
+      ? "Use bullet points. Start with strong action verbs. Quantify results where possible."
+      : "Usa viñetas (bullet points). Comienza con verbos de acción fuertes. Cuantifica resultados siempre que sea posible.",
+    educacion: safeLang === "en"
+      ? "Format clearly. Focus on relevant degree details."
+      : "Formato claro. Enfócate en detalles académicos relevantes.",
+    habilidades: safeLang === "en"
+      ? "List technical and soft skills clearly. Prioritize keywords."
+      : "Lista habilidades técnicas y blandas claramente. Prioriza palabras clave.",
+    otros: safeLang === "en"
+      ? "Summarize relevant extra info concisely."
+      : "Resume información extra de forma concisa."
+  };
+
+  // 2. Definimos instrucciones según el OBJETIVO (Goal)
+  const goalRules = {
+    mejora: safeLang === "en" ? "Improve clarity and flow." : "Mejora la claridad y la fluidez del texto.",
+    ats: safeLang === "en" ? "Optimize for ATS systems. Use standard keywords from the industry." : "Optimiza para sistemas ATS. Usa palabras clave estándar de la industria.",
+    logros: safeLang === "en" ? "Rewrite focusing on measurable achievements (numbers, %, impact)." : "Reescribe enfocándote en logros medibles (números, %, impacto).",
+    correccion: safeLang === "en" ? "Strictly fix grammar and spelling errors only. Do not change the meaning." : "Corrige estrictamente gramática y ortografía. No cambies el sentido ni el estilo.",
+  };
+
+  const currentSectionRule = sectionRules[safeSection] || "";
+  const currentGoalRule = goalRules[goal] || goalRules["mejora"];
+
+  // 3. Construcción del Prompt Dinámico
+  const systemMessage = safeLang === "en"
+    ? `You are an expert CV writer specializing in the ${targetIndustry || "general"} industry.`
+    : `Eres un experto redactor de CVs especializado en la industria de ${targetIndustry || "general"}.`;
+
+  const userMessage = safeLang === "en"
+    ? `
+    TASK: Rewrite the following "${safeSection}" section of a CV.
+    
+    CONFIGURATION:
+    - Tone: ${tone || "Professional"}
+    - Goal: ${currentGoalRule}
+    - Specific rules for this section: ${currentSectionRule}
+    
+    CONTEXT:
+    - Job Description target: """${jobDescription || "Not provided"}"""
+    
+    ORIGINAL CONTENT:
+    """${safeContent}"""
+    
+    OUTPUT:
+    Provide ONLY the rewritten content. No conversational filler.
+    `
+    : `
+    TAREA: Reescribe la siguiente sección "${safeSection}" de un currículum.
+    
+    CONFIGURACIÓN:
+    - Tono deseado: ${tone || "Profesional"}
+    - Objetivo principal: ${currentGoalRule}
+    - Reglas específicas para esta sección: ${currentSectionRule}
+    
+    CONTEXTO:
+    - Descripción del puesto: """${jobDescription || "No provista"}"""
+    
+    CONTENIDO ORIGINAL:
+    """${safeContent}"""
+    
+    SALIDA:
+    Provee SOLO el contenido reescrito. Sin explicaciones ni saludos.
+    `;
 
   // 🔹 Fallback 1: sin API key -> simulación
   if (!process.env.OPENAI_API_KEY) {
@@ -254,48 +328,9 @@ app.post("/api/optimizar-cv", async (req, res) => {
   }
 
   try {
-    const systemMessage =
-      safeLang === "en"
-        ? "You are an expert CV writer and recruiter. Improve the user's CV section."
-        : "Sos un experto en redacción de CVs y selección de personal. Mejorá la sección del CV del usuario.";
-
-    const userMessage =
-      safeLang === "en"
-        ? `
-Improve the following CV section in English.
-- Keep a neutral-professional tone.
-- Focus on achievements and measurable impact when possible.
-- Adapt to this job description if present.
-- Industry (optional): ${targetIndustry || "not specified"}.
-
-Section: ${safeSection}
-Current content:
-"""${safeContent}"""
-
-Job description:
-"""${jobDescription || ""}"""
-
-Answer ONLY with the improved text for that section, without explanations.
-`
-        : `
-Mejorá la siguiente sección de CV en español.
-- Usá un tono profesional y claro.
-- Enfocate en logros y resultados medibles cuando sea posible.
-- Adaptá el contenido a la descripción del puesto si está presente.
-- Rubro objetivo (opcional): ${targetIndustry || "no especificado"}.
-
-Sección: ${safeSection}
-Contenido actual:
-"""${safeContent}"""
-
-Descripción del puesto:
-"""${jobDescription || ""}"""
-
-Respondé SOLO con el texto mejorado de esa sección, sin explicaciones adicionales.
-`;
-
+    // 4. Llamada REAL a OpenAI
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o-mini", // Asegúrate de tener acceso a este modelo, si no usa "gpt-3.5-turbo"
       messages: [
         { role: "system", content: systemMessage },
         { role: "user", content: userMessage },
@@ -307,10 +342,11 @@ Respondé SOLO con el texto mejorado de esa sección, sin explicaciones adiciona
     console.log("✅ IA devolvió sugerencia.");
 
     return res.status(200).json({ suggestion });
+
   } catch (err) {
     console.error("❌ Error en /api/optimizar-cv:", err);
 
-    // 🔹 Fallback 2: error de cuota u otro → simulación
+    // 🔹 Fallback 2: error real -> mensaje de error amigable
     const isQuotaError =
       err?.status === 429 ||
       err?.code === "insufficient_quota" ||
@@ -330,7 +366,6 @@ Respondé SOLO con el texto mejorado de esa sección, sin explicaciones adiciona
     });
   }
 });
-
 // ====================
 // 🚀 Arranque del servidor
 // ====================
