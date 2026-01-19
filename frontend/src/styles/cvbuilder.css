@@ -684,6 +684,7 @@
   border: 1px solid #e5e7eb;
   pointer-events: auto;
   z-index: 10001;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* Highlight SIEMPRE en viewport */
@@ -694,6 +695,7 @@
   pointer-events: none;
   transition: all 0.25s ease;
   z-index: 10000;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 

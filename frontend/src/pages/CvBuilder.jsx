@@ -333,7 +333,7 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
 
   const [posicionPaso, setPosicionPaso] = useState(null);
 
-  const calcularPosicionPaso = (indicePaso) => {
+const calcularPosicionPaso = (indicePaso) => {
     if (!tutorialActivo) return;
 
     const paso = pasos[indicePaso];
@@ -341,21 +341,44 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
 
     const el = paso.ref.current;
     const rect = el.getBoundingClientRect();
+    
+    // Dimensiones del viewport
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
 
-    const margen = 12;
-    const anchoModal = 520;
+    // Configuración
+    const margen = 16;
+    const anchoModal = 520; // Coincide con el max-width del CSS
+    
+    // 1. Lógica Vertical: ¿Arriba o Abajo?
+    // Si el elemento está más abajo del 60% de la pantalla, ponemos el modal ARRIBA.
+    const ponerArriba = rect.top > (vh * 0.6);
 
-    const modalTop = Math.min(window.innerHeight - 12, rect.bottom + margen);
-    const maxLeft = window.innerWidth - anchoModal - margen;
-    const modalLeft = Math.max(margen, Math.min(rect.left, maxLeft));
+    // 2. Lógica Horizontal: Centrado Inteligente con Clamp
+    // Intentamos centrar el modal respecto al elemento resaltado
+    let leftCalculado = rect.left + (rect.width / 2) - (anchoModal / 2);
+
+    // Clamp: Evitamos que se salga por la izquierda (mínimo margen)
+    if (leftCalculado < margen) leftCalculado = margen;
+    
+    // Clamp: Evitamos que se salga por la derecha
+    if (leftCalculado + anchoModal > vw - margen) {
+      leftCalculado = vw - anchoModal - margen;
+    }
 
     setPosicionPaso({
+      // Coordenadas para el Highlight (caja hueca)
       top: rect.top,
       left: rect.left,
       width: rect.width,
       height: rect.height,
-      modalTop,
-      modalLeft,
+
+      // Datos para posicionar el Modal
+      modalLeft: leftCalculado,
+      ponerArriba, // Booleano clave
+      // Puntos de anclaje
+      anchorTop: rect.top - margen,       // Dónde termina el modal si va arriba
+      anchorBottom: rect.bottom + margen, // Dónde empieza el modal si va abajo
     });
   };
 
@@ -428,7 +451,14 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
         className="tutorial-modal"
         style={
           posicionPaso
-            ? { top: posicionPaso.modalTop, left: posicionPaso.modalLeft }
+            ? {
+                left: posicionPaso.modalLeft,
+                // Si va arriba: Anulamos 'top' y usamos 'bottom' calculado desde el borde inferior
+                top: posicionPaso.ponerArriba ? "auto" : posicionPaso.anchorBottom,
+                bottom: posicionPaso.ponerArriba 
+                  ? (window.innerHeight - posicionPaso.anchorTop) 
+                  : "auto",
+              }
             : undefined
         }
       >
