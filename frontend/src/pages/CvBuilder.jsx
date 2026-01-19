@@ -324,55 +324,68 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
 
   const pasoActual = pasos[pasoTutorial];
 
+  const pasoTutorialRef = useRef(pasoTutorial);
+
+  useEffect(() => {
+    pasoTutorialRef.current = pasoTutorial;
+  }, [pasoTutorial]);
+
+
   const [posicionPaso, setPosicionPaso] = useState(null);
 
-  const calcularPosicionPaso = () => {
-  if (!tutorialActivo || !pasoActual?.ref?.current) return;
+  const calcularPosicionPaso = (indicePaso) => {
+    if (!tutorialActivo) return;
 
-  const el = pasoActual.ref.current;
-  const rect = el.getBoundingClientRect();
+    const paso = pasos[indicePaso];
+    if (!paso?.ref?.current) return;
 
-  const margen = 12;
-  const anchoModal = 520;
+    const el = paso.ref.current;
+    const rect = el.getBoundingClientRect();
 
-  const modalTop = Math.min(window.innerHeight - 12, rect.bottom + margen);
-  const maxLeft = window.innerWidth - anchoModal - margen;
-  const modalLeft = Math.max(margen, Math.min(rect.left, maxLeft));
+    const margen = 12;
+    const anchoModal = 520;
 
-  setPosicionPaso({
-    top: rect.top,
-    left: rect.left,
-    width: rect.width,
-    height: rect.height,
-    modalTop,
-    modalLeft,
-  });
-};
+    const modalTop = Math.min(window.innerHeight - 12, rect.bottom + margen);
+    const maxLeft = window.innerWidth - anchoModal - margen;
+    const modalLeft = Math.max(margen, Math.min(rect.left, maxLeft));
 
-
-useEffect(() => {
-  if (!tutorialActivo || !pasoActual?.ref?.current) return;
-
-  const el = pasoActual.ref.current;
-
-  el.scrollIntoView({ behavior: "auto", block: "center", inline: "nearest" });
-
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      calcularPosicionPaso();
-
-      // Corrección extra SOLO para el paso 3 (index 2)
-      if (pasoTutorial === 2) {
-        setTimeout(() => {
-          // validación para no recalcular si ya cambiaste de paso
-          if (!tutorialActivo) return;
-          if (pasoTutorial !== 2) return;
-          calcularPosicionPaso();
-        }, 120);
-      }
+    setPosicionPaso({
+      top: rect.top,
+      left: rect.left,
+      width: rect.width,
+      height: rect.height,
+      modalTop,
+      modalLeft,
     });
-  });
-}, [tutorialActivo, pasoTutorial]);
+  };
+
+
+
+  useEffect(() => {
+    if (!tutorialActivo) return;
+
+    const paso = pasos[pasoTutorial];
+    if (!paso?.ref?.current) return;
+
+    const el = paso.ref.current;
+
+    el.scrollIntoView({ behavior: "auto", block: "center", inline: "nearest" });
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        calcularPosicionPaso(pasoTutorial);
+
+        if (pasoTutorial === 2) {
+          setTimeout(() => {
+            if (!tutorialActivo) return;
+            if (pasoTutorialRef.current !== 2) return;
+            calcularPosicionPaso(2);
+          }, 120);
+        }
+      });
+    });
+  }, [tutorialActivo, pasoTutorial]);
+
 
 
   const marcarTutorialComoVisto = () => {
