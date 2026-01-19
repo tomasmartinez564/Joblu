@@ -400,4 +400,94 @@
   letter-spacing: -0.02em;
 }
 
+.home-como-funciona {
+  padding: 3rem 1.5rem;
+}
+
+.home-como-titulo {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.home-como-pasos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.home-paso {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  background: white;
+}
+
+.home-paso-numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #6337B7;
+  color: white;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+@media (max-width: 900px) {
+  .home-como-pasos {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.home-sobre {
+  padding: 3rem 1.5rem 4rem;
+}
+
+.home-sobre-titulo {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.home-sobre-contenido {
+  max-width: 70ch;
+  line-height: 1.7;
+}
+
+.home-sobre-contenido p {
+  margin: 0 0 1rem;
+}
+
+.home-cta-final {
+  padding: 4rem 1.5rem;
+  text-align: center;
+  background: #f9fafb;
+}
+
+.home-cta-final h2 {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.home-cta-final p {
+  margin-bottom: 1.5rem;
+}
+
+.home-cta-botones {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.home-cta-secundario {
+  padding: 0.9rem 1.2rem;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+}
+
 

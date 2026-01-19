@@ -71,6 +71,16 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
   const [saveError, setSaveError] = useState("");
   const [saveSuccess, setSaveSuccess] = useState("");
 
+  // Tutorial guiado (onboarding)
+  const [tutorialActivo, setTutorialActivo] = useState(false);
+  const [pasoTutorial, setPasoTutorial] = useState(0);
+
+  const refBtnConfiguracion = useRef(null);
+  const refTextareaPerfil = useRef(null);
+  const refBtnIA = useRef(null);
+  const refVistaPrevia = useRef(null);
+
+
 
   // Cuando cambia el CV activo (desde "Mis CVs"), actualizamos el formulario
   useEffect(() => {
@@ -80,6 +90,17 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
       setCvData(emptyCv);
     }
   }, [initialData]);
+
+  useEffect(() => {
+    if (!showTips) return;
+
+  const yaVioTutorial = localStorage.getItem("joblu_tutorial_cv_v1");
+    if (yaVioTutorial) return;
+
+  setTutorialActivo(true);
+  setPasoTutorial(0);
+  }, [showTips]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -276,13 +297,134 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
     setAiOpen(false);
   };
 
+  const pasos = [
+  {
+    titulo: "Elegí la configuración del CV",
+    descripcion: "Acá podés seleccionar el rubro/estilo del CV antes de completarlo.",
+    ref: refBtnConfiguracion,
+  },
+  {
+    titulo: "Completá tu perfil profesional",
+    descripcion: "Escribí un resumen breve y claro de quién sos y qué buscás.",
+    ref: refTextareaPerfil,
+  },
+  {
+    titulo: "Mejoralo con IA",
+    descripcion: "Usá la IA para mejorar el texto y hacerlo más profesional.",
+    ref: refBtnIA,
+  },
+  {
+    titulo: "Revisá la vista previa",
+    descripcion: "La vista previa se actualiza en tiempo real mientras completás los datos.",
+    ref: refVistaPrevia,
+  },
+];
+
+  const pasoActual = pasos[pasoTutorial];
+
+  const [posicionPaso, setPosicionPaso] = useState(null);
+
+    useEffect(() => {
+      if (!tutorialActivo || !pasoActual?.ref?.current) return;
+
+      const el = pasoActual.ref.current;
+
+      el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+
+      // esperamos 1 frame para que el layout quede estable después del scroll
+      requestAnimationFrame(() => {
+        const rect = el.getBoundingClientRect();
+
+        const margen = 12;
+        const anchoModal = 520;
+
+        const modalTop = Math.min(window.innerHeight - 12, rect.bottom + margen);
+        const maxLeft = window.innerWidth - anchoModal - margen;
+        const modalLeft = Math.max(margen, Math.min(rect.left, maxLeft));
+
+        setPosicionPaso({
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+          modalTop,
+          modalLeft,
+        });
+      });
+    }, [tutorialActivo, pasoTutorial]);
+
+
+
+  const marcarTutorialComoVisto = () => {
+    localStorage.setItem("joblu_tutorial_cv_v1", "1");
+  };
+
+  const cerrarTutorial = () => {
+    setTutorialActivo(false);
+    marcarTutorialComoVisto();
+  };
+
+  const siguientePaso = () => {
+    const ultimo = pasoTutorial >= pasos.length - 1;
+    if (ultimo) {
+      cerrarTutorial();
+      return;
+    }
+    setPasoTutorial((prev) => prev + 1);
+  };
+
+
   return (
+      <div className="cv-page">
+        {tutorialActivo && pasoActual?.ref?.current && (
+      <div className="tutorial-overlay">
+        {posicionPaso && (
+          <div
+            className="tutorial-highlight"
+            style={{
+              top: posicionPaso.top,
+              left: posicionPaso.left,
+              width: posicionPaso.width,
+              height: posicionPaso.height,
+            }}
+          />
+        )}
+
+      <div
+        className="tutorial-modal"
+        style={
+          posicionPaso
+            ? { top: posicionPaso.modalTop, left: posicionPaso.modalLeft }
+            : undefined
+        }
+      >
+
+
+
+      <p className="tutorial-paso">Paso {pasoTutorial + 1} de {pasos.length}</p>
+      <h3 className="tutorial-titulo">{pasoActual.titulo}</h3>
+      <p className="tutorial-descripcion">{pasoActual.descripcion}</p>
+
+      <div className="tutorial-acciones">
+        <button type="button" className="tutorial-btn-secundario" onClick={cerrarTutorial}>
+          Omitir
+        </button>
+        <button type="button" className="tutorial-btn-principal" onClick={siguientePaso}>
+          Siguiente
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
     <section className="cv-builder">
       {/* 📝 Columna izquierda - Formulario */}
       <div className="cv-column">
 
         <div className="cv-settings-toggle">
           <button
+            ref={refBtnConfiguracion}
             type="button"
             className="cv-settings-toggle-btn"
             onClick={() => setShowSettings((prev) => !prev)}
@@ -489,6 +631,7 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
           <label>
             {cvLanguage === "en" ? "Summary:" : "Resumen:"}
             <textarea
+              ref={refTextareaPerfil}
               name="perfil"
               value={cvData.perfil}
               onChange={handleChange}
@@ -718,6 +861,7 @@ Proyecto portafolio personal · React · 2024
                 </button>
 
                 <button
+                  ref={refBtnIA}
                   type="button"
                   className="cv-action-btn ai-btn" 
                   onClick={() => setAiOpen(true)}
@@ -743,7 +887,7 @@ Proyecto portafolio personal · React · 2024
       {/* 👀 Columna derecha - Vista previa */}
       <div className="cv-column">
         <h2>{cvLanguage === "en" ? "Preview" : "Vista previa"}</h2>
-        <div className="cv-preview-wrapper">
+        <div className="cv-preview-wrapper" ref={refVistaPrevia}>
           <div className={previewPaperClass} ref={cvRef}>
             <div className="cv-preview-header">
               <div>
@@ -1016,6 +1160,7 @@ Proyecto portafolio personal · React · 2024
         </>
       )}
     </section>
+    </div>
   );
 }
 

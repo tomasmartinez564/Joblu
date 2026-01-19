@@ -119,6 +119,47 @@ export default function Home({ user }) {
   </div>
 </section>
 
+<section className="home-sobre">
+  <h2 className="home-sobre-titulo">Sobre Joblu</h2>
+
+  <div className="home-sobre-contenido">
+    <p>
+      Joblu nació como un proyecto educativo con un objetivo claro: ayudar a
+      personas a crear currículums profesionales de forma simple, moderna y
+      accesible.
+    </p>
+
+    <p>
+      Muchas veces, tener un buen perfil laboral no alcanza si no sabés cómo
+      presentarlo. Por eso combinamos diseño, inteligencia artificial y búsqueda
+      laboral en un solo lugar.
+    </p>
+
+    <p>
+      Este proyecto cuenta con el apoyo de docentes, instituciones educativas y
+      personas que creen en el aprendizaje práctico y en la tecnología como
+      herramienta para generar oportunidades reales.
+    </p>
+  </div>
+</section>
+
+<section className="home-cta-final">
+  <h2>Empezá hoy a crear tu CV profesional</h2>
+  <p>
+    Es simple, rápido y potenciado con inteligencia artificial.
+  </p>
+
+  <div className="home-cta-botones">
+    <Link to="/cv" className="hero-cta">
+      Crear mi CV
+    </Link>
+
+    <Link to="/jobs" className="home-cta-secundario">
+      Ver empleos
+    </Link>
+  </div>
+</section>
+
 
     </main>
   );
