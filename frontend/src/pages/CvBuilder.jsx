@@ -79,6 +79,8 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
   const refTextareaPerfil = useRef(null);
   const refBtnIA = useRef(null);
   const refVistaPrevia = useRef(null);
+  const refTutorialModal = useRef(null);
+
 
 
 
@@ -324,35 +326,53 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
 
   const [posicionPaso, setPosicionPaso] = useState(null);
 
-    useEffect(() => {
-      if (!tutorialActivo || !pasoActual?.ref?.current) return;
+  const calcularPosicionPaso = () => {
+  if (!tutorialActivo || !pasoActual?.ref?.current) return;
 
-      const el = pasoActual.ref.current;
+  const el = pasoActual.ref.current;
+  const rect = el.getBoundingClientRect();
 
-      el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+  const margen = 12;
+  const anchoModal = 520;
 
-      // esperamos 1 frame para que el layout quede estable después del scroll
-      requestAnimationFrame(() => {
-        const rect = el.getBoundingClientRect();
+  const modalTop = Math.min(window.innerHeight - 12, rect.bottom + margen);
+  const maxLeft = window.innerWidth - anchoModal - margen;
+  const modalLeft = Math.max(margen, Math.min(rect.left, maxLeft));
 
-        const margen = 12;
-        const anchoModal = 520;
+  setPosicionPaso({
+    top: rect.top,
+    left: rect.left,
+    width: rect.width,
+    height: rect.height,
+    modalTop,
+    modalLeft,
+  });
+};
 
-        const modalTop = Math.min(window.innerHeight - 12, rect.bottom + margen);
-        const maxLeft = window.innerWidth - anchoModal - margen;
-        const modalLeft = Math.max(margen, Math.min(rect.left, maxLeft));
 
-        setPosicionPaso({
-          top: rect.top,
-          left: rect.left,
-          width: rect.width,
-          height: rect.height,
-          modalTop,
-          modalLeft,
-        });
-      });
-    }, [tutorialActivo, pasoTutorial]);
+useEffect(() => {
+  if (!tutorialActivo || !pasoActual?.ref?.current) return;
 
+  const el = pasoActual.ref.current;
+
+  el.scrollIntoView({ behavior: "auto", block: "center", inline: "nearest" });
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      calcularPosicionPaso();
+
+      // Corrección extra SOLO para el paso 3 (index 2)
+      if (pasoTutorial === 2) {
+        setTimeout(() => {
+          // validación para no recalcular si ya cambiaste de paso
+          if (!tutorialActivo) return;
+          if (pasoTutorial !== 2) return;
+          calcularPosicionPaso();
+        }, 120);
+      }
+    });
+  });
+}, [tutorialActivo, pasoTutorial]);
 
 
   const marcarTutorialComoVisto = () => {
@@ -391,6 +411,7 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
         )}
 
       <div
+        ref={refTutorialModal}
         className="tutorial-modal"
         style={
           posicionPaso
@@ -398,6 +419,7 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
             : undefined
         }
       >
+
 
 
 
