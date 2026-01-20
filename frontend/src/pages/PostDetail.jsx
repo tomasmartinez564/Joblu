@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import "../styles/postdetail.css";
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+import API_BASE_URL from "../config/api";
 
 
 const STORAGE_KEY = "joblu_liked_posts";

@@ -22,6 +22,7 @@ import Footer from "./components/Footer";
 const LS_USER_KEY = 'joblu_user'
 const LS_SETTINGS_KEY = 'joblu_settings'
 const LS_CVS_KEY = 'joblu_savedCvs'
+const LS_SAVED_JOBS_KEY = 'joblu_savedJobs'
 const LS_ONBOARDING_KEY = 'joblu_onboarding_done'
 
 const defaultSettings = {
@@ -57,6 +58,33 @@ function AppLayout() {
 
   // CV activo cargado desde "Mis CVs"
   const [activeCvData, setActiveCvData] = useState(null)
+
+  // 💼 Empleos guardados
+  const [savedJobs, setSavedJobs] = useState(() => {
+    try {
+      const raw = localStorage.getItem(LS_SAVED_JOBS_KEY)
+      return raw ? JSON.parse(raw) : []
+    } catch {
+      return []
+    }
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LS_SAVED_JOBS_KEY, JSON.stringify(savedJobs))
+    } catch { }
+  }, [savedJobs])
+
+  const toggleSavedJob = (jobId) => {
+    setSavedJobs((prev) => {
+      const exists = prev.includes(jobId);
+      if (exists) {
+        return prev.filter(id => id !== jobId);
+      } else {
+        return [...prev, jobId];
+      }
+    });
+  }
 
   // ⚙️ Preferencias del CV
   const [settings, setSettings] = useState(() => {
@@ -288,8 +316,8 @@ function AppLayout() {
           <Route path="/comunidad" element={<Community user={user} />} />
           <Route path="/comunidad/:id" element={<PostDetail user={user} />} />
 
-          <Route path="/jobs" element={<Jobs />} />
-          <Route path="/jobs/:id" element={<JobDetail />} />
+          <Route path="/jobs" element={<Jobs savedJobs={savedJobs} toggleSavedJob={toggleSavedJob} />} />
+          <Route path="/jobs/:id" element={<JobDetail savedJobs={savedJobs} toggleSavedJob={toggleSavedJob} />} />
 
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
 

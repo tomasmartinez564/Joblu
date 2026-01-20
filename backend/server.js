@@ -50,7 +50,7 @@ const postSchema = new mongoose.Schema(
     authorEmail: { type: String },
     title: { type: String, required: true },
     content: { type: String, required: true },
-    comments: [commentSchema], 
+    comments: [commentSchema],
     likes: {
       type: Number,
       default: 0, // 👈 nuevo campo
@@ -218,17 +218,84 @@ app.delete("/api/community/posts/:id", async (req, res) => {
     res.status(500).json({ error: "Error al borrar el posteo." });
   }
 });
+
+// ====================
+// 💼 Modelo y Endpoints Empleos (Jobs)
+// ====================
+
+const jobSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    company: { type: String, required: true },
+    location: { type: String }, // e.g. "Remote", "USA", etc.
+    type: { type: String }, // e.g. "full_time", "freelance"
+    description: { type: String }, // HTML description usually
+    url: { type: String }, // Link to apply
+    salary: { type: String }, // Optional
+    externalId: { type: String }, // ID from the external API to avoid dupes
+    tags: [String],
+    logo: { type: String },
+    publishedAt: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
+
+const Job = mongoose.models.Job || mongoose.model("Job", jobSchema);
+
+// GET /api/jobs -> listar empleos
+app.get("/api/jobs", async (req, res) => {
+  try {
+    // Podríamos agregar filtros por query params (tipo, tags, etc.)
+    const jobs = await Job.find().sort({ publishedAt: -1 }).limit(100).lean();
+    res.json(jobs);
+  } catch (err) {
+    console.error("❌ Error al obtener empleos:", err);
+    res.status(500).json({ error: "Error al obtener la lista de empleos." });
+  }
+});
+
+// GET /api/jobs/:id -> obtener un empleo por ID
+app.get("/api/jobs/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "ID de empleo inválido." });
+    }
+
+    const job = await Job.findById(id).lean();
+
+    if (!job) {
+      return res.status(404).json({ error: "Empleo no encontrado." });
+    }
+
+    res.json(job);
+  } catch (err) {
+    console.error("❌ Error al obtener empleo por id:", err);
+    res.status(500).json({ error: "Error al obtener el empleo." });
+  }
+});
 // ====================
 // 🤖 Cliente de OpenAI (IA CV)
 // ====================
+
+import rateLimit from "express-rate-limit";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Endpoint para optimizar una sección del CV
+// Limiter for AI endpoint: 5 requests per 15 minutes per IP
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { error: "Demasiadas solicitudes. Intenta de nuevo en 15 minutos." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Endpoint para optimizar una sección del CV (CÓDIGO COMPLETO)
-app.post("/api/optimizar-cv", async (req, res) => {
+app.post("/api/optimizar-cv", aiLimiter, async (req, res) => {
   const {
     section,
     content,
@@ -247,7 +314,7 @@ app.post("/api/optimizar-cv", async (req, res) => {
 
   // 1. Definimos instrucciones específicas por SECCIÓN
   const sectionRules = {
-    perfil: safeLang === "en" 
+    perfil: safeLang === "en"
       ? "Create a compelling professional summary. Highlight unique value proposition."
       : "Crea un perfil profesional impactante. Resalta la propuesta de valor única del candidato.",
     experiencias: safeLang === "en"
@@ -358,8 +425,8 @@ app.post("/api/optimizar-cv", async (req, res) => {
           ? "Simulated improved version (AI quota exceeded):\n\n"
           : "Simulated improved version (AI error):\n\n"
         : isQuotaError
-        ? "Versión mejorada simulada (la cuota de IA se agotó):\n\n"
-        : "Versión mejorada simulada (hubo un error con la IA):\n\n";
+          ? "Versión mejorada simulada (la cuota de IA se agotó):\n\n"
+          : "Versión mejorada simulada (hubo un error con la IA):\n\n";
 
     return res.status(200).json({
       suggestion: prefix + safeContent,
