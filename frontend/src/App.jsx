@@ -12,7 +12,9 @@ import AccountSettings from './pages/AccountSettings.jsx'
 import JobDetail from './pages/JobDetail.jsx'
 import PostDetail from "./pages/PostDetail";
 import "./styles/header.css";
+import "./styles/footer.css";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 
 
@@ -79,19 +81,19 @@ function AppLayout() {
       } else {
         localStorage.removeItem(LS_USER_KEY)
       }
-    } catch {}
+    } catch { }
   }, [user])
 
   useEffect(() => {
     try {
       localStorage.setItem(LS_SETTINGS_KEY, JSON.stringify(settings))
-    } catch {}
+    } catch { }
   }, [settings])
 
   useEffect(() => {
     try {
       localStorage.setItem(LS_CVS_KEY, JSON.stringify(savedCvs))
-    } catch {}
+    } catch { }
   }, [savedCvs])
 
   const handleLogin = ({ email }) => {
@@ -105,7 +107,7 @@ function AppLayout() {
         setOnboardingStep(0)
         setShowOnboarding(true)
       }
-    } catch {}
+    } catch { }
 
     navigate('/cv')
   }
@@ -163,11 +165,11 @@ function AppLayout() {
     navigate('/cuenta')
   }
 
-    const finishOnboarding = () => {
+  const finishOnboarding = () => {
     setShowOnboarding(false)
     try {
       localStorage.setItem(LS_ONBOARDING_KEY, 'done')
-    } catch {}
+    } catch { }
   }
 
   const handleNextOnboarding = () => {
@@ -181,7 +183,7 @@ function AppLayout() {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
 
   const onboardingSteps = [
@@ -204,9 +206,9 @@ function AppLayout() {
   ];
 
 
-// ----------------------------------------------------------- HEADER -----------------------------------------------------------
-  
-return (
+  // ----------------------------------------------------------- HEADER -----------------------------------------------------------
+
+  return (
     <div className="app">
 
       <Navbar
@@ -268,7 +270,7 @@ return (
 
       <main className="app-main">
         <Routes>
-        <Route path="/" element={<Home user={user} />} />
+          <Route path="/" element={<Home user={user} />} />
           <Route
             path="/cv"
             element={
@@ -317,6 +319,8 @@ return (
 
         </Routes>
       </main>
+
+      <Footer />
     </div>
   )
 }

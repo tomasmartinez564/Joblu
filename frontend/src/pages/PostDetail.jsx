@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import "../styles/postdetail.css";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 
 const STORAGE_KEY = "joblu_liked_posts";
 
@@ -40,7 +42,7 @@ function PostDetail({ user }) {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/community/posts/${id}`);
+        const res = await fetch(`${API_BASE_URL}/api/community/posts/${id}`);
         if (!res.ok) {
           throw new Error("No se pudo obtener el post.");
         }
@@ -72,19 +74,19 @@ function PostDetail({ user }) {
   const handleDelete = async () => {
     if (!window.confirm("¿Seguro que querés eliminar este post?")) return;
 
-      setActionError("");
+    setActionError("");
 
     setDeleting(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/community/posts/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/community/posts/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("No se pudo borrar el post.");
       navigate("/comunidad");
-      } catch (err) {
-        console.error(err);
-        setActionError("Hubo un problema al borrar el post.");
-      } finally {
+    } catch (err) {
+      console.error(err);
+      setActionError("Hubo un problema al borrar el post.");
+    } finally {
       setDeleting(false);
     }
   };
@@ -105,7 +107,7 @@ function PostDetail({ user }) {
       setCommentLoading(true);
 
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/community/posts/${id}/comments`,
+        `${API_BASE_URL}/api/community/posts/${id}/comments`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -142,14 +144,14 @@ function PostDetail({ user }) {
   const handleToggleLike = async () => {
     if (!post) return;
 
-      setActionError("");
+    setActionError("");
 
     const alreadyLiked = likedPosts.includes(post._id);
     const action = alreadyLiked ? "unlike" : "like";
 
     try {
-        const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/community/posts/${post._id}/like`,
+      const res = await fetch(
+        `${API_BASE_URL}/api/community/posts/${post._id}/like`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -172,10 +174,10 @@ function PostDetail({ user }) {
           ? prev.filter((id) => id !== post._id)
           : [...prev, post._id]
       );
-      } catch (err) {
-        console.error(err);
-        setActionError("Hubo un problema al actualizar el like.");
-      }
+    } catch (err) {
+      console.error(err);
+      setActionError("Hubo un problema al actualizar el like.");
+    }
 
   };
 
@@ -272,9 +274,9 @@ function PostDetail({ user }) {
                   <span className="postdetail-comment-meta">
                     {c.createdAt
                       ? new Date(c.createdAt).toLocaleString("es-AR", {
-                          dateStyle: "short",
-                          timeStyle: "short",
-                        })
+                        dateStyle: "short",
+                        timeStyle: "short",
+                      })
                       : ""}
                   </span>
                 </p>
