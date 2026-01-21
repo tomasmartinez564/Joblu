@@ -219,6 +219,7 @@ app.delete("/api/community/posts/:id", async (req, res) => {
   }
 });
 
+
 // ====================
 // 💼 Modelo y Endpoints Empleos (Jobs)
 // ====================
@@ -227,13 +228,13 @@ const jobSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     company: { type: String, required: true },
-    location: { type: String }, // e.g. "Remote", "USA", etc.
-    type: { type: String }, // e.g. "full_time", "freelance"
-    description: { type: String }, // HTML description usually
-    url: { type: String }, // Link to apply
-    salary: { type: String }, // Optional
-    externalId: { type: String }, // ID from the external API to avoid dupes
-    tags: [String],
+    location: { type: String },
+    type: { type: String }, // "full_time", "contract", etc.
+    description: { type: String }, // Viene con HTML
+    url: { type: String }, // Link para aplicar
+    salary: { type: String },
+    externalId: { type: String },
+    tags: [String], // Array de strings: ["React", "Design"]
     logo: { type: String },
     publishedAt: { type: Date, default: Date.now },
   },
@@ -242,39 +243,56 @@ const jobSchema = new mongoose.Schema(
 
 const Job = mongoose.models.Job || mongoose.model("Job", jobSchema);
 
-// GET /api/jobs -> listar empleos
+// GET /api/jobs -> Listar con búsqueda real
 app.get("/api/jobs", async (req, res) => {
   try {
-    // Podríamos agregar filtros por query params (tipo, tags, etc.)
-    const jobs = await Job.find().sort({ publishedAt: -1 }).limit(100).lean();
+    const { search, tag, limit } = req.query;
+
+    // Construimos el filtro dinámico
+    let query = {};
+
+    if (search) {
+      // Busca texto en Título O Empresa O Tags
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { company: { $regex: search, $options: "i" } },
+        { tags: { $regex: search, $options: "i" } }
+      ];
+    }
+
+    if (tag) {
+      query.tags = { $in: [tag] }; // Filtra si tiene ese tag exacto
+    }
+
+    // Buscamos en BD
+    const jobs = await Job.find(query)
+      .sort({ publishedAt: -1 }) // Más nuevos primero
+      .limit(limit ? parseInt(limit) : 50) // Límite por defecto
+      .lean();
+
     res.json(jobs);
   } catch (err) {
-    console.error("❌ Error al obtener empleos:", err);
-    res.status(500).json({ error: "Error al obtener la lista de empleos." });
+    console.error("❌ Error al buscar empleos:", err);
+    res.status(500).json({ error: "Error de servidor al buscar empleos." });
   }
 });
 
-// GET /api/jobs/:id -> obtener un empleo por ID
+// GET /api/jobs/:id -> Detalle
 app.get("/api/jobs/:id", async (req, res) => {
   try {
     const { id } = req.params;
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "ID de empleo inválido." });
+      return res.status(400).json({ error: "ID inválido." });
     }
-
     const job = await Job.findById(id).lean();
-
-    if (!job) {
-      return res.status(404).json({ error: "Empleo no encontrado." });
-    }
-
+    if (!job) return res.status(404).json({ error: "Empleo no encontrado." });
     res.json(job);
   } catch (err) {
-    console.error("❌ Error al obtener empleo por id:", err);
-    res.status(500).json({ error: "Error al obtener el empleo." });
+    res.status(500).json({ error: "Error al obtener empleo." });
   }
 });
+
+
 // ====================
 // 🤖 Cliente de OpenAI (IA CV)
 // ====================

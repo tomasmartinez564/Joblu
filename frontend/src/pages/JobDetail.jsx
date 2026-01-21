@@ -1,127 +1,95 @@
-// frontend/src/pages/JobDetail.jsx
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import "../styles/jobs-detail.css";
-import API_BASE_URL from "../config/api";
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import "../styles/jobs-detail.css"; // Asegúrate de que este archivo exista
 
-function JobDetail({ savedJobs = [], toggleSavedJob }) {
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+function JobDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
-
   const [job, setJob] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/jobs/${id}`)
-      .then((res) => {
-        if (!res.ok) {
-          if (res.status === 404) throw new Error("Empleo no encontrado");
-          throw new Error("Error obteniendo el empleo");
+    const fetchJob = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/jobs/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setJob(data);
         }
-        return res.json();
-      })
-      .then((data) => {
-        setJob(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setError(err.message);
-        setLoading(false);
-      });
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchJob();
   }, [id]);
 
-  if (loading) {
-    return (
-      <section className="job-detail-page">
-        <p>Cargando detalles...</p>
-      </section>
-    );
-  }
+  const handleApply = () => {
+    if (!job) return;
 
-  if (error || !job) {
-    return (
-      <section className="job-detail-page">
-        <button
-          type="button"
-          className="job-detail-back"
-          onClick={() => navigate("/jobs")}
-        >
-          Volver a la bolsa de trabajo
-        </button>
-        <p className="job-detail-not-found">
-          {error || "No encontramos este empleo. Es posible que haya sido eliminado."}
-        </p>
-      </section>
-    );
-  }
+    // 1. Feedback / Consejo Joblu
+    alert("🚀 ¡Consejo Joblu!\n\nAsegurate de descargar tu CV en PDF desde la sección 'Crear CV' antes de continuar con la postulación en el sitio de la empresa.");
 
-  const isSaved = savedJobs.includes(job._id);
+    // 2. Redirección al sitio de la empresa
+    if (job.url) {
+      window.open(job.url, "_blank");
+    } else {
+      alert("No hay link de aplicación disponible.");
+    }
+  };
+
+  if (isLoading) return <div className="job-detail-loading" style={{padding: "2rem", textAlign: "center"}}>Cargando empleo...</div>;
+  if (!job) return <div className="job-detail-error" style={{padding: "2rem", textAlign: "center"}}>Empleo no encontrado.</div>;
 
   return (
-    <section className="job-detail-page">
-      <button
-        type="button"
-        className="job-detail-back"
-        onClick={() => navigate("/jobs")}
-      >
-        ← Volver a la bolsa de trabajo
-      </button>
+    <div className="job-detail-container">
+      <div className="job-detail-nav">
+         <Link to="/jobs" className="back-link">← Volver a la lista</Link>
+      </div>
 
-      <article className="job-detail-card">
-        <header className="job-detail-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            {job.logo && <img src={job.logo} alt={job.company} style={{ width: 60, height: 60, objectFit: 'contain', borderRadius: 6 }} />}
-            <div>
-              <h1 className="job-detail-title">{job.title}</h1>
-              <p className="job-detail-company">{job.company}</p>
-            </div>
-          </div>
-          <span className="job-detail-time">{new Date(job.publishedAt).toLocaleDateString()}</span>
-        </header>
-
-        <p className="job-detail-meta">
-          {job.location} · {job.type && job.type.replace('_', ' ')}
-        </p>
-
-        {/* Etiquetas */}
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', margin: '0.5rem 0 1rem' }}>
-          {(job.tags || []).map(t => (
-            <span key={t} style={{ fontSize: '0.85rem', background: '#eee', padding: '4px 8px', borderRadius: 4 }}>{t}</span>
-          ))}
+      <header className="job-detail-header">
+        <div style={{display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem'}}>
+             {job.logo && <img src={job.logo} alt="logo" style={{width: 60, height: 60, objectFit: 'contain', borderRadius: 8, background: '#fff'}} />}
+             <h1 style={{margin: 0, fontSize: '1.8rem'}}>{job.title}</h1>
         </div>
 
-        {/* Descripción HTML (cuidado con XSS en apps reales, pero Remotive es confiable o usamos sanitizer) */}
-        <div
-          className="job-detail-description"
-          dangerouslySetInnerHTML={{ __html: job.description }}
-        />
-
-        <div className="job-detail-footer">
-          <div className="job-detail-footer-left">
-            <button
-              type="button"
-              className="job-card-secondary-btn"
-              onClick={() => toggleSavedJob && toggleSavedJob(job._id)}
-              title={isSaved ? "Quitar de guardados" : "Guardar empleo"}
-              style={{ color: isSaved ? "var(--joblu-primary)" : "inherit" }}
-            >
-              {isSaved ? "❤️ Guardado" : "🤍 Guardar"}
-            </button>
-          </div>
-
-          <a
-            href={job.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="job-detail-cta"
-          >
-            Aplicar en la web oficial
-          </a>
+        <div className="job-detail-sub">
+          <span className="company-name">🏢 {job.company}</span>
+          <span className="location">📍 {job.location || "Remoto"}</span>
+          <span className="type">💼 {job.type ? job.type.replace("_", " ") : "Full time"}</span>
         </div>
-      </article>
-    </section>
+
+        {job.tags && (
+          <div className="job-detail-tags" style={{marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap'}}>
+            {job.tags.map(t => (
+                <span key={t} className="tag-badge" style={{background: '#e0e7ff', color: '#4338ca', padding: '4px 12px', borderRadius: 99, fontSize: '0.85rem'}}>
+                    {t}
+                </span>
+            ))}
+          </div>
+        )}
+      </header>
+
+      <div className="job-detail-actions" style={{margin: '2rem 0', display: 'flex', gap: '1rem'}}>
+        <button onClick={handleApply} className="apply-btn-primary" style={{
+            background: 'var(--joblu-primary, #6366f1)', color: 'white', border: 'none',
+            padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '1rem', cursor: 'pointer', fontWeight: 600
+        }}>
+          Postularme en el sitio de la empresa ↗
+        </button>
+      </div>
+
+      <hr className="divider" style={{border: '0', borderTop: '1px solid #e5e7eb', margin: '2rem 0'}} />
+
+      {/* Renderizado HTML completo */}
+      <div
+        className="job-detail-content"
+        dangerouslySetInnerHTML={{ __html: job.description }}
+        style={{lineHeight: 1.6, color: '#374151'}}
+      />
+    </div>
   );
 }
 
