@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Route, Routes, useNavigate, Link } from 'react-router-dom'
 import './App.css'
+
+// Páginas
 import Home from './pages/Home.jsx'
 import CvBuilder from './pages/CvBuilder.jsx'
 import Community from './pages/Community.jsx'
@@ -11,13 +13,53 @@ import Settings from './pages/Settings.jsx'
 import AccountSettings from './pages/AccountSettings.jsx'
 import JobDetail from './pages/JobDetail.jsx'
 import PostDetail from "./pages/PostDetail";
+
+// Estilos globales de componentes
 import "./styles/header.css";
 import "./styles/footer.css";
+
+// Componentes
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
+// Contexto (NUEVO IMPORT)
+import { ToastProvider } from './context/toastContext'; 
 
 
+const handleLogin = (userData, token) => {
+    // Guardamos el usuario en el estado
+    setUser(userData)
+    setIsAccountMenuOpen(false)
+
+    // Guardamos token y user en localStorage para persistencia
+    try {
+      localStorage.setItem('joblu_token', token)
+      localStorage.setItem(LS_USER_KEY, JSON.stringify(userData)) // Actualizamos esto también
+      
+      // Chequeo de onboarding
+      const done = localStorage.getItem(LS_ONBOARDING_KEY) === 'done'
+      if (!done) {
+        setOnboardingStep(0)
+        setShowOnboarding(true)
+      }
+    } catch { }
+
+    navigate('/cv')
+  }
+
+  const handleLogout = () => {
+    setUser(null)
+    setSavedCvs([])
+    setActiveCvData(null)
+    setIsAccountMenuOpen(false)
+    setShowOnboarding(false)
+    
+    // Limpieza profunda
+    localStorage.removeItem('joblu_token')
+    localStorage.removeItem(LS_USER_KEY)
+    
+    navigate('/')
+  }
 
 const LS_USER_KEY = 'joblu_user'
 const LS_SETTINGS_KEY = 'joblu_settings'
@@ -33,10 +75,12 @@ const defaultSettings = {
   showTips: true,
 }
 
+// ⚠️ Nota: Cambiamos el nombre de la función principal a AppLayout internamente
+// para poder envolverla después.
 function AppLayout() {
   const navigate = useNavigate()
 
-  // 🧑‍💻 Usuario (con lectura inicial desde localStorage)
+  // 🧑‍💻 Usuario
   const [user, setUser] = useState(() => {
     try {
       const raw = localStorage.getItem(LS_USER_KEY)
@@ -56,7 +100,7 @@ function AppLayout() {
     }
   })
 
-  // CV activo cargado desde "Mis CVs"
+  // CV activo
   const [activeCvData, setActiveCvData] = useState(null)
 
   // 💼 Empleos guardados
@@ -86,7 +130,7 @@ function AppLayout() {
     });
   }
 
-  // ⚙️ Preferencias del CV
+  // ⚙️ Preferencias
   const [settings, setSettings] = useState(() => {
     try {
       const raw = localStorage.getItem(LS_SETTINGS_KEY)
@@ -98,10 +142,9 @@ function AppLayout() {
     }
   })
 
-  // 🔽 Menú desplegable de cuenta
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
 
-  // 💾 Guardar en localStorage cuando cambian
+  // 💾 Effects para localStorage
   useEffect(() => {
     try {
       if (user) {
@@ -124,6 +167,7 @@ function AppLayout() {
     } catch { }
   }, [savedCvs])
 
+  // Handlers
   const handleLogin = ({ email }) => {
     const username = email ? email.split('@')[0] : 'Usuario'
     setUser({ email, name: username })
@@ -166,7 +210,6 @@ function AppLayout() {
     setSavedCvs((prev) => [newCv, ...prev])
   }
 
-
   const handleOpenCv = (id) => {
     const found = savedCvs.find((cv) => cv.id === id)
     if (!found) return
@@ -178,8 +221,6 @@ function AppLayout() {
     setSavedCvs((prev) => prev.filter((cv) => cv.id !== id))
   }
 
-
-  // 🧑‍💻 Actualizar datos del usuario (nombre, email) desde "Cuenta"
   const handleUpdateUser = (updates) => {
     if (!user) return
     setUser((prev) => ({
@@ -193,6 +234,7 @@ function AppLayout() {
     navigate('/cuenta')
   }
 
+  // Onboarding Logic
   const finishOnboarding = () => {
     setShowOnboarding(false)
     try {
@@ -208,9 +250,7 @@ function AppLayout() {
     }
   }
 
-
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
 
@@ -233,12 +273,8 @@ function AppLayout() {
     },
   ];
 
-
-  // ----------------------------------------------------------- HEADER -----------------------------------------------------------
-
   return (
     <div className="app">
-
       <Navbar
         user={user}
         isMobileMenuOpen={isMobileMenuOpen}
@@ -249,7 +285,6 @@ function AppLayout() {
         handleLogout={handleLogout}
         goToAccount={goToAccount}
       />
-
 
       {user && showOnboarding && (
         <div className="onboarding-backdrop">
@@ -295,7 +330,6 @@ function AppLayout() {
         </div>
       )}
 
-
       <main className="app-main">
         <Routes>
           <Route path="/" element={<Home user={user} />} />
@@ -311,18 +345,12 @@ function AppLayout() {
               />
             }
           />
-
-
           <Route path="/comunidad" element={<Community user={user} />} />
           <Route path="/comunidad/:id" element={<PostDetail user={user} />} />
-
           <Route path="/jobs" element={<Jobs savedJobs={savedJobs} toggleSavedJob={toggleSavedJob} />} />
           <Route path="/jobs/:id" element={<JobDetail savedJobs={savedJobs} toggleSavedJob={toggleSavedJob} />} />
-
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
-
           <Route path="/configuracion" element={<Settings />} />
-
           <Route
             path="/mis-cvs"
             element={
@@ -334,7 +362,6 @@ function AppLayout() {
               />
             }
           />
-
           <Route
             path="/cuenta"
             element={
@@ -344,13 +371,24 @@ function AppLayout() {
               />
             }
           />
-
         </Routes>
       </main>
-
       <Footer />
     </div>
   )
 }
 
-export default AppLayout
+// =========================================================
+// AQUÍ ESTÁ EL CAMBIO IMPORTANTE:
+// Creamos un componente "App" que envuelve a "AppLayout" con el Provider
+// =========================================================
+
+function App() {
+  return (
+    <ToastProvider>
+      <AppLayout />
+    </ToastProvider>
+  )
+}
+
+export default App

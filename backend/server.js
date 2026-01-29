@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import OpenAI from "openai";
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs"; // Importar bcrypt
+import jwt from "jsonwebtoken"; // Importar jwt
 
 dotenv.config();
 
@@ -28,6 +30,19 @@ if (!mongoUri) {
       console.error("❌ Error al conectar a MongoDB:", err);
     });
 }
+
+
+// ====================
+// 👤 Modelo User (NUEVO)
+// ====================
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  // Podemos agregar rol: 'admin' | 'user' en el futuro
+}, { timestamps: true });
+
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 // ====================
 // 🧩 Modelo Post (Comunidad)
@@ -289,6 +304,89 @@ app.get("/api/jobs/:id", async (req, res) => {
     res.json(job);
   } catch (err) {
     res.status(500).json({ error: "Error al obtener empleo." });
+  }
+});
+
+
+// ====================
+// 🔐 Endpoints Auth (NUEVOS)
+// ====================
+
+const JWT_SECRET = process.env.JWT_SECRET || "secreto_super_seguro_cambiar_en_env";
+
+// POST /api/auth/register
+app.post("/api/auth/register", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // 1. Validaciones básicas
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: "Faltan datos obligatorios." });
+    }
+
+    // 2. Verificar si ya existe
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "El email ya está registrado." });
+    }
+
+    // 3. Encriptar contraseña
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // 4. Crear usuario
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword,
+    });
+    await newUser.save();
+
+    res.status(201).json({ message: "Usuario creado con éxito. ¡Ahora iniciá sesión!" });
+
+  } catch (err) {
+    console.error("❌ Error en register:", err);
+    res.status(500).json({ error: "Error al registrar usuario." });
+  }
+});
+
+// POST /api/auth/login
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // 1. Buscar usuario
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ error: "Credenciales inválidas." });
+    }
+
+    // 2. Verificar contraseña
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Credenciales inválidas." });
+    }
+
+    // 3. Generar Token
+    const token = jwt.sign(
+      { id: user._id, name: user.name, email: user.email },
+      JWT_SECRET,
+      { expiresIn: "7d" } // El usuario no tiene que loguearse a cada rato
+    );
+
+    // 4. Responder (sin devolver la password!)
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email
+      }
+    });
+
+  } catch (err) {
+    console.error("❌ Error en login:", err);
+    res.status(500).json({ error: "Error al iniciar sesión." });
   }
 });
 

@@ -1,71 +1,148 @@
-import { useState } from "react";
-import "../styles/login.css";
-
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useToast } from '../context/ToastContext' // Importamos nuestros Toasts
+import '../styles/login.css'
 
 function Login({ onLogin }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [isRegistering, setIsRegistering] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: ''
+  })
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const navigate = useNavigate()
+  const { addToast } = useToast() // Hook de notificaciones
 
-    if (!email || !password) {
-      setError("Completá email y contraseña.");
-      return;
+  // Manejo de inputs
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  }
+
+  // Submit del formulario
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsLoading(true)
+
+    const endpoint = isRegistering 
+      ? 'http://localhost:3000/api/auth/register' 
+      : 'http://localhost:3000/api/auth/login'
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Ocurrió un error inesperado')
+      }
+
+      if (isRegistering) {
+        // Éxito en registro
+        addToast('¡Cuenta creada! Ahora iniciá sesión.', 'success')
+        setIsRegistering(false) // Cambiar a modo login
+      } else {
+        // Éxito en login
+        addToast(`Bienvenido de nuevo, ${data.user.name} 👋`, 'success')
+        onLogin(data.user, data.token) // Pasamos user y token a App.jsx
+      }
+
+    } catch (error) {
+      addToast(error.message, 'error')
+    } finally {
+      setIsLoading(false)
     }
-
-    // Si está todo bien, limpiamos el error y llamamos al manejador que viene desde App
-    setError("");
-    onLogin({ email });
-  };
+  }
 
   return (
-    <section className="login">
-      <h2>Iniciar sesión</h2>
-      <p className="login-subtitle">
-        Accedé a tus CVs guardados y configuraciones personalizadas.
-      </p>
+    <div className="login-page">
+      <div className="login-card">
+        <h2 className="login-title">
+          {isRegistering ? 'Crear cuenta en Joblu' : 'Iniciar Sesión'}
+        </h2>
+        <p className="login-subtitle">
+          {isRegistering 
+            ? 'Unite a la comunidad y potenciá tu carrera.' 
+            : 'Accedé a tus CVs y empleos guardados.'}
+        </p>
 
-      <form className="login-form" onSubmit={handleSubmit}>
-        <label>
-          Email
-          <input
-            type="email"
-            placeholder="ejemplo@mail.com"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (error) setError("");
-            }}
-          />
-        </label>
+        <form onSubmit={handleSubmit} className="login-form">
+          {isRegistering && (
+            <div className="form-group">
+              <label htmlFor="name">Nombre completo</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="Ej: Tomás Martínez"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          )}
 
-        <label>
-          Contraseña
-          <input
-            type="password"
-            placeholder="Tu contraseña"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              if (error) setError("");
-            }}
-          />
-        </label>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="tu@email.com"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <button type="submit" className="login-btn">
-          Entrar
-        </button>
-      </form>
+          <div className="form-group">
+            <label htmlFor="password">Contraseña</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-      {error && <p className="login-error">{error}</p>}
+          <button 
+            type="submit" 
+            className="login-submit" 
+            disabled={isLoading}
+          >
+            {isLoading 
+              ? 'Procesando...' 
+              : (isRegistering ? 'Registrarme' : 'Ingresar')
+            }
+          </button>
+        </form>
 
-      <p className="login-hint">
-        Más adelante podés agregar registro, recuperación de contraseña, etc.
-      </p>
-    </section>
-  );
+        <div className="login-footer">
+          <p>
+            {isRegistering ? '¿Ya tenés cuenta?' : '¿No tenés cuenta?'}
+            <button 
+              type="button" 
+              className="login-toggle"
+              onClick={() => setIsRegistering(!isRegistering)}
+            >
+              {isRegistering ? 'Iniciá sesión' : 'Registrate gratis'}
+            </button>
+          </p>
+        </div>
+      </div>
+    </div>
+  )
 }
 
-export default Login;
+export default Login
