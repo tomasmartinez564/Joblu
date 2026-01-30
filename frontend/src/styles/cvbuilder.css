@@ -142,10 +142,10 @@
 
 /* Limitar crecimiento de los textarea del CV */
 .cv-form textarea {
-  max-height: 220px;      
-  min-height: 90px;       
-  overflow-y: auto;      
-  resize: vertical;       
+  max-height: 220px;
+  min-height: 90px;
+  overflow-y: auto;
+  resize: vertical;
 }
 
 
@@ -205,7 +205,8 @@
 .cv-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.25rem;          /* separación real */
+  gap: 1.25rem;
+  /* separación real */
   margin-top: 1.5rem;
   align-items: center;
 }
@@ -233,39 +234,31 @@
   cursor: pointer;
   white-space: nowrap;
 
-  flex: 0 0 auto;        /* 🔑 permite que el gap se vea */
+  flex: 0 0 auto;
+  /* 🔑 permite que el gap se vea */
   transition: background-color 0.2s ease, transform 0.15s ease;
 }
 
-/* Guardar CV – Verde */
-.cv-actions .save-btn {
-  background-color: #10b981;
-  color: #ffffff;
-}
-.cv-actions .save-btn:hover {
-  background-color: #059669;
-  transform: translateY(-1px);
-}
-
-/* Descargar PDF – Violeta */
-.cv-actions .download-btn {
-  background-color: var(--joblu-secondary, #6366f1);
-  color: #ffffff;
-}
-.cv-actions .download-btn:hover {
-  background-color: var(--joblu-primary, #4f46e5);
-  transform: translateY(-1px);
-}
-
-/* Mejorar con IA */
+/* Base común overrides */
+.cv-actions .save-btn,
+.cv-actions .download-btn,
 .cv-actions .ai-btn {
-  background-color: #e7fdfb;
-  color: #065f46;
-  border-color: var(--joblu-primary-accent, #10b981);
+  background-color: var(--joblu-primary, #4f46e5);
+  /* Violeta principal */
+  color: #ffffff;
+  border-color: transparent;
+  flex: 1;
+  /* Opcional: hacer que ocupen el mismo ancho si hay espacio */
+  text-align: center;
 }
+
+.cv-actions .save-btn:hover,
+.cv-actions .download-btn:hover,
 .cv-actions .ai-btn:hover {
-  background-color: #ccfbf5;
+  background-color: #4338ca;
+  /* Violeta más oscuro */
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
 
 
@@ -572,9 +565,9 @@
 
 @media (max-width: 1024px) {
   .cv-builder {
-    grid-template-columns: 1fr;        
+    grid-template-columns: 1fr;
     gap: 1.25rem;
-    max-width: 760px;                  
+    max-width: 760px;
     margin: 0 auto;
   }
 
@@ -597,7 +590,7 @@
     padding: 0.75rem 0.5rem;
   }
 
-  
+
   .cv-form-group-inline {
     grid-template-columns: 1fr;
   }
@@ -697,8 +690,3 @@
   z-index: 10000;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
-
-
-
-
-

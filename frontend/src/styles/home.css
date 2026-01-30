@@ -1,9 +1,145 @@
+/* Página Home & Dashboard */
+
+/* --- DASHBOARD STYLES --- */
+.home-dashboard {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+  animation: joblu-fade-in-up 0.4s ease;
+}
+
+.dashboard-header {
+  margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+  font-size: 2rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--joblu-text-main);
+}
+
+.dashboard-header p {
+  color: var(--joblu-text-muted);
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: var(--joblu-surface);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--joblu-border-soft);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Progress Card */
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.stat-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--joblu-text-main);
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--joblu-primary);
+}
+
+.progress-bar-container {
+  height: 10px;
+  background-color: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+body.dark-mode .progress-bar-container {
+  background-color: #374151;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--joblu-primary), var(--joblu-primary-accent));
+  border-radius: 999px;
+  transition: width 1s ease-in-out;
+}
+
+.stat-hint {
+  font-size: 0.9rem;
+  color: var(--joblu-text-muted);
+  margin: 0 0 1.5rem 0;
+  flex: 1;
+}
+
+.stat-action {
+  align-self: flex-start;
+  color: var(--joblu-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stat-action:hover {
+  text-decoration: underline;
+}
+
+/* Quick Actions */
+.quick-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.quick-link {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  background-color: var(--joblu-bg-main);
+  border-radius: 0.75rem;
+  text-decoration: none;
+  color: var(--joblu-text-main);
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.quick-link:hover {
+  background-color: var(--joblu-border-soft);
+}
+
+.dashboard-recommendations h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* --- END DASHBOARD STYLES --- */
+
 /* Página Home */
 .home-hero {
   background: var(--joblu-surface);
   border-radius: 1rem;
   padding: 2rem;
-  background: transparent; /* deja ver el fondo general */
+  background: transparent;
+  /* deja ver el fondo general */
   border: none;
 }
 
@@ -22,6 +158,21 @@
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 1rem;
   margin-top: 1.5rem;
+}
+
+/* Dark Mode overrides for Home */
+body.dark-mode .home-card,
+body.dark-mode .home-card-trabajo,
+body.dark-mode .home-suggestions,
+body.dark-mode .suggestion-card,
+body.dark-mode .home-paso {
+  background: var(--joblu-surface);
+  border-color: var(--joblu-border-soft);
+}
+
+body.dark-mode .home-subtitle,
+body.dark-mode .hero-type-animation {
+  color: #bfdbfe;
 }
 
 .home-card {
@@ -100,11 +251,9 @@
   bottom: -3.5rem;
   height: 80px;
   border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    #3dd5e5,
-    #45e0d4
-  );
+  background: linear-gradient(90deg,
+      #3dd5e5,
+      #45e0d4);
   opacity: 0.9;
   transform: translateY(8px);
   z-index: -1;
@@ -489,5 +638,3 @@
   border: 1px solid #e5e7eb;
   color: #111827;
 }
-
-

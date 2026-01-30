@@ -3,7 +3,8 @@
   padding: 1.5rem;
   max-width: 1120px;
   margin: 2rem auto;
-  background: transparent; /* deja ver el fondo general */
+  background: transparent;
+  /* deja ver el fondo general */
   border: none;
   animation: joblu-fade-in-up 0.35s ease;
 }
@@ -19,7 +20,8 @@
 .community-post {
   padding: 0.9rem 1.1rem;
   border-radius: 0.8rem;
-  background: #ffffff;
+  background: var(--joblu-surface);
+  /* Usa variable para dark mode */
   border: 1px solid var(--joblu-border-soft);
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
   transition:
@@ -28,6 +30,13 @@
     border-color 0.16s ease,
     background-color 0.16s ease;
   animation: joblu-fade-in-up 0.35s ease;
+
+  /* Glass touch subtle */
+  backdrop-filter: blur(5px);
+}
+
+body.dark-mode .community-post {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
 }
 
 .community-post:hover {
@@ -43,7 +52,8 @@
   padding: 1.1rem 1.25rem;
   border-radius: 0.9rem;
   border: 1px solid var(--joblu-border-soft);
-  background: #f9fafb;
+  background: var(--joblu-surface);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
 }
 
 .community-create-title {
@@ -132,8 +142,9 @@
   font-size: 0.95rem;
   padding: 0.55rem 0.8rem;
   border-radius: 0.6rem;
+  border-radius: 0.6rem;
   border: 1px solid var(--joblu-border-soft);
-  background-color: #f9fafb;
+  background-color: var(--joblu-bg-main);
   color: var(--joblu-text-main);
   transition:
     border-color 0.16s ease,
@@ -149,7 +160,7 @@
 .community-input:focus {
   outline: none;
   border-color: var(--joblu-primary-accent);
-  background-color: #ffffff;
+  background-color: var(--joblu-surface);
   box-shadow:
     0 0 0 1px rgba(33, 219, 210, 0.35),
     0 6px 18px rgba(15, 23, 42, 0.12);
@@ -167,37 +178,134 @@
   margin-top: 0.75rem;
 }
 
-  /* Comunidad: ocupar casi todo el ancho y bajar un poco la sombra */
-  .community {
-    margin: 1rem 0.5rem;
-    padding: 1rem;
-    border-radius: 0.8rem;
-  }
+/* Comunidad: ocupar casi todo el ancho y bajar un poco la sombra */
+.community {
+  margin: 1rem 0.5rem;
+  padding: 1rem;
+  border-radius: 0.8rem;
+}
 
-  .community-create-card {
-    padding: 0.9rem 1rem;
-    margin-bottom: 1.2rem;
-  }
+.community-create-card {
+  padding: 0.9rem 1rem;
+  margin-bottom: 1.2rem;
+}
 
-  .community-post {
-    padding: 0.8rem 0.9rem;
-  }
+.community-post {
+  padding: 0.8rem 0.9rem;
+}
 
-  .community-input {
-    font-size: 0.9rem;
-    padding: 0.5rem 0.75rem;
-  }
+.community-input {
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+}
 
-  .community-subtitle {
-    font-size: 0.9rem;
-  }
+.community-subtitle {
+  font-size: 0.9rem;
+}
 
-  .community-post-excerpt,
-  .community-post-meta {
-    font-size: 0.85rem;
-  }
+.community-post-excerpt,
+.community-post-meta {
+  font-size: 0.85rem;
+}
 
-  .community-create-card {
-    padding: 0.9rem 1rem;
-  }
+.community-create-card {
+  padding: 0.9rem 1rem;
+}
 
+/* --- Agregado para Likes y Mejoras UI --- */
+
+/* Contenedor del post para alinear el botón de like a la derecha */
+/* Contenedor del post */
+.community-post {
+  display: flex;
+  flex-direction: column;
+  /* Cambiado a columna para footer abajo */
+  gap: 10px;
+  position: relative;
+}
+
+.post-main {
+  width: 100%;
+}
+
+/* Footer de acciones (Like, Compartir) */
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f3f4f6;
+  /* Separador sutil opcional */
+  width: 100%;
+}
+
+/* Botones de acción (transparentes) */
+.action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  color: #6b7280;
+  /* Gris por defecto */
+}
+
+.action-btn:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+/* Estado Liked */
+.action-btn.liked {
+  color: #e11d48;
+}
+
+.action-btn.liked .action-icon {
+  transform: scale(1.1);
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.action-icon {
+  font-size: 1.1rem;
+}
+
+.action-count {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Alerta informativa */
+.community-alert-info {
+  background-color: #eff6ff;
+  border-left: 4px solid #3b82f6;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  color: #1e3a8a;
+  font-size: 0.9rem;
+}
+
+.community-alert-info a {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* Estado de carga simple */
+.community-loading {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Botón deshabilitado */
+.btn-disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

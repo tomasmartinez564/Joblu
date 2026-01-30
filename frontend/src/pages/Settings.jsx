@@ -14,6 +14,7 @@ function Settings({ user, settings, onChangeSettings }) {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    // Manejo especial para checkboxes
     const newValue = type === "checkbox" ? checked : value;
     onChangeSettings({
       ...settings,
@@ -25,11 +26,12 @@ function Settings({ user, settings, onChangeSettings }) {
     <section className="settings">
       <h2>Configuración</h2>
       <p className="settings-subtitle">
-        Personalizá cómo querés que se generen y optimicen tus CVs. Más
-        adelante, estas opciones se van a usar para la IA y los formatos.
+        Personalizá cómo querés que se vea la app y cómo generar tus CVs.
       </p>
 
       <form className="settings-form">
+        {/* Apariencia MOVIDO A CUENTA */}
+
         {/* Idioma */}
         <div className="settings-group">
           <label className="settings-label">

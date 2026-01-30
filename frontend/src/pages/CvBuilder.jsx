@@ -67,6 +67,7 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
   const [aiError, setAiError] = useState("");
   const [saveError, setSaveError] = useState("");
   const [saveSuccess, setSaveSuccess] = useState("");
+  const [isSaving, setIsSaving] = useState(false); // Estado para evitar doble click
 
   // Tutorial guiado (onboarding)
   const [tutorialActivo, setTutorialActivo] = useState(false);
@@ -128,7 +129,8 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (isSaving) return;
 
     setSaveError("");
     setSaveSuccess("");
@@ -142,13 +144,23 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
       return;
     }
 
-    onSaveCv?.(cvData);
+    setIsSaving(true);
+    try {
+      if (onSaveCv) {
+        await onSaveCv(cvData); // Esperamos a que termine (App debe retornar promesa)
+      }
 
-    setSaveSuccess(
-      cvLanguage === "en"
-        ? 'CV saved in "My CVs".'
-        : 'CV guardado en "Mis CVs".'
-    );
+      setSaveSuccess(
+        cvLanguage === "en"
+          ? 'CV saved in "My CVs".'
+          : 'CV guardado en "Mis CVs".'
+      );
+    } catch (error) {
+      console.error(error);
+      setSaveError("Error al guardar.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
 
@@ -532,8 +544,10 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
               type="button"
               className="cv-action-btn save-btn"
               onClick={handleSave}
+              disabled={isSaving}
+              style={{ opacity: isSaving ? 0.7 : 1, cursor: isSaving ? "wait" : "pointer" }}
             >
-              {cvLanguage === "en" ? "Save CV" : "Guardar CV"}
+              {isSaving ? "Guardando..." : (cvLanguage === "en" ? "Save CV" : "Guardar CV")}
             </button>
 
             <button

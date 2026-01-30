@@ -9,6 +9,7 @@ export default function Navbar({
   navigate,
   handleLogout,
   goToAccount,
+  onCreateCv, // Recibimos el handler
 }) {
   return (
     <header className="app-header">
@@ -28,6 +29,12 @@ export default function Navbar({
         <NavLink
           to="/cv"
           className={({ isActive }) => "nav-link" + (isActive ? " nav-link-active" : "")}
+          onClick={(e) => {
+            if (onCreateCv) {
+              e.preventDefault();
+              onCreateCv();
+            }
+          }}
         >
           Crear CV
         </NavLink>
@@ -137,14 +144,14 @@ export default function Navbar({
               ✕
             </button>
 
-                <button
-                type="button"
-                className="drawer-user"
-                onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    goToAccount();
-                }}
-                >
+            <button
+              type="button"
+              className="drawer-user"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                goToAccount();
+              }}
+            >
               <div className="drawer-avatar">{user.name?.charAt(0)?.toUpperCase()}</div>
               <div className="drawer-user-info">
                 <p className="drawer-username">{user.name}</p>
@@ -154,50 +161,59 @@ export default function Navbar({
 
             <nav className="drawer-nav" onClick={() => setIsMobileMenuOpen(false)}>
 
-                <NavLink
+              <NavLink
                 to="/"
                 className={({ isActive }) =>
-                    "drawer-link" + (isActive ? " drawer-link-active" : "")
+                  "drawer-link" + (isActive ? " drawer-link-active" : "")
                 }
-                >
+              >
                 Inicio
-                </NavLink>
+              </NavLink>
 
-                <NavLink
+              <NavLink
                 to="/cv"
                 className={({ isActive }) =>
-                    "drawer-link" + (isActive ? " drawer-link-active" : "")
+                  "drawer-link" + (isActive ? " drawer-link-active" : "")
                 }
-                >
+                onClick={(e) => {
+                  if (onCreateCv) {
+                    e.preventDefault();
+                    onCreateCv();
+                    setIsMobileMenuOpen(false); // Cerramos menú móvil también
+                  } else {
+                    setIsMobileMenuOpen(false);
+                  }
+                }}
+              >
                 Crear CV
-                </NavLink>
+              </NavLink>
 
-                <NavLink
+              <NavLink
                 to="/comunidad"
                 className={({ isActive }) =>
-                    "drawer-link" + (isActive ? " drawer-link-active" : "")
+                  "drawer-link" + (isActive ? " drawer-link-active" : "")
                 }
-                >
+              >
                 Comunidad
-                </NavLink>
+              </NavLink>
 
-                <NavLink
+              <NavLink
                 to="/jobs"
                 className={({ isActive }) =>
-                    "drawer-link" + (isActive ? " drawer-link-active" : "")
+                  "drawer-link" + (isActive ? " drawer-link-active" : "")
                 }
-                >
+              >
                 Bolsa de Trabajo
-                </NavLink>
+              </NavLink>
 
-                <NavLink
+              <NavLink
                 to="/mis-cvs"
                 className={({ isActive }) =>
-                    "drawer-link" + (isActive ? " drawer-link-active" : "")
+                  "drawer-link" + (isActive ? " drawer-link-active" : "")
                 }
-                >
+              >
                 Mis cvs
-                </NavLink>
+              </NavLink>
             </nav>
 
             <button

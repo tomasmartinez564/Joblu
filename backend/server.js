@@ -12,6 +12,24 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Middleware de Autenticación
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ error: "Acceso denegado. Token no provisto." });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET || "secreto_super_seguro_cambiar_en_env", (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: "Token inválido o expirado." });
+    }
+    req.user = user;
+    next();
+  });
+};
+
 // ====================
 // 🔗 Conexión a MongoDB
 // ====================
@@ -45,6 +63,18 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 // ====================
+// 📄 Modelo Cv (NUEVO)
+// ====================
+const cvSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  title: { type: String, default: "Mi CV" },
+  puesto: { type: String },
+  data: { type: Object }, // Guardamos toda la estructura JSON del CV aquí
+}, { timestamps: true });
+
+const Cv = mongoose.models.Cv || mongoose.model("Cv", cvSchema);
+
+// ====================
 // 🧩 Modelo Post (Comunidad)
 // ====================
 
@@ -66,15 +96,26 @@ const postSchema = new mongoose.Schema(
     title: { type: String, required: true },
     content: { type: String, required: true },
     comments: [commentSchema],
-    likes: {
-      type: Number,
-      default: 0, // 👈 nuevo campo
-    },
+    // likes: { type: Number, default: 0 }, // Deprecated concept, now calculated
+    likedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    lkCount: { type: Number, default: 0 } // Cache para no hacer .length todo el tiempo
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
+
+// Virtual param for 'likes' for backward compatibility
+postSchema.virtual('likes').get(function () {
+  return this.likedBy ? this.likedBy.length : 0;
+});
 
 const Post = mongoose.models.Post || mongoose.model("Post", postSchema);
 
@@ -182,34 +223,43 @@ app.post("/api/community/posts/:id/comments", async (req, res) => {
   }
 });
 
-// POST /api/community/posts/:id/like -> sumar o restar like
-app.post("/api/community/posts/:id/like", async (req, res) => {
+// POST /api/community/posts/:id/like -> Toggle like (requiere auth)
+app.post("/api/community/posts/:id/like", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { action } = req.body || {}; // 'like' o 'unlike'
+    const userId = req.user.id;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ error: "ID de post inválido." });
     }
 
-    const increment = action === "unlike" ? -1 : 1;
-
-    const post = await Post.findByIdAndUpdate(
-      id,
-      { $inc: { likes: increment } },
-      { new: true }
-    );
-
+    const post = await Post.findById(id);
     if (!post) {
       return res.status(404).json({ error: "Post no encontrado." });
     }
 
-    if (post.likes < 0) {
-      post.likes = 0;
-      await post.save();
+    // Check if user already liked
+    const alreadyLiked = post.likedBy.includes(userId);
+
+    if (alreadyLiked) {
+      // Unlike
+      post.likedBy = post.likedBy.filter((uid) => uid.toString() !== userId);
+    } else {
+      // Like
+      post.likedBy.push(userId);
     }
 
-    res.json(post);
+    // Save triggers virtuals and updates
+    await post.save();
+
+    // Devolvemos el post actualizado con el count correcto
+    // Mongoose virtual 'likes' se incluirá si usamos toJSON endpoint
+    res.json({
+      _id: post._id,
+      likes: post.likedBy.length,
+      likedBy: post.likedBy,
+      userHasLiked: !alreadyLiked
+    });
   } catch (err) {
     console.error("❌ Error al actualizar likes:", err);
     res.status(500).json({ error: "Error al actualizar los likes." });
@@ -231,6 +281,96 @@ app.delete("/api/community/posts/:id", async (req, res) => {
   } catch (err) {
     console.error("❌ Error al borrar post:", err);
     res.status(500).json({ error: "Error al borrar el posteo." });
+  }
+});
+
+
+// ====================
+// 📄 Endpoints CVs (NUEVO)
+// ====================
+
+// GET /api/cvs -> Listar CVs del usuario
+app.get("/api/cvs", authenticateToken, async (req, res) => {
+  try {
+    const cvs = await Cv.find({ userId: req.user.id }).sort({ updatedAt: -1 });
+    res.json(cvs);
+  } catch (err) {
+    console.error("❌ Error al obtener CVs:", err);
+    res.status(500).json({ error: "Error al obtener CVs." });
+  }
+});
+
+// POST /api/cvs -> Crear CV
+app.post("/api/cvs", authenticateToken, async (req, res) => {
+  try {
+    const { title, puesto, data } = req.body;
+    const newCv = new Cv({
+      userId: req.user.id,
+      title: title || "Sin título",
+      puesto: puesto || "",
+      data: data || {}
+    });
+    await newCv.save();
+    res.status(201).json(newCv);
+  } catch (err) {
+    console.error("❌ Error al guardar CV:", err);
+    res.status(500).json({ error: "Error al guardar el CV." });
+  }
+});
+
+// PUT /api/cvs/:id -> Actualizar CV
+app.put("/api/cvs/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, puesto, data } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "ID inválido." });
+    }
+
+    // Buscamos y actualizamos SOLO si pertenece al usuario
+    const updatedCv = await Cv.findOneAndUpdate(
+      { _id: id, userId: req.user.id },
+      {
+        $set: {
+          title,
+          puesto,
+          data
+        }
+      },
+      { new: true } // Devuelve el documento actualizado
+    );
+
+    if (!updatedCv) {
+      return res.status(404).json({ error: "CV no encontrado o no autorizado." });
+    }
+
+    res.json(updatedCv);
+  } catch (err) {
+    console.error("❌ Error al actualizar CV:", err);
+    res.status(500).json({ error: "Error al actualizar el CV." });
+  }
+});
+
+// DELETE /api/cvs/:id -> Borrar CV
+app.delete("/api/cvs/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "ID inválido." });
+    }
+
+    const deleted = await Cv.findOneAndDelete({ _id: id, userId: req.user.id });
+
+    if (!deleted) {
+      return res.status(404).json({ error: "CV no encontrado o no autorizado." });
+    }
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("❌ Error al borrar CV:", err);
+    res.status(500).json({ error: "Error al borrar el CV." });
   }
 });
 

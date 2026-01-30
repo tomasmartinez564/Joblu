@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import "../styles/account.css";
 
 
-function AccountSettings({ user, onUpdateUser }) {
+function AccountSettings({ user, onUpdateUser, settings, onChangeSettings }) {
   if (!user) {
     return (
       <section className="account">
@@ -74,13 +74,32 @@ function AccountSettings({ user, onUpdateUser }) {
     setNewPassword("");
     setRepeatPassword("");
   };
-  
+
   return (
     <section className="account">
       <h2>Cuenta</h2>
       <p className="account-subtitle">
-        Gestioná tus datos personales, tu email y cómo se ve la aplicación.
+        Gestioná tus datos personales, tu email y la apariencia de la app.
       </p>
+
+      {/* Preferencias Globales (Dark Mode) */}
+      <div className="account-card" style={{ marginBottom: "2rem" }}>
+        <h3>Apariencia</h3>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginTop: "1rem" }}>
+          <label className="toggle-switch" style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={settings?.darkMode || false}
+              onChange={(e) => onChangeSettings({ ...settings, darkMode: e.target.checked })}
+              style={{ accentColor: "var(--joblu-primary)", transform: "scale(1.2)" }}
+            />
+            <span style={{ fontSize: "1rem", fontWeight: 500 }}>Modo Oscuro 🌙</span>
+          </label>
+          <p style={{ margin: 0, fontSize: "0.9rem", color: "var(--joblu-text-muted)" }}>
+            (Cambia el tema de toda la aplicación)
+          </p>
+        </div>
+      </div>
 
       <div className="account-grid">
         {/* Perfil */}
