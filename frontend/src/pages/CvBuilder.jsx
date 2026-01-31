@@ -128,8 +128,7 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
     }));
   };
 
-  const handleSave = () => {
-
+  const handleSave = async () => {
     setSaveError("");
     setSaveSuccess("");
 
@@ -142,13 +141,52 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
       return;
     }
 
-    onSaveCv?.(cvData);
+    // Preparar payload
+    // Si cvData ya tiene _id (porque vino de BD o ya se guardó y volvió), lo mandamos para actualizar.
+    const payload = {
+      _id: cvData._id,
+      userEmail: user.email,
+      title: cvData.nombre,
+      puesto: cvData.puesto,
+      data: cvData,
+    };
 
-    setSaveSuccess(
-      cvLanguage === "en"
-        ? 'CV saved in "My CVs".'
-        : 'CV guardado en "Mis CVs".'
-    );
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/cvs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        throw new Error("Error al guardar CV");
+      }
+
+      const savedCv = await res.json();
+
+      // Actualizamos el estado local con el ID que volvió (para que la próxima sea update)
+      // Ojo: savedCv es el objeto de BD {_id, userEmail, title, data: {...}}
+      // Queremos que cvData tenga el _id.
+      // Así que mergeamos:
+      const updatedData = { ...cvData, _id: savedCv._id };
+      setCvData(updatedData);
+
+      // Si App.jsx necesita saberlo (para actualizar listas cacheadas, etc), llamamos al prop
+      onSaveCv?.(savedCv); // Le pasamos el objeto entero de BD o lo que espere App
+
+      setSaveSuccess(
+        cvLanguage === "en"
+          ? 'CV saved in "My CVs".'
+          : 'CV guardado correctamente en "Mis CVs".'
+      );
+    } catch (err) {
+      console.error(err);
+      setSaveError(
+        cvLanguage === "en"
+          ? "Error saving the CV. Please try again."
+          : "Hubo un error al guardar el CV. Intentalo de nuevo."
+      );
+    }
   };
 
 

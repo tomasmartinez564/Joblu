@@ -221,6 +221,167 @@ app.delete("/api/community/posts/:id", async (req, res) => {
 
 
 // ====================
+// 📄 Modelo y Endpoints CVs
+// ====================
+
+const cvSchema = new mongoose.Schema(
+  {
+    userEmail: { type: String, required: true }, // Identificador del dueño
+    title: { type: String, required: true },
+    puesto: { type: String },
+
+    // Tipo: 'generated' (el builder) o 'uploaded' (archivo subido)
+    type: { type: String, enum: ["generated", "uploaded"], default: "generated" },
+
+    // Si es generated
+    data: { type: Object },
+
+    // Si es uploaded
+    fileData: { type: String }, // Base64
+    fileName: { type: String },
+    contentType: { type: String },
+  },
+  { timestamps: true }
+);
+
+const Cv = mongoose.models.Cv || mongoose.model("Cv", cvSchema);
+
+// GET /api/cvs -> Listar CVs de un usuario
+app.get("/api/cvs", async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({ error: "Falta el email del usuario." });
+    }
+
+    const cvs = await Cv.find({ userEmail: email }).sort({ updatedAt: -1 });
+    res.json(cvs);
+  } catch (err) {
+    console.error("❌ Error al listar CVs:", err);
+    res.status(500).json({ error: "Error al obtener CVs." });
+  }
+});
+
+// GET /api/cvs/:id -> Obtener un CV específico
+app.get("/api/cvs/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "ID inválido." });
+    }
+
+    const cv = await Cv.findById(id);
+    if (!cv) {
+      return res.status(404).json({ error: "CV no encontrado." });
+    }
+    res.json(cv);
+  } catch (err) {
+    console.error("❌ Error al obtener CV:", err);
+    res.status(500).json({ error: "Error al obtener el CV." });
+  }
+});
+
+
+// POST /api/cvs -> Crear o Actualizar CV
+// Soporta tanto generado como subido
+app.post("/api/cvs", async (req, res) => {
+  try {
+    const {
+      _id,
+      userEmail,
+      title,
+      puesto,
+      data,
+      type = "generated",
+      fileData,
+      fileName,
+      contentType
+    } = req.body;
+
+    if (!userEmail) {
+      return res.status(400).json({ error: "Falta el email del usuario." });
+    }
+
+    // Validaciones según tipo
+    if (type === "generated" && !data) {
+      return res.status(400).json({ error: "Faltan datos del CV (data)." });
+    }
+    if (type === "uploaded" && !fileData) {
+      return res.status(400).json({ error: "Falta el archivo (fileData)." });
+    }
+
+    let cv;
+
+    if (_id && mongoose.Types.ObjectId.isValid(_id)) {
+      // Actualizar
+      const updatePayload = {
+        title: title || (data && data.nombre) || fileName || "CV sin título",
+        puesto: puesto || (data && data.puesto) || "",
+        type,
+        userEmail,
+      };
+
+      if (type === "generated") updatePayload.data = data;
+      if (type === "uploaded") {
+        updatePayload.fileData = fileData;
+        updatePayload.fileName = fileName;
+        updatePayload.contentType = contentType;
+      }
+
+      cv = await Cv.findByIdAndUpdate(
+        _id,
+        updatePayload,
+        { new: true }
+      );
+    } else {
+      // Crear
+      const createPayload = {
+        userEmail,
+        title: title || (data && data.nombre) || fileName || "CV sin título",
+        puesto: puesto || (data && data.puesto) || "",
+        type,
+      };
+
+      if (type === "generated") createPayload.data = data;
+      if (type === "uploaded") {
+        createPayload.fileData = fileData;
+        createPayload.fileName = fileName;
+        createPayload.contentType = contentType;
+      }
+
+      cv = new Cv(createPayload);
+      await cv.save();
+    }
+
+    res.json(cv);
+  } catch (err) {
+    console.error("❌ Error al guardar CV:", err);
+    if (err.message && err.message.includes("payload too large")) {
+      res.status(413).json({ error: "El archivo es demasiado grande." });
+    } else {
+      res.status(500).json({ error: "Error al guardar el CV." });
+    }
+  }
+});
+
+// DELETE /api/cvs/:id -> Eliminar CV
+app.delete("/api/cvs/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "ID inválido." });
+    }
+
+    await Cv.findByIdAndDelete(id);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("❌ Error al eliminar CV:", err);
+    res.status(500).json({ error: "Error al eliminar el CV." });
+  }
+});
+
+
+// ====================
 // 💼 Modelo y Endpoints Empleos (Jobs)
 // ====================
 

@@ -150,10 +150,12 @@ function AppLayout() {
   }
 
   const handleSaveCv = (cvData) => {
+    // Legacy support or local update if needed.
+    // Since CvBuilder handles API save, this might just update local state which is fine but unused by MyCvs now.
     const now = new Date()
     const title = cvData.nombre || 'CV sin nombre'
     const puesto = cvData.puesto || ''
-    const id = Date.now()
+    const id = cvData._id || Date.now() // Use real ID if available
 
     const newCv = {
       id,
@@ -163,14 +165,17 @@ function AppLayout() {
       data: cvData,
     }
 
-    setSavedCvs((prev) => [newCv, ...prev])
+    setSavedCvs((prev) => {
+      // Avoid duplicates if ID exists
+      const filtered = prev.filter(c => c.id !== id && c.id !== cvData._id);
+      return [newCv, ...filtered];
+    })
   }
 
 
-  const handleOpenCv = (id) => {
-    const found = savedCvs.find((cv) => cv.id === id)
-    if (!found) return
-    setActiveCvData(found.data)
+  const handleOpenCv = (cvData) => {
+    // Ahora recibimos el objeto completo del CV (incluso con _id)
+    setActiveCvData(cvData)
     navigate('/cv')
   }
 
@@ -328,9 +333,7 @@ function AppLayout() {
             element={
               <MyCvs
                 user={user}
-                savedCvs={savedCvs}
                 onOpenCv={handleOpenCv}
-                onDeleteCv={handleDeleteCv}
               />
             }
           />
