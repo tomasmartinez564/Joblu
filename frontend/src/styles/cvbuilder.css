@@ -250,6 +250,7 @@
   flex: 1;
   /* Opcional: hacer que ocupen el mismo ancho si hay espacio */
   text-align: center;
+  margin-top: 0; /* Reset global styles */
 }
 
 .cv-actions .save-btn:hover,

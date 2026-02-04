@@ -1,21 +1,33 @@
 import "../styles/home.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import API_BASE_URL from "../config/api";
+import cvService from "../services/cvService";
 
-export default function Home({ user, savedCvs, onOpenCv }) {
+export default function Home({ user }) {
+  const navigate = useNavigate();
   const [recommendedJobs, setRecommendedJobs] = useState([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
+  const [lastCv, setLastCv] = useState(null);
 
-  // Fetch de Empleos Recomendados
+  // Fetch de Empleos Recomendados y Último CV
   useEffect(() => {
     if (user) {
       setLoadingJobs(true);
+
+      // Fetch CVs
+      cvService.getAll()
+        .then(cvs => {
+          if (cvs && cvs.length > 0) {
+            setLastCv(cvs[0]);
+          }
+        })
+        .catch(console.error);
+
+      // Fetch Jobs
       fetch(`${API_BASE_URL}/api/jobs`)
         .then(res => res.json())
         .then(data => {
-          // Tomamos los 3 primeros como "recomendados" por ahora
-          // Idealmente filtraríamos por perfil del usuario
           setRecommendedJobs(data.slice(0, 3));
         })
         .catch(err => console.error("Error fetching jobs:", err))
@@ -25,11 +37,6 @@ export default function Home({ user, savedCvs, onOpenCv }) {
 
   // LÓGICA DASHBOARD
   if (user) {
-    // 1. Obtener el CV principal (el más reciente por 'updatedAt' o el primero)
-    // Asumimos que savedCvs ya viene ordenado o tomamos el primero
-    // Si quisieramos ordenar: savedCvs.sort((a,b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-    const lastCv = savedCvs && savedCvs.length > 0 ? savedCvs[0] : null;
-
     // 2. Calcular progreso (Lógica Estricta) 🧠
     const calculateProgress = (cv) => {
       if (!cv || !cv.data) return 0;
@@ -88,7 +95,7 @@ export default function Home({ user, savedCvs, onOpenCv }) {
 
             {lastCv ? (
               <button
-                onClick={() => onOpenCv(lastCv.id)}
+                onClick={() => navigate(`/cv/${lastCv._id}`)}
                 className="stat-action"
                 style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", padding: 0 }}
               >

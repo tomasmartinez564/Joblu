@@ -83,6 +83,7 @@ function AppLayout() {
   const navigate = useNavigate()
 
   // 🧑‍💻 Usuario
+  // 🧑‍💻 Usuario
   const [user, setUser] = useState(() => {
     try {
       const raw = localStorage.getItem(LS_USER_KEY)
@@ -91,13 +92,6 @@ function AppLayout() {
       return null
     }
   })
-
-  // 📄 CVs guardados (Ahora sincronizados con backend)
-  const [savedCvs, setSavedCvs] = useState([]);
-
-  // CV activo
-  const [activeCvData, setActiveCvData] = useState(null)
-  const [activeCvId, setActiveCvId] = useState(null) // ID para saber si es update o create
 
   // 💼 Empleos guardados
   const [savedJobs, setSavedJobs] = useState(() => {
@@ -163,25 +157,7 @@ function AppLayout() {
     } catch { }
   }, [settings])
 
-  // 📡 Efecto para cargar CVs desde Backend al iniciar o loguearse
-  useEffect(() => {
-    if (user) {
-      const token = localStorage.getItem('joblu_token');
-      if (!token) return;
 
-      fetch(`${API_BASE_URL}/api/cvs`, {
-        headers: { "Authorization": `Bearer ${token}` }
-      })
-        .then(res => {
-          if (res.ok) return res.json();
-          throw new Error("Error fetching CVs");
-        })
-        .then(data => setSavedCvs(data))
-        .catch(err => console.error("Error cargando CVs:", err));
-    } else {
-      setSavedCvs([]);
-    }
-  }, [user]);
 
   // Handlers
   const handleLogin = (userData, token) => {
@@ -208,89 +184,13 @@ function AppLayout() {
 
   const handleLogout = () => {
     setUser(null)
-    setSavedCvs([])
-    setActiveCvData(null)
-    setActiveCvId(null)
     setIsAccountMenuOpen(false)
     setShowOnboarding(false)
     navigate('/')
   }
 
-  const handleSaveCv = async (cvData) => {
-    const token = localStorage.getItem('joblu_token');
-    if (!user || !token) {
-      alert("Iniciá sesión para guardar tu CV en la nube.");
-      return;
-    }
-
-    const title = cvData.nombre || 'CV sin nombre';
-    const puesto = cvData.puesto || '';
-
-    try {
-      let method = 'POST';
-      let url = `${API_BASE_URL}/api/cvs`;
-
-      // Si tenemos un ID activo, es una ACTUALIZACIÓN (PUT)
-      if (activeCvId) {
-        method = 'PUT';
-        url = `${API_BASE_URL}/api/cvs/${activeCvId}`;
-      }
-
-      const res = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ title, puesto, data: cvData })
-      });
-
-      if (res.ok) {
-        const savedCv = await res.json();
-
-        if (method === 'POST') {
-          // Si es nuevo, lo agregamos y lo marcamos como activo
-          setSavedCvs(prev => [savedCv, ...prev]);
-          setActiveCvId(savedCv._id); // Para que el próximo save sea update
-        } else {
-          // Si es update, actualizamos la lista
-          setSavedCvs(prev => prev.map(cv => cv._id === savedCv._id ? savedCv : cv));
-        }
-
-        // Feedback visual simple (opcional, o usar toast si existiera)
-        console.log("CV guardado correctamente");
-        return true; // Retornamos éxito para el UI
-      }
-    } catch (err) {
-      console.error("Error guardando CV:", err);
-    }
-    return false;
-  }
-
-  const handleOpenCv = (id) => {
-    const found = savedCvs.find((cv) => cv.id === id || cv._id === id)
-    if (!found) return
-    setActiveCvData(found.data)
-    setActiveCvId(found._id || found.id) // Guardamos el ID para saber que estamos editando ESTE
-    navigate('/cv')
-  }
-
-  const handleDeleteCv = async (id) => {
-    const token = localStorage.getItem('joblu_token');
-    if (!token) return;
-
-    // Optimistic update
-    setSavedCvs((prev) => prev.filter((cv) => cv.id !== id && cv._id !== id));
-
-    try {
-      await fetch(`${API_BASE_URL}/api/cvs/${id}`, {
-        method: 'DELETE',
-        headers: { "Authorization": `Bearer ${token}` }
-      });
-    } catch (err) {
-      console.error("Error borrando CV:", err);
-      // Rollback si falla (opcional)
-    }
+  const handleCreateCv = () => {
+    navigate('/cv');
   }
 
   const handleUpdateUser = (updates) => {
@@ -322,11 +222,7 @@ function AppLayout() {
     }
   }
 
-  const handleCreateCv = () => {
-    setActiveCvData(null);
-    setActiveCvId(null);
-    navigate('/cv');
-  }
+
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -411,13 +307,21 @@ function AppLayout() {
 
       <main className="app-main">
         <Routes>
-          <Route path="/" element={<Home user={user} savedCvs={savedCvs} onOpenCv={handleOpenCv} />} />
+          <Route path="/" element={<Home user={user} />} />
           <Route
             path="/cv"
             element={
               <CvBuilder
-                onSaveCv={handleSaveCv}
-                initialData={activeCvData}
+                user={user}
+                settings={settings}
+                onChangeSettings={setSettings}
+              />
+            }
+          />
+          <Route
+            path="/cv/:id"
+            element={
+              <CvBuilder
                 user={user}
                 settings={settings}
                 onChangeSettings={setSettings}
@@ -435,9 +339,6 @@ function AppLayout() {
             element={
               <MyCvs
                 user={user}
-                savedCvs={savedCvs}
-                onOpenCv={handleOpenCv}
-                onDeleteCv={handleDeleteCv}
               />
             }
           />

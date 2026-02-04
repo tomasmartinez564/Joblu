@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import html2pdf from "html2pdf.js";
 import "../styles/cvbuilder.css";
 import Settings from "./Settings";
 import CvForm from "../components/cv/CvForm";
 import API_BASE_URL from "../config/api";
+import cvService from "../services/cvService";
 
 // Estado base vacío de un CV
 const emptyCv = {
@@ -30,7 +32,9 @@ const emptyCv = {
   foto: "",
 };
 
-function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) {
+function CvBuilder({ user, settings, onChangeSettings }) {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const isLogged = !!user;
 
   // Preferencias del usuario (con defaults por si no vienen)
@@ -42,7 +46,7 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
     targetIndustry = "",
   } = settings || {};
 
-  const [cvData, setCvData] = useState(initialData || emptyCv);
+  const [cvData, setCvData] = useState(emptyCv);
 
   const [showSettings, setShowSettings] = useState(false);
 
@@ -82,14 +86,31 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
 
 
 
-  // Cuando cambia el CV activo (desde "Mis CVs"), actualizamos el formulario
+  // Cargar CV si hay ID en la URL
   useEffect(() => {
-    if (initialData) {
-      setCvData(initialData);
+    if (id) {
+      loadCvForEdit(id);
     } else {
       setCvData(emptyCv);
     }
-  }, [initialData]);
+  }, [id]);
+
+  const loadCvForEdit = async (cvId) => {
+    try {
+      const data = await cvService.getById(cvId);
+      // Backend devuelve { ..., data: { ...contenido... } }
+      // Ajustamos según la estructura que guardamos
+      if (data.data) {
+        setCvData(data.data);
+      } else {
+        // Fallback por si la estructura es plana (depende de cómo guardaste)
+        setCvData(data);
+      }
+    } catch (error) {
+      console.error("Error cargando CV:", error);
+      // Si falla, quizás redirigir o mostrar error
+    }
+  };
 
   useEffect(() => {
     if (!showTips) return;
@@ -146,18 +167,31 @@ function CvBuilder({ onSaveCv, initialData, user, settings, onChangeSettings }) 
 
     setIsSaving(true);
     try {
-      if (onSaveCv) {
-        await onSaveCv(cvData); // Esperamos a que termine (App debe retornar promesa)
+      const payload = {
+        title: cvData.nombre || "CV sin nombre",
+        puesto: cvData.puesto || "",
+        data: cvData,
+      };
+
+      if (id) {
+        // Update
+        await cvService.update(id, payload);
+        setSaveSuccess(
+          cvLanguage === "en" ? "CV updated." : "CV actualizado correctamente."
+        );
+      } else {
+        // Create
+        const newCv = await cvService.create(payload);
+        setSaveSuccess(
+          cvLanguage === "en" ? "CV created." : "CV creado correctamente."
+        );
+        // Navegar a la URL del nuevo CV para modo edición
+        navigate(`/cv/${newCv._id}`, { replace: true });
       }
 
-      setSaveSuccess(
-        cvLanguage === "en"
-          ? 'CV saved in "My CVs".'
-          : 'CV guardado en "Mis CVs".'
-      );
     } catch (error) {
       console.error(error);
-      setSaveError("Error al guardar.");
+      setSaveError(error.message || "Error al guardar.");
     } finally {
       setIsSaving(false);
     }

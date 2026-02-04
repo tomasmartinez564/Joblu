@@ -3,14 +3,20 @@ import cors from "cors";
 import dotenv from "dotenv";
 import OpenAI from "openai";
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs"; // Importar bcrypt
-import jwt from "jsonwebtoken"; // Importar jwt
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import multer from "multer";
+import fs from "fs";
+import { createRequire } from "module";
 
 dotenv.config();
 
+const require = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse");
+
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 
 // Middleware de Autenticación
 const authenticateToken = (req, res, next) => {
@@ -300,6 +306,28 @@ app.get("/api/cvs", authenticateToken, async (req, res) => {
   }
 });
 
+// GET /api/cvs/:id -> Obtener un CV por ID
+app.get("/api/cvs/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "ID inválido." });
+    }
+
+    const cv = await Cv.findOne({ _id: id, userId: req.user.id });
+
+    if (!cv) {
+      return res.status(404).json({ error: "CV no encontrado o no autorizado." });
+    }
+
+    res.json(cv);
+  } catch (err) {
+    console.error("❌ Error al obtener CV:", err);
+    res.status(500).json({ error: "Error al obtener el CV." });
+  }
+});
+
 // POST /api/cvs -> Crear CV
 app.post("/api/cvs", authenticateToken, async (req, res) => {
   try {
@@ -548,6 +576,113 @@ const aiLimiter = rateLimit({
   message: { error: "Demasiadas solicitudes. Intenta de nuevo en 15 minutos." },
   standardHeaders: true,
   legacyHeaders: false,
+});
+
+// ====================
+// 📥 Importar CV (Ex-PDF)
+// ====================
+
+// Multer config: storage in memory (buffer)
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+app.post("/api/cvs/import", authenticateToken, upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No se subió ningún archivo." });
+    }
+
+    // 1. Extraer texto del PDF
+    let textContent = "";
+    if (req.file.mimetype === "application/pdf") {
+      const pdfData = await pdfParse(req.file.buffer);
+      textContent = pdfData.text;
+    } else {
+      // Si fuera .txt u otro, intentamos leer como string
+      textContent = req.file.buffer.toString("utf-8");
+    }
+
+    if (!textContent || textContent.trim().length < 10) {
+      return res.status(400).json({ error: "No se pudo leer texto del archivo." });
+    }
+
+    // 2. Usar OpenAI para estructurar la info
+    //    Prompt para que devuelva el JSON que esperamos en CvBuilder
+    const systemPrompt = `Eres un asistente experto en Recorsos Humanos y Parsing de CVs.
+    Tu tarea es extraer la información del texto de un currículum y formatearla estrictamente como un objeto JSON válido.
+    
+    El formato de salida debe coincidir con esta estructura (si falta info, dejala vacía o pon algo genérico):
+    {
+      "nombre": "Nombre completo",
+      "puesto": "Puesto actual o deseado",
+      "email": "correo@ejemplo.com",
+      "telefono": "...",
+      "ubicacion": "...",
+      "sitioWeb": "...",
+      "linkedin": "...",
+      "perfil": "Resumen profesional...",
+      "experiencias": "Experiencia laboral (texto libre o bullets)",
+      "educacion": "Educación (texto libre o bullets)",
+      "habilidades": "Habilidades (texto libre)",
+      "idiomas": "Idiomas (texto libre)",
+      "proyectos": "Proyectos (texto libre)",
+      "otros": "Otros datos de interés"
+    }
+    
+    Responde SOLO con el JSON válido, sin bloques de código markdown ni texto adicional.`;
+
+    const userPrompt = `Aquí está el contenido del CV:\n\n"""${textContent}"""`;
+
+    // Fallback si no hay API Key (Simulación)
+    if (!process.env.OPENAI_API_KEY) {
+      console.warn("⚠️ No OPENAI_API_KEY. Devolviendo 'mock' data.");
+      return res.json({
+        nombre: "Usuario Importado (Simulado)",
+        puesto: "Dev (Simulado)",
+        perfil: "Este es un perfil simulado extraído del PDF porque no hay API Key.",
+        experiencias: textContent.substring(0, 200) + "..."
+      });
+    }
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // o gpt-3.5-turbo
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ],
+      temperature: 0.2, // Baja temperatura para ser más determinista
+    });
+
+    const resultRaw = completion.choices[0].message.content.trim();
+
+    // Limpieza básica por si la IA se manda un ```json ... ```
+    const cleanJson = resultRaw.replace(/^```json/, "").replace(/```$/, "");
+
+    let parsedData;
+    try {
+      parsedData = JSON.parse(cleanJson);
+    } catch (e) {
+      console.error("Error parseando JSON de IA:", e);
+      return res.status(500).json({ error: "La IA no devolvió un JSON válido." });
+    }
+
+    // 3. (Opcional) Guardar directamente en la BD
+    // En este flujo, guardamos el CV importado como nuevo
+    const newCv = new Cv({
+      userId: req.user.id,
+      title: `Importado: ${parsedData.nombre || "Sin nombre"}`,
+      puesto: parsedData.puesto || "Sin puesto",
+      data: parsedData
+    });
+
+    await newCv.save();
+
+    res.json(newCv);
+
+  } catch (err) {
+    console.error("❌ Error en import CV:", err);
+    res.status(500).json({ error: "Error al procesar el archivo." });
+  }
 });
 
 // Endpoint para optimizar una sección del CV (CÓDIGO COMPLETO)
