@@ -186,6 +186,13 @@ function AppLayout() {
     setUser(null)
     setIsAccountMenuOpen(false)
     setShowOnboarding(false)
+
+    // Clear user data from localStorage
+    try {
+      localStorage.removeItem('joblu_token')
+      localStorage.removeItem(LS_USER_KEY)
+    } catch { }
+
     navigate('/')
   }
 

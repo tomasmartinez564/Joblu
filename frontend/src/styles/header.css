@@ -133,6 +133,23 @@ body.dark-mode .nav-link {
   background-color: #e5e7eb;
 }
 
+.nav-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.account-avatar-button {
+  width: 38px;  /* Ajustalo al tamaño de tu botón actual */
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Desktop: mostrar avatar, ocultar hamburguesa */
 @media (min-width: 768px) {
   .desktop-user-menu {

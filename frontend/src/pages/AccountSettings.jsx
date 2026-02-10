@@ -1,208 +1,171 @@
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
+import API_BASE_URL from "../config/api";
 import "../styles/account.css";
 
-
-function AccountSettings({ user, onUpdateUser, settings, onChangeSettings }) {
-  if (!user) {
-    return (
-      <section className="account">
-        <h2>Cuenta</h2>
-        <p className="account-subtitle">
-          Iniciá sesión para gestionar tu cuenta, apariencia y datos personales.
-        </p>
-      </section>
-    );
-  }
-
-  const [displayName, setDisplayName] = useState(user.name || "");
-  const [email, setEmail] = useState(user.email || "");
+function AccountSettings({ user, onUpdateUser }) {
+  // Sincronizar estados locales con los datos del usuario cuando estos cambian
+  const [displayName, setDisplayName] = useState(user?.name || "");
+  const [avatarPreview, setAvatarPreview] = useState(user?.avatar || "");
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
 
-  const [profileError, setProfileError] = useState("");
-  const [profileSuccess, setProfileSuccess] = useState("");
-
-  const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
-
-
+  // IMPORTANTE: Este efecto asegura que si el usuario cambia (ej: por un reload o update), 
+  // los campos del formulario se actualicen.
   useEffect(() => {
-    setDisplayName(user.name || "");
-    setEmail(user.email || "");
+    if (user) {
+      setDisplayName(user.name || "");
+      setAvatarPreview(user.avatar || "");
+    }
   }, [user]);
 
-  const handleProfileSubmit = (e) => {
-    e.preventDefault();
+  const handleAvatarClick = () => fileInputRef.current.click();
 
-    // limpiar mensajes previos
-    setProfileError("");
-    setProfileSuccess("");
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-    if (!displayName || !email) {
-      setProfileError("Completá nombre y email.");
-      return;
+    // Previsualización local inmediata para feedback UX
+    setAvatarPreview(URL.createObjectURL(file));
+    setIsUploading(true);
+
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/user/upload-avatar`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("joblu_token")}`,
+        },
+        body: formData,
+      });
+
+      // Verificar si la respuesta es exitosa
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error del servidor:", response.status, errorText);
+
+        // Intentar extraer un mensaje de error más específico
+        if (errorText.includes("File too large")) {
+          alert("El archivo es demasiado grande. El tamaño máximo permitido es 5MB.");
+        } else if (errorText.includes("Solo se permiten imágenes")) {
+          alert("Solo se permiten archivos de imagen (JPG, PNG, etc.).");
+        } else {
+          alert(`Error del servidor (${response.status}). Por favor intenta de nuevo.`);
+        }
+        return;
+      }
+
+      const data = await response.json();
+      if (data.avatarUrl) {
+        // Actualizamos el usuario global. El useEffect de arriba se encargará 
+        // de refrescar esta pantalla.
+        onUpdateUser({ avatar: data.avatarUrl });
+
+        // Mostrar mensaje de éxito (opcional, puedes agregar un toast si tienes uno)
+        console.log("✅ Avatar actualizado correctamente");
+      } else if (data.error) {
+        console.error("Error del servidor:", data.error);
+        alert(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Error subiendo avatar:", error);
+      alert("Error al subir el avatar. Por favor intenta de nuevo.");
+    } finally {
+      setIsUploading(false);
     }
-
-    onUpdateUser({ name: displayName, email });
-    setProfileSuccess("Datos de cuenta actualizados (solo frontend, sin backend).");
   };
-
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
-
-    // limpiar mensajes previos
-    setPasswordError("");
-    setPasswordSuccess("");
-
-    if (!currentPassword || !newPassword || !repeatPassword) {
-      setPasswordError("Completá todos los campos de contraseña.");
-      return;
-    }
-
-    if (newPassword !== repeatPassword) {
-      setPasswordError("La nueva contraseña y la repetición no coinciden.");
-      return;
-    }
-
-    // En una app real acá llamarías al backend
-    setPasswordSuccess("Cambio de contraseña simulado (en un backend real se aplicaría).");
-
-    setCurrentPassword("");
-    setNewPassword("");
-    setRepeatPassword("");
+    alert("Cambio de contraseña simulado.");
   };
 
   return (
     <section className="account">
-      <h2>Cuenta</h2>
-      <p className="account-subtitle">
-        Gestioná tus datos personales, tu email y la apariencia de la app.
-      </p>
-
-      {/* Preferencias Globales (Dark Mode) */}
-      <div className="account-card" style={{ marginBottom: "2rem" }}>
-        <h3>Apariencia</h3>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginTop: "1rem" }}>
-          <label className="toggle-switch" style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
-            <input
-              type="checkbox"
-              checked={settings?.darkMode || false}
-              onChange={(e) => onChangeSettings({ ...settings, darkMode: e.target.checked })}
-              style={{ accentColor: "var(--joblu-primary)", transform: "scale(1.2)" }}
-            />
-            <span style={{ fontSize: "1rem", fontWeight: 500 }}>Modo Oscuro 🌙</span>
-          </label>
-          <p style={{ margin: 0, fontSize: "0.9rem", color: "var(--joblu-text-muted)" }}>
-            (Cambia el tema de toda la aplicación)
-          </p>
-        </div>
+      <div className="account-header">
+        <h2>Mi Cuenta</h2>
+        <p>Gestioná tu identidad y la seguridad de tu acceso.</p>
       </div>
 
       <div className="account-grid">
-        {/* Perfil */}
         <div className="account-card">
-          <h3>Datos de perfil</h3>
-          <p className="account-hint">
-            Estos datos se usan para mostrar tu nombre en la app y, más
-            adelante, para cosas como el saludo o plantillas por defecto.
-          </p>
+          <div className="avatar-section">
+            <div
+              className={`avatar-wrapper ${isUploading ? "uploading" : ""}`}
+              onClick={handleAvatarClick}
+            >
+              <img
+                src={avatarPreview || "/logo.png"}
+                alt="Avatar"
+                className="user-avatar-lg"
+              />
+              <div className="avatar-overlay">Cambiar</div>
+            </div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              hidden
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+            <p className="hint">JPG o PNG, máx 5MB</p>
+          </div>
 
-          <form className="account-form" onSubmit={handleProfileSubmit}>
-            <label>
-              Nombre visible
+          <form className="account-form" onSubmit={(e) => {
+            e.preventDefault();
+            onUpdateUser({ name: displayName });
+          }}>
+            <div className="input-group">
+              <label>Nombre Visible</label>
               <input
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Ej: Sofi, Lucas, Marta"
+                placeholder="Ej: Tomas Martinez"
               />
-            </label>
-
-            <label>
-              Email de la cuenta
+            </div>
+            <div className="input-group">
+              <label>Email de la cuenta</label>
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="ejemplo@mail.com"
+                value={user?.email || ""}
+                disabled
+                className="input-disabled"
               />
-            </label>
-
-            <button type="submit" className="account-btn primary">
-              Guardar cambios
-            </button>
-
-            {profileError && (
-              <p className="account-message account-message--error">
-                {profileError}
-              </p>
-            )}
-
-            {profileSuccess && (
-              <p className="account-message account-message--success">
-                {profileSuccess}
-              </p>
-            )}
+              <p className="hint">El email no puede modificarse.</p>
+            </div>
+            <button type="submit" className="btn-primary">Guardar Cambios</button>
           </form>
-
         </div>
 
-        {/* Contraseña */}
-        <div className="account-card">
-          <h3>Contraseña</h3>
-          <p className="account-hint">
-            Por ahora esto es solo una simulación de la UI. En un proyecto real,
-            estos datos se enviarían al servidor de forma segura.
-          </p>
+        <div className="account-card full-width">
+          <div className="security-content">
+            <h3>Seguridad</h3>
+            <p className="account-hint">Actualizá tu contraseña para mantener tu cuenta protegida.</p>
 
-          <form className="account-form" onSubmit={handlePasswordSubmit}>
-            <label>
-              Contraseña actual
-              <input
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-              />
-            </label>
-
-            <label>
-              Nueva contraseña
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-            </label>
-
-            <label>
-              Repetir nueva contraseña
-              <input
-                type="password"
-                value={repeatPassword}
-                onChange={(e) => setRepeatPassword(e.target.value)}
-              />
-            </label>
-
-            <button type="submit" className="account-btn">
-              Cambiar contraseña
-            </button>
-
-            {passwordError && (
-              <p className="account-message account-message--error">
-                {passwordError}
-              </p>
-            )}
-
-            {passwordSuccess && (
-              <p className="account-message account-message--success">
-                {passwordSuccess}
-              </p>
-            )}
-          </form>
-
+            <form className="password-form" onSubmit={handlePasswordSubmit}>
+              <div className="password-grid">
+                <div className="input-group">
+                  <label>Contraseña Actual</label>
+                  <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="••••••••" />
+                </div>
+                <div className="input-group">
+                  <label>Nueva Contraseña</label>
+                  <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Mínimo 8 caracteres" />
+                </div>
+                <div className="input-group">
+                  <label>Repetir Nueva Contraseña</label>
+                  <input type="password" value={repeatPassword} onChange={(e) => setRepeatPassword(e.target.value)} placeholder="Confirmá tu contraseña" />
+                </div>
+              </div>
+              <button type="submit" className="btn-secondary">Actualizar Contraseña</button>
+            </form>
+          </div>
         </div>
       </div>
     </section>

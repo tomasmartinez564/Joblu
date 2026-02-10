@@ -5,122 +5,113 @@ function Settings({ user, settings, onChangeSettings }) {
     return (
       <section className="settings">
         <h2>Configuración</h2>
-        <p className="settings-subtitle">
-          Iniciá sesión para personalizar tus preferencias de CV y cuenta.
-        </p>
+        <p className="settings-subtitle">Iniciá sesión para personalizar tus preferencias.</p>
       </section>
     );
   }
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    // Manejo especial para checkboxes
-    const newValue = type === "checkbox" ? checked : value;
+  const handleToggle = (name) => {
     onChangeSettings({
       ...settings,
-      [name]: newValue,
+      [name]: !settings[name],
+    });
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    onChangeSettings({
+      ...settings,
+      [name]: value,
     });
   };
 
   return (
     <section className="settings">
-      <h2>Configuración</h2>
-      <p className="settings-subtitle">
-        Personalizá cómo querés que se vea la app y cómo generar tus CVs.
-      </p>
+      <div className="settings-header">
+        <h2>Configuración</h2>
+        <p>Personalizá cómo Joblu te ayuda a conseguir trabajo.</p>
+      </div>
 
-      <form className="settings-form">
-        {/* Apariencia MOVIDO A CUENTA */}
+      <div className="settings-grid">
+        {/* Preferencias de Aplicación */}
+        <div className="settings-card">
+          <h3>Experiencia de Usuario</h3>
+          
+          <div className="setting-item">
+            <div className="setting-info">
+              <label>Mostrar Tips</label>
+              <p>Habilitar recomendaciones de ayuda en el editor.</p>
+            </div>
+            <label className="switch">
+              <input 
+                type="checkbox" 
+                name="showTips"
+                checked={settings.showTips} 
+                onChange={() => handleToggle("showTips")}
+              />
+              <span className="slider"></span>
+            </label>
+          </div>
 
-        {/* Idioma */}
-        <div className="settings-group">
-          <label className="settings-label">
-            Idioma por defecto del CV
-            <select
-              name="cvLanguage"
-              value={settings.cvLanguage}
+          <div className="setting-item">
+            <div className="setting-info">
+              <label>Incluir Foto en CV</label>
+              <p>Define si las plantillas incluyen tu avatar.</p>
+            </div>
+            <label className="switch">
+              <input 
+                type="checkbox" 
+                name="includePhoto"
+                checked={settings.includePhoto} 
+                onChange={() => handleToggle("includePhoto")}
+              />
+              <span className="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        {/* Preferencias de IA y Contenido */}
+        <div className="settings-card">
+          <h3>IA y Contenido</h3>
+          
+          <div className="input-group">
+            <label>Idioma por Defecto del CV</label>
+            <select 
+              name="cvLanguage" 
+              value={settings.cvLanguage} 
               onChange={handleChange}
             >
               <option value="es">Español</option>
               <option value="en">Inglés</option>
             </select>
-          </label>
-          <p className="settings-hint">
-            En qué idioma querés que se genere el contenido del CV por
-            defecto.
-          </p>
-        </div>
+          </div>
+          
+          <div className="input-group">
+            <label>Industria Objetivo</label>
+            <input 
+              type="text" 
+              name="targetIndustry"
+              value={settings.targetIndustry} 
+              onChange={handleChange}
+              placeholder="Ej: IT, Marketing..."
+            />
+            <p className="hint">Esto optimiza las sugerencias de la IA.</p>
+          </div>
 
-        {/* Estilo / enfoque */}
-        <div className="settings-group">
-          <label className="settings-label">
-            Estilo / enfoque del CV
-            <select
-              name="cvStyle"
-              value={settings.cvStyle}
+          <div className="input-group">
+            <label>Estilo / Enfoque</label>
+            <select 
+              name="cvStyle" 
+              value={settings.cvStyle} 
               onChange={handleChange}
             >
-              <option value="ats">Compatibilidad ATS (filtros automatizados)</option>
-              <option value="balanceado">Balanceado (ATS + reclutador)</option>
-              <option value="visual">Más visual / creativo</option>
+              <option value="ats">Compatibilidad ATS</option>
+              <option value="balanceado">Balanceado</option>
+              <option value="visual">Creativo / Visual</option>
             </select>
-          </label>
-          <p className="settings-hint">
-            Esto se puede usar después para que la IA adapte el contenido y el
-            formato según lo que priorices.
-          </p>
+          </div>
         </div>
-
-        {/* Rubro / industria */}
-        <div className="settings-group">
-          <label className="settings-label">
-            Rubro / industria objetivo
-            <input
-              type="text"
-              name="targetIndustry"
-              value={settings.targetIndustry}
-              onChange={handleChange}
-              placeholder="Ej: IT, marketing digital, diseño gráfico, atención al cliente..."
-            />
-          </label>
-          <p className="settings-hint">
-            Usaremos este dato para que las sugerencias de la IA se adapten al
-            sector donde querés trabajar.
-          </p>
-        </div>
-
-        {/* Foto */}
-        <div className="settings-group settings-group-row">
-          <label className="settings-checkbox">
-            <input
-              type="checkbox"
-              name="includePhoto"
-              checked={settings.includePhoto}
-              onChange={handleChange}
-            />
-            <span>Incluir foto en mis plantillas de CV</span>
-          </label>
-          <p className="settings-hint">
-            Dependiendo del país y el rubro, a veces es mejor con o sin foto.
-          </p>
-        </div>
-
-        {/* Tips UI */}
-        <div className="settings-group settings-group-row">
-          <label className="settings-checkbox">
-            <input
-              type="checkbox"
-              name="showTips"
-              checked={settings.showTips}
-              onChange={handleChange}
-            />
-            <span>Mostrar tips y recomendaciones dentro del generador</span>
-          </label>
-          <p className="settings-hint">
-            Si te resultan molestos los tips, podés desactivarlos.
-          </p>
-        </div>
-      </form>
+      </div>
     </section>
   );
 }
