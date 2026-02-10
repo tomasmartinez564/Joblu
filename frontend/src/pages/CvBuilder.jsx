@@ -101,10 +101,10 @@ function CvBuilder({ user, settings, onChangeSettings }) {
       // Backend devuelve { ..., data: { ...contenido... } }
       // Ajustamos según la estructura que guardamos
       if (data.data) {
-        setCvData(data.data);
+        setCvData({ ...emptyCv, ...data.data });
       } else {
         // Fallback por si la estructura es plana (depende de cómo guardaste)
-        setCvData(data);
+        setCvData({ ...emptyCv, ...data });
       }
     } catch (error) {
       console.error("Error cargando CV:", error);

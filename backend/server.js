@@ -21,9 +21,14 @@ const pdfParse = require("pdf-parse");
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Inicializar OpenAI
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "secreto_super_seguro_cambiar_en_env";
+
+
 
 // 📂 Configuración de carpetas y archivos estáticos
 const uploadDir = path.join(__dirname, "uploads");
@@ -237,16 +242,179 @@ app.get("/api/cvs", authenticateToken, async (req, res) => {
   res.json(cvs);
 });
 
+app.get("/api/cvs/:id", authenticateToken, async (req, res) => {
+  try {
+    const cv = await Cv.findOne({ _id: req.params.id, userId: req.user.id });
+    if (!cv) return res.status(404).json({ error: "CV no encontrado." });
+    res.json(cv);
+  } catch (err) {
+    res.status(500).json({ error: "Error al obtener el CV." });
+  }
+});
+
+// Configuración Multer para CVs (PDF/TXT)
+const cvStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, `cv-import-${uniqueSuffix}${path.extname(file.originalname)}`);
+  },
+});
+
+const uploadCv = multer({
+  storage: cvStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === "application/pdf" || file.mimetype === "text/plain") {
+      cb(null, true);
+    } else {
+      cb(new Error("Solo se permiten archivos PDF o de texto (.txt)."));
+    }
+  }
+});
+
+app.post("/api/cvs/import", authenticateToken, uploadCv.single("file"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "No hay archivo." });
+
+    let extractedText = "";
+
+    if (req.file.mimetype === "application/pdf") {
+      const dataBuffer = fs.readFileSync(req.file.path);
+      const pdfData = await pdfParse(dataBuffer);
+      extractedText = pdfData.text;
+    } else if (req.file.mimetype === "text/plain") {
+      extractedText = fs.readFileSync(req.file.path, "utf8");
+    }
+
+    // Default: todo al perfil
+    let parsedData = {
+      perfil: extractedText,
+      experiencias: "",
+      educacion: "",
+      habilidades: "",
+      idiomas: "",
+      proyectos: "",
+      otros: "",
+      // Contacto básico
+      nombre: "",
+      puesto: "",
+      email: "",
+      telefono: "",
+      ubicacion: "",
+      sitioWeb: "",
+      linkedin: "",
+      github: "",
+    };
+
+    // Intentar parsear con IA si hay key
+    if (process.env.OPENAI_API_KEY) {
+      try {
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: `Eres un experto en reclutamiento y análisis de CVs. Tu tarea es extraer la información del texto de un Currículum Vitae y organizarla en un objeto JSON estricto.
+              
+              El JSON debe tener EXACTAMENTE esta estructura:
+              {
+                "nombre": "Nombre completo detectado",
+                "puesto": "Puesto actual o título profesional detectado",
+                "email": "Email detectado",
+                "telefono": "Teléfono detectado",
+                "ubicacion": "Ciudad/País detectado",
+                "sitioWeb": "Sitio web personal detectado (o vacío)",
+                "linkedin": "URL de LinkedIn detectada (o vacío)",
+                "github": "URL de GitHub detectada (o vacío)",
+                "perfil": "Resumen profesional o perfil (string)",
+                "experiencias": "Lista de experiencias laborales (formateado como texto con saltos de línea, no array)",
+                "educacion": "Lista de educación (formateado como texto con saltos de línea)",
+                "habilidades": "Lista de habilidades (texto)",
+                "idiomas": "Lista de idiomas (texto)",
+                "proyectos": "Lista de proyectos (texto)",
+                "otros": "Otra información relevante (texto)"
+              }
+              
+              Si no encuentras información para un campo, déjalo como string vacío "".
+              Responde SOLO con el JSON, sin markdown ni explicaciones adicionales.`
+            },
+            {
+              role: "user",
+              content: `Analiza este CV y extrae los datos en JSON:\n\n${extractedText.substring(0, 15000)}` // Limite caracteres por si acaso
+            }
+          ],
+          response_format: { type: "json_object" }
+        });
+
+        const rawJson = completion.choices[0].message.content;
+        parsedData = JSON.parse(rawJson);
+        console.log("✅ CV parseado con IA exitosamente");
+
+      } catch (aiError) {
+        console.error("❌ Error parseando CV con IA:", aiError);
+        // Fallback: se queda con el extractedText en 'perfil'
+      }
+    }
+
+    // Crear el CV con los datos (ya sea parseados o raw)
+    const newCv = new Cv({
+      userId: req.user.id,
+      title: req.file.originalname,
+      puesto: parsedData.puesto || "",
+      data: parsedData
+    });
+
+    await newCv.save();
+
+    // Eliminar archivo temporal
+    try {
+      fs.unlinkSync(req.file.path);
+    } catch (e) { console.error("Error eliminando archivo temporal:", e); }
+
+    res.status(201).json(newCv);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error al importar el CV." });
+  }
+});
+
 app.post("/api/cvs", authenticateToken, async (req, res) => {
   const newCv = new Cv({ userId: req.user.id, ...req.body });
   await newCv.save();
   res.status(201).json(newCv);
 });
 
+app.put("/api/cvs/:id", authenticateToken, async (req, res) => {
+  try {
+    const updatedCv = await Cv.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.id },
+      req.body,
+      { new: true }
+    );
+    if (!updatedCv) return res.status(404).json({ error: "CV no encontrado." });
+    res.json(updatedCv);
+  } catch (err) {
+    res.status(500).json({ error: "Error al actualizar el CV." });
+  }
+});
+
+app.delete("/api/cvs/:id", authenticateToken, async (req, res) => {
+  try {
+    const deletedCv = await Cv.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
+    if (!deletedCv) return res.status(404).json({ error: "CV no encontrado." });
+    res.json({ message: "CV eliminado correctamente." });
+  } catch (err) {
+    res.status(500).json({ error: "Error al eliminar el CV." });
+  }
+});
+
 // ====================
 // 🤖 IA CV (OpenAI)
 // ====================
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// 'openai' ya está inicializado arriba
+
 const aiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
 
 app.post("/api/optimizar-cv", aiLimiter, async (req, res) => {
@@ -285,6 +453,16 @@ app.get("/api/jobs", async (req, res) => {
   }
   const jobs = await Job.find(query).sort({ publishedAt: -1 }).limit(50);
   res.json(jobs);
+});
+
+app.get("/api/jobs/:id", async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id);
+    if (!job) return res.status(404).json({ error: "Empleo no encontrado" });
+    res.json(job);
+  } catch (err) {
+    res.status(500).json({ error: "Error al obtener empleo" });
+  }
 });
 
 // ====================
