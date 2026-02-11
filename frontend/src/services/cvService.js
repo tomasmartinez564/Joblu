@@ -92,6 +92,28 @@ const cvService = {
         if (!response.ok) throw new Error("Error al eliminar el CV");
         return await response.json();
     },
+
+    // Optimizar CV con IA
+    optimize: async ({ section, content, jobDescription, language, targetIndustry, tone, goal }) => {
+        const response = await fetch(`${API_BASE_URL}/api/optimizar-cv`, {
+            method: "POST",
+            headers: cvService.getAuthHeaders(),
+            body: JSON.stringify({
+                section,
+                content,
+                jobDescription,
+                language,
+                targetIndustry,
+                tone,
+                goal
+            }),
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || "Error al conectar con la IA");
+        }
+        return await response.json();
+    },
 };
 
 export default cvService;

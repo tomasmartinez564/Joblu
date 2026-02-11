@@ -73,6 +73,10 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   const [saveSuccess, setSaveSuccess] = useState("");
   const [isSaving, setIsSaving] = useState(false); // Estado para evitar doble click
 
+  // 🧠 Estados extra para IA mejorada
+  const [aiTone, setAiTone] = useState("Professional");
+  const [aiGoal, setAiGoal] = useState("improve"); // improve, fix, keywords, shorter
+
   // Tutorial guiado (onboarding)
   const [tutorialActivo, setTutorialActivo] = useState(false);
   const [pasoTutorial, setPasoTutorial] = useState(0);
@@ -285,28 +289,18 @@ function CvBuilder({ user, settings, onChangeSettings }) {
     setAiSuggestion("");
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/optimizar-cv`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          section: aiSection,
-          content: cvData[aiSection],
-          jobDescription: jobDesc,
-          language: cvLanguage,
-          targetIndustry,
-        }),
+      // Usamos el nuevo método optimize del servicio
+      const data = await cvService.optimize({
+        section: aiSection,
+        content: cvData[aiSection],
+        jobDescription: jobDesc,
+        language: cvLanguage,
+        targetIndustry,
+        tone: aiTone,
+        goal: aiGoal
       });
 
-      const text = await response.text();
-      console.log("📩 Respuesta cruda del backend:", response.status, text);
-
-      if (!response.ok) {
-        throw new Error(`Respuesta no OK del servidor: ${response.status}`);
-      }
-
-      const data = JSON.parse(text);
+      // cvService.optimize ya devuelve el JSON parseado
 
       if (!data.suggestion) {
         throw new Error("La respuesta no contiene 'suggestion'");
@@ -340,6 +334,15 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   const closeAiPanel = () => {
     if (aiLoading) return;
     setAiOpen(false);
+  };
+
+  // Función para abrir la IA desde el botón "Mejorar" de cada sección
+  const handleOpenAiForSection = (sectionName) => {
+    setAiSection(sectionName);
+    setAiOpen(true);
+    // Resetear estados si se quiere
+    setAiSuggestion("");
+    setAiError("");
   };
 
   const pasos = [
@@ -570,6 +573,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
             toggleSection={toggleSection}
             onPhotoChange={handlePhotoChange}
             onRemovePhoto={handleRemovePhoto}
+            onImprove={handleOpenAiForSection}
             refs={{ refTextareaPerfil }}
           />
 
@@ -815,6 +819,28 @@ function CvBuilder({ user, settings, onChangeSettings }) {
                     ></textarea>
                   </label>
 
+                  <div className="cv-ai-options">
+                    <label>
+                      {cvLanguage === "en" ? "Tone:" : "Tono:"}
+                      <select value={aiTone} onChange={(e) => setAiTone(e.target.value)}>
+                        <option value="Professional">{cvLanguage === "en" ? "Professional" : "Profesional"}</option>
+                        <option value="Creative">{cvLanguage === "en" ? "Creative" : "Creativo"}</option>
+                        <option value="Academic">{cvLanguage === "en" ? "Academic" : "Académico"}</option>
+                        <option value="Direct">{cvLanguage === "en" ? "Direct" : "Directo"}</option>
+                      </select>
+                    </label>
+
+                    <label>
+                      {cvLanguage === "en" ? "Goal:" : "Objetivo:"}
+                      <select value={aiGoal} onChange={(e) => setAiGoal(e.target.value)}>
+                        <option value="improve">{cvLanguage === "en" ? "Improve writing" : "Mejorar redacción"}</option>
+                        <option value="fix">{cvLanguage === "en" ? "Fix grammar" : "Corregir gramática"}</option>
+                        <option value="make_shorter">{cvLanguage === "en" ? "Make shorter" : "Hacer más corto"}</option>
+                        <option value="keywords">{cvLanguage === "en" ? "Optimize keywords" : "Optimizar palabras clave"}</option>
+                      </select>
+                    </label>
+                  </div>
+
                   <label>
                     {cvLanguage === "en"
                       ? "Which section do you want to improve?"
@@ -852,30 +878,27 @@ function CvBuilder({ user, settings, onChangeSettings }) {
                     disabled={aiLoading}
                   >
                     {aiLoading
-                      ? cvLanguage === "en"
-                        ? "Thinking..."
-                        : "Pensando..."
-                      : cvLanguage === "en"
-                        ? "Generate suggestion (mock)"
-                        : "Generar sugerencia (simulada)"}
+                      ? (cvLanguage === "en" ? "Thinking..." : "Pensando...")
+                      : (cvLanguage === "en" ? "Generate suggestion" : "Generar sugerencia")}
                   </button>
 
                   {aiError && <p className="cv-ai-error">{aiError}</p>}
 
                   {aiSuggestion && (
-                    <div className="cv-ai-suggestion">
-                      <h4>
-                        {cvLanguage === "en"
-                          ? "Suggested text"
-                          : "Texto sugerido"}
-                      </h4>
-                      <pre>{aiSuggestion}</pre>
+                    <div className="cv-ai-comparison">
+                      <div className="cv-ai-col">
+                        <h4>{cvLanguage === "en" ? "Original" : "Original"}</h4>
+                        <div className="cv-ai-box original">{cvData[aiSection]}</div>
+                      </div>
+                      <div className="cv-ai-col">
+                        <h4>{cvLanguage === "en" ? "Suggested" : "Sugerido"}</h4>
+                        <div className="cv-ai-box suggested">{aiSuggestion}</div>
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Footer fijo con el botón de aplicar */}
               <div className="cv-ai-footer">
                 <button
                   type="button"
@@ -883,9 +906,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
                   onClick={applyAiSection}
                   disabled={!aiSuggestion}
                 >
-                  {cvLanguage === "en"
-                    ? "Apply suggestion to CV"
-                    : "Aplicar sugerencia al CV"}
+                  {cvLanguage === "en" ? "Apply suggestion" : "Aplicar sugerencia"}
                 </button>
               </div>
             </div>

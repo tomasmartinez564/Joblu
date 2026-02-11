@@ -8,6 +8,7 @@ function CvForm({
     toggleSection,
     onPhotoChange,
     onRemovePhoto,
+    onImprove,
     refs = {},
 }) {
     const { cvLanguage = "es", includePhoto = true } = settings;
@@ -171,6 +172,16 @@ function CvForm({
             <div className="cv-form-sectionHeader">
                 <h3 className="cv-form-sectionTitle">
                     {cvLanguage === "en" ? "Professional profile" : "Perfil profesional"}
+                    {onImprove && (
+                        <button
+                            type="button"
+                            className="cv-improve-btn animated"
+                            onClick={() => onImprove("perfil")}
+                            title={cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
+                        >
+                            ✨
+                        </button>
+                    )}
                 </h3>
                 <button
                     type="button"
@@ -203,6 +214,16 @@ function CvForm({
             <div className="cv-form-sectionHeader">
                 <h3 className="cv-form-sectionTitle">
                     {cvLanguage === "en" ? "Work experience" : "Experiencia laboral"}
+                    {onImprove && (
+                        <button
+                            type="button"
+                            className="cv-improve-btn animated"
+                            onClick={() => onImprove("experiencias")}
+                            title={cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
+                        >
+                            ✨
+                        </button>
+                    )}
                 </h3>
                 <button
                     type="button"
@@ -239,6 +260,16 @@ Empresa X · Desarrollador Frontend · 2023 - Actualidad
             <div className="cv-form-sectionHeader">
                 <h3 className="cv-form-sectionTitle">
                     {cvLanguage === "en" ? "Education" : "Educación"}
+                    {onImprove && (
+                        <button
+                            type="button"
+                            className="cv-improve-btn animated"
+                            onClick={() => onImprove("educacion")}
+                            title={cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
+                        >
+                            ✨
+                        </button>
+                    )}
                 </h3>
                 <button
                     type="button"
@@ -271,6 +302,16 @@ Universidad X · Tecnicatura en Desarrollo Web · 2022 - Actualidad`
             <div className="cv-form-sectionHeader">
                 <h3 className="cv-form-sectionTitle">
                     {cvLanguage === "en" ? "Skills" : "Habilidades"}
+                    {onImprove && (
+                        <button
+                            type="button"
+                            className="cv-improve-btn animated"
+                            onClick={() => onImprove("habilidades")}
+                            title={cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
+                        >
+                            ✨
+                        </button>
+                    )}
                 </h3>
                 <button
                     type="button"
@@ -304,6 +345,16 @@ Universidad X · Tecnicatura en Desarrollo Web · 2022 - Actualidad`
             <div className="cv-form-sectionHeader">
                 <h3 className="cv-form-sectionTitle">
                     {cvLanguage === "en" ? "Languages" : "Idiomas"}
+                    {onImprove && (
+                        <button
+                            type="button"
+                            className="cv-improve-btn animated"
+                            onClick={() => onImprove("idiomas")}
+                            title={cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
+                        >
+                            ✨
+                        </button>
+                    )}
                 </h3>
                 <button
                     type="button"
@@ -334,6 +385,16 @@ Universidad X · Tecnicatura en Desarrollo Web · 2022 - Actualidad`
             <div className="cv-form-sectionHeader">
                 <h3 className="cv-form-sectionTitle">
                     {cvLanguage === "en" ? "Projects" : "Proyectos"}
+                    {onImprove && (
+                        <button
+                            type="button"
+                            className="cv-improve-btn animated"
+                            onClick={() => onImprove("proyectos")}
+                            title={cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
+                        >
+                            ✨
+                        </button>
+                    )}
                 </h3>
                 <button
                     type="button"
@@ -370,6 +431,16 @@ Proyecto portafolio personal · React · 2024
                     {cvLanguage === "en"
                         ? "Additional information"
                         : "Información adicional"}
+                    {onImprove && (
+                        <button
+                            type="button"
+                            className="cv-improve-btn animated"
+                            onClick={() => onImprove("otros")}
+                            title={cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
+                        >
+                            ✨
+                        </button>
+                    )}
                 </h3>
                 <button
                     type="button"

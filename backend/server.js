@@ -418,22 +418,48 @@ app.delete("/api/cvs/:id", authenticateToken, async (req, res) => {
 const aiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
 
 app.post("/api/optimizar-cv", aiLimiter, async (req, res) => {
-  const { section, content, language, tone, jobDescription } = req.body;
+  const { section, content, language, tone, goal, jobDescription } = req.body;
 
   if (!process.env.OPENAI_API_KEY) {
-    return res.json({ suggestion: `[Simulado] Versión mejorada de: ${content}` });
+    return res.json({ suggestion: `[Simulado] Versión mejorada (${tone}/${goal}) de: ${content}` });
   }
 
   try {
+    let systemPrompt = `Eres un experto en RRHH y redacción de CVs de alto impacto. 
+    Tu tarea es mejorar el texto proporcionado para que destaque ante los reclutadores.
+    Idioma de salida: ${language === 'en' ? 'Inglés' : 'Español'}.
+    Tono: ${tone || 'Profesional'}.`;
+
+    let userPrompt = `Texto original (${section}): "${content}".`;
+
+    if (jobDescription) {
+      userPrompt += `\n\nContexto del puesto al que se aplica: "${jobDescription}".`;
+    }
+
+    // Objetivos específicos
+    if (goal === 'fix') {
+      userPrompt += "\n\nObjetivo: Corregir errores gramaticales y ortográficos, manteniendo el contenido original.";
+    } else if (goal === 'make_shorter') {
+      userPrompt += "\n\nObjetivo: Resumir y hacer el texto más conciso y directo, eliminando redundancias.";
+    } else if (goal === 'keywords') {
+      userPrompt += "\n\nObjetivo: Enriquecer el texto integrando palabras clave relevantes del puesto (si se proporcionó), o keywords estándar de la industria.";
+    } else {
+      // Default: improve
+      userPrompt += "\n\nObjetivo: Mejorar la redacción para que suene más profesional, orientado a logros y con mayor impacto.";
+    }
+
+    userPrompt += "\n\nIMPORTANTE: Devuelve SOLAMENTE el texto mejorado. No incluyas explicaciones, ni comillas, ni introducciones.";
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: `Eres un experto en HR. Tono: ${tone || 'Profesional'}.` },
-        { role: "user", content: `Optimiza esta sección de CV (${section}) en ${language || 'es'}: ${content}. Contexto puesto: ${jobDescription}` }
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
       ],
     });
     res.json({ suggestion: completion.choices[0].message.content.trim() });
   } catch (err) {
+    console.error("Error OpenAI:", err);
     res.status(500).json({ error: "Error con la IA." });
   }
 });
