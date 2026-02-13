@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useToast } from "../context/ToastContext";
 import "../styles/postdetail.css";
 import API_BASE_URL from "../config/api";
+import { formatDate } from "../utils/dateUtils";
 
 
 const STORAGE_KEY = "joblu_liked_posts";
@@ -18,6 +20,7 @@ const getInitialLikedPosts = () => {
 function PostDetail({ user }) {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToast } = useToast();
 
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,10 +28,7 @@ function PostDetail({ user }) {
   const [deleting, setDeleting] = useState(false);
 
   const [commentContent, setCommentContent] = useState("");
-  const [commentError, setCommentError] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
-
-  const [actionError, setActionError] = useState("");
 
   const [likedPosts, setLikedPosts] = useState(() => getInitialLikedPosts());
 
@@ -58,33 +58,26 @@ function PostDetail({ user }) {
     fetchPost();
   }, [id]);
 
-  const formatDate = (isoString) => {
-    if (!isoString) return "";
-    const date = new Date(isoString);
-    return date.toLocaleString("es-AR", {
-      dateStyle: "short",
-      timeStyle: "short",
-    });
-  };
-
   const canDelete =
     user && post && post.authorEmail && user.email && user.email === post.authorEmail;
 
   const handleDelete = async () => {
     if (!window.confirm("¿Seguro que querés eliminar este post?")) return;
 
-    setActionError("");
-
     setDeleting(true);
     try {
       const res = await fetch(`${API_BASE_URL}/api/community/posts/${id}`, {
         method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("joblu_token")}`
+        }
       });
       if (!res.ok) throw new Error("No se pudo borrar el post.");
+      addToast("Post eliminado correctamente", "success");
       navigate("/comunidad");
     } catch (err) {
       console.error(err);
-      setActionError("Hubo un problema al borrar el post.");
+      addToast("Hubo un problema al borrar el post.", "error");
     } finally {
       setDeleting(false);
     }
@@ -92,10 +85,9 @@ function PostDetail({ user }) {
 
   const handleAddComment = async (e) => {
     e.preventDefault();
-    setCommentError("");
 
     if (!commentContent.trim()) {
-      setCommentError("Escribí un comentario antes de publicar.");
+      addToast("Escribí un comentario antes de publicar.", "info");
       return;
     }
 
@@ -109,7 +101,10 @@ function PostDetail({ user }) {
         `${API_BASE_URL}/api/community/posts/${id}/comments`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("joblu_token")}`
+          },
           body: JSON.stringify({
             authorName,
             authorEmail,
@@ -123,18 +118,14 @@ function PostDetail({ user }) {
         throw new Error(errorData.error || "No se pudo agregar el comentario.");
       }
 
-      const newComment = await res.json();
-
-      setPost((prev) =>
-        prev
-          ? { ...prev, comments: [...(prev.comments || []), newComment] }
-          : prev
-      );
+      const updatedPost = await res.json();
+      setPost(updatedPost);
 
       setCommentContent("");
+      addToast("Comentario agregado", "success");
     } catch (err) {
       console.error(err);
-      setCommentError(err.message || "Hubo un problema al comentar.");
+      addToast(err.message || "Hubo un problema al comentar.", "error");
     } finally {
       setCommentLoading(false);
     }
@@ -142,8 +133,6 @@ function PostDetail({ user }) {
 
   const handleToggleLike = async () => {
     if (!post) return;
-
-    setActionError("");
 
     const alreadyLiked = likedPosts.includes(post._id);
     const action = alreadyLiked ? "unlike" : "like";
@@ -153,7 +142,10 @@ function PostDetail({ user }) {
         `${API_BASE_URL}/api/community/posts/${post._id}/like`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("joblu_token")}`
+          },
           body: JSON.stringify({ action }),
         }
       );
@@ -175,7 +167,7 @@ function PostDetail({ user }) {
       );
     } catch (err) {
       console.error(err);
-      setActionError("Hubo un problema al actualizar el like.");
+      addToast("Hubo un problema al actualizar el like.", "error");
     }
 
   };
@@ -233,10 +225,6 @@ function PostDetail({ user }) {
         </span>
       </div>
 
-      {actionError && (
-        <p className="postdetail-action-error">{actionError}</p>
-      )}
-
       {/* Contenido principal del post */}
       <div className="postdetail-content">
         {post.content}
@@ -271,12 +259,7 @@ function PostDetail({ user }) {
                     {c.authorName || "Usuario anónimo"}
                   </span>
                   <span className="postdetail-comment-meta">
-                    {c.createdAt
-                      ? new Date(c.createdAt).toLocaleString("es-AR", {
-                        dateStyle: "short",
-                        timeStyle: "short",
-                      })
-                      : ""}
+                    {formatDate(c.createdAt)}
                   </span>
                 </p>
                 <p className="postdetail-comment-body">{c.content}</p>
@@ -290,12 +273,6 @@ function PostDetail({ user }) {
           onSubmit={handleAddComment}
           className="community-form community-form--compact"
         >
-          {commentError && (
-            <p className="community-error-text">
-              {commentError}
-            </p>
-          )}
-
           <textarea
             placeholder="Escribí tu comentario..."
             value={commentContent}

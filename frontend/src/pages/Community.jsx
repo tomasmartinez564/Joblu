@@ -3,6 +3,17 @@ import { Link } from "react-router-dom";
 import { useToast } from "../context/ToastContext"; // 🔔 Importamos el hook
 import API_BASE_URL from "../config/api";
 import "../styles/community.css";
+import { formatDate } from "../utils/dateUtils";
+
+// Categorías disponibles
+const CATEGORIES = [
+  "General",
+  "Consejos CV",
+  "Entrevistas",
+  "Networking",
+  "Ofertas Laborales",
+  "Dudas Técnicas"
+];
 
 function Community({ user }) {
   const [posts, setPosts] = useState([]);
@@ -11,7 +22,13 @@ function Community({ user }) {
   // States para el formulario
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [category, setCategory] = useState("General");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // States para comentarios (mapa pid -> booleano/texto)
+  const [openComments, setOpenComments] = useState({});
+  const [commentText, setCommentText] = useState({});
+  const [submittingComment, setSubmittingComment] = useState({});
 
   const { addToast } = useToast(); // 🔔 Instanciamos
   const isLogged = !!user;
@@ -44,6 +61,11 @@ function Community({ user }) {
       return;
     }
 
+    if (!isLogged) {
+      addToast("Debes iniciar sesión para publicar", "info");
+      return;
+    }
+
     setIsSubmitting(true);
     const authorName = user?.name || "Usuario anónimo";
     const authorEmail = user?.email || "";
@@ -51,12 +73,16 @@ function Community({ user }) {
     try {
       const res = await fetch(`${API_BASE_URL}/api/community/posts`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("joblu_token")}`
+        },
         body: JSON.stringify({
           authorName,
           authorEmail,
           title: title.trim(),
           content: content.trim(),
+          category
         }),
       });
 
@@ -67,6 +93,7 @@ function Community({ user }) {
       setPosts((prev) => [newPost, ...prev]); // Agregamos arriba
       setTitle("");
       setContent("");
+      setCategory("General");
       addToast("¡Post publicado con éxito! 🎉", "success");
 
     } catch (err) {
@@ -108,32 +135,70 @@ function Community({ user }) {
     );
 
     try {
-      // 2. Llamada al backend
       const res = await fetch(`${API_BASE_URL}/api/community/posts/${postId}/like`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        // body: JSON.stringify({ action: "like" }), // Ya no es necesario 'action'
       });
 
       if (!res.ok) throw new Error("Error al dar like");
 
       const updatedData = await res.json();
 
-      // 3. Confirmación con datos reales del server (opcional, por si la concurrencia)
-      // updatedData trae: { _id, likes, likedBy, ... }
       setPosts((prev) =>
         prev.map(p => p._id === postId ? { ...p, likedBy: updatedData.likedBy } : p)
       );
 
     } catch (error) {
-      // Revertir en caso de error
-      // Para simplificar, podríamos recargar los posts o deshacer localmente
-      // Aquí recargamos, aunque es brusco, asegura consistencia
       addToast("No pudimos registrar tu like", "error");
-      // idealmente rollback manual
+    }
+  };
+
+  // Toggle Comentarios
+  const toggleComments = (postId) => {
+    setOpenComments(prev => ({ ...prev, [postId]: !prev[postId] }));
+  };
+
+  // Manejar Comentario
+  const handleCommentSubmit = async (e, postId) => {
+    e.preventDefault();
+    if (!isLogged) {
+      addToast("Debes iniciar sesión para comentar", "info");
+      return;
+    }
+
+    const text = commentText[postId];
+    if (!text?.trim()) return;
+
+    setSubmittingComment(prev => ({ ...prev, [postId]: true }));
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/community/posts/${postId}/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("joblu_token")}`
+        },
+        body: JSON.stringify({ content: text, authorName: user.name })
+      });
+
+      if (!res.ok) throw new Error("Error al comentar");
+
+      const updatedPost = await res.json();
+
+      // Actualizar post en la lista
+      setPosts(prev => prev.map(p => p._id === postId ? updatedPost : p));
+
+      // Limpiar input
+      setCommentText(prev => ({ ...prev, [postId]: "" }));
+      addToast("Comentario agregado", "success");
+
+    } catch (err) {
+      addToast("Error al enviar comentario", "error");
+    } finally {
+      setSubmittingComment(prev => ({ ...prev, [postId]: false }));
     }
   };
 
@@ -145,16 +210,7 @@ function Community({ user }) {
     });
   };
 
-  const formatDate = (isoString) => {
-    if (!isoString) return "";
-    const date = new Date(isoString);
-    return date.toLocaleDateString("es-AR", {
-      day: "2-digit",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-  };
+
 
   return (
     <section className="community">
@@ -171,7 +227,7 @@ function Community({ user }) {
 
         {!isLogged && (
           <div className="community-alert-info">
-            💡 Publicarás como <strong>Usuario anónimo</strong>. <Link to="/login">Iniciá sesión</Link> para usar tu nombre.
+            💡 Para publicar necesitas <Link to="/login">iniciar sesión</Link>.
           </div>
         )}
 
@@ -182,8 +238,17 @@ function Community({ user }) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="community-input"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !isLogged}
           />
+
+          <select
+            className="community-input"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            disabled={isSubmitting || !isLogged}
+          >
+            {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+          </select>
 
           <textarea
             placeholder="Escribí acá tu consulta o aporte..."
@@ -191,13 +256,13 @@ function Community({ user }) {
             onChange={(e) => setContent(e.target.value)}
             rows={3}
             className="community-textarea community-input"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !isLogged}
           />
 
           <button
             type="submit"
-            className={`btn-joblu ${isSubmitting ? "btn-disabled" : ""}`}
-            disabled={isSubmitting}
+            className={`btn-joblu ${isSubmitting || !isLogged ? "btn-disabled" : ""}`}
+            disabled={isSubmitting || !isLogged}
           >
             {isSubmitting ? "Publicando..." : "Publicar Post"}
           </button>
@@ -219,24 +284,25 @@ function Community({ user }) {
         <div className="community-list">
           {posts.map((post) => (
             <article key={post._id} className="community-post">
-              <div className="post-main">
-                <Link to={`/comunidad/${post._id}`} className="community-post-title">
-                  {post.title}
-                </Link>
-
-                <p className="community-post-excerpt">
-                  {post.content.length > 140
-                    ? post.content.slice(0, 140) + "..."
-                    : post.content}
-                </p>
-
+              <div className="community-post-header">
+                <span className="community-category-badge">{post.category || "General"}</span>
                 <div className="community-post-meta">
                   <span>👤 {post.authorName || "Anónimo"}</span>
                   <span>📅 {formatDate(post.createdAt)}</span>
                 </div>
               </div>
 
-              {/* Footer de Acciones (Like y Compartir) */}
+              <div className="post-main">
+                <Link to={`/comunidad/${post._id}`} className="community-post-title">
+                  {post.title}
+                </Link>
+
+                <p className="community-post-excerpt">
+                  {post.content}
+                </p>
+              </div>
+
+              {/* Footer de Acciones */}
               <div className="post-actions">
                 <button
                   className={`action-btn ${user && post.likedBy?.includes(user.id) ? "liked" : ""}`}
@@ -253,12 +319,55 @@ function Community({ user }) {
 
                 <button
                   className="action-btn"
+                  onClick={() => toggleComments(post._id)}
+                  title="Comentarios"
+                >
+                  <span className="action-icon">💬</span>
+                  <span className="action-count">{post.comments?.length || 0}</span>
+                </button>
+
+                <button
+                  className="action-btn"
                   onClick={() => handleShare(post._id)}
                   title="Compartir"
                 >
                   <span className="action-icon">🔗</span>
                 </button>
               </div>
+
+              {/* Sección Comentarios */}
+              {openComments[post._id] && (
+                <div className="community-comments-section">
+                  <div className="comments-list">
+                    {post.comments?.length > 0 ? (
+                      post.comments.map((comment, idx) => (
+                        <div key={idx} className="comment-item">
+                          <strong>{comment.authorName}</strong>: {comment.content}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="no-comments">Sé el primero en comentar.</p>
+                    )}
+                  </div>
+
+                  {isLogged && (
+                    <form onSubmit={(e) => handleCommentSubmit(e, post._id)} className="comment-form">
+                      <input
+                        type="text"
+                        placeholder="Escribe un comentario..."
+                        className="community-input comment-input"
+                        value={commentText[post._id] || ""}
+                        onChange={(e) => setCommentText(prev => ({ ...prev, [post._id]: e.target.value }))}
+                        disabled={submittingComment[post._id]}
+                      />
+                      <button type="submit" className="btn-comment" disabled={submittingComment[post._id]}>
+                        Enviar
+                      </button>
+                    </form>
+                  )}
+                </div>
+              )}
+
             </article>
           ))}
         </div>

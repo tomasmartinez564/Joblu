@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "../styles/jobs.css";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+import API_BASE_URL from "../config/api";
 
 function Jobs() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,7 +19,7 @@ function Jobs() {
   const fetchJobs = async (term = "") => {
     setIsLoading(true);
     try {
-      const url = term 
+      const url = term
         ? `${API_BASE_URL}/api/jobs?search=${encodeURIComponent(term)}`
         : `${API_BASE_URL}/api/jobs`;
 
@@ -173,7 +173,7 @@ function Jobs() {
 
       <div className="jobs-layout">
         <aside className="jobs-filters">
-          
+
           {/* Filtro Tipo de Empleo (Recuperado y Mapeado) */}
           <details className="jobs-filter-section" open>
             <summary className="jobs-filter-title">Tipo de Contrato</summary>
@@ -210,46 +210,46 @@ function Jobs() {
 
         <section className="jobs-list-area">
           <div className="jobs-list">
-            
+
             {/* SKELETON LOADER (Mejora UX) */}
             {isLoading ? (
-               <>
-                 <JobSkeleton />
-                 <JobSkeleton />
-                 <JobSkeleton />
-               </>
+              <>
+                <JobSkeleton />
+                <JobSkeleton />
+                <JobSkeleton />
+              </>
             ) : filteredJobs.length === 0 ? (
               <div className="jobs-empty-state">
-                <div style={{fontSize: "3rem"}}>🔍</div>
+                <div style={{ fontSize: "3rem" }}>🔍</div>
                 <h3>No encontramos resultados</h3>
                 <p>Intenta ajustar los filtros o buscar algo más general.</p>
-                <button onClick={() => {setSelectedTags([]); setSearchTerm(""); setActiveTab("all")}} style={{marginTop: "1rem", padding: "0.5rem 1rem", cursor: "pointer"}}>
+                <button onClick={() => { setSelectedTags([]); setSearchTerm(""); setActiveTab("all") }} style={{ marginTop: "1rem", padding: "0.5rem 1rem", cursor: "pointer" }}>
                   Limpiar filtros
                 </button>
               </div>
             ) : (
               filteredJobs.map((job) => {
                 const isNew = getDaysAgo(job.publishedAt) <= 3;
-                
+
                 return (
                   <article key={job._id} className="job-card">
                     <header className="job-card-header">
                       <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
                         {job.logo ? (
-                          <img 
-                            src={job.logo} 
-                            alt={job.company} 
-                            className="job-card-logo" 
+                          <img
+                            src={job.logo}
+                            alt={job.company}
+                            className="job-card-logo"
                             style={{ width: "48px", height: "48px", objectFit: "contain", borderRadius: "8px", background: "#fff", border: "1px solid #eee" }}
-                            onError={(e) => e.target.style.display = 'none'} 
+                            onError={(e) => e.target.style.display = 'none'}
                           />
                         ) : (
                           <div className="job-card-logo-placeholder">🏢</div>
                         )}
                         <div>
-                          <div style={{display: "flex", alignItems: "center", gap: "0.5rem"}}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                             <h2 className="job-card-title">{job.title}</h2>
-                            {isNew && <span style={{fontSize: "0.7rem", background: "#fee2e2", color: "#b91c1c", padding: "2px 6px", borderRadius: "4px", fontWeight: "bold"}}>NUEVO</span>}
+                            {isNew && <span style={{ fontSize: "0.7rem", background: "#fee2e2", color: "#b91c1c", padding: "2px 6px", borderRadius: "4px", fontWeight: "bold" }}>NUEVO</span>}
                           </div>
                           <p className="job-card-company">{job.company}</p>
                         </div>
@@ -266,14 +266,14 @@ function Jobs() {
                     <div className="job-card-meta">
                       📍 {job.location || "Remoto"} &nbsp;•&nbsp; 💼 {formatJobType(job.type)}
                     </div>
-                    
-                    <div 
+
+                    <div
                       className="job-card-description"
                       style={{ maxHeight: "4.5em", overflow: "hidden", textOverflow: "ellipsis" }}
-                      dangerouslySetInnerHTML={{ 
-                        __html: job.description 
-                          ? job.description.substring(0, 180) + "..." 
-                          : "Ver detalles..." 
+                      dangerouslySetInnerHTML={{
+                        __html: job.description
+                          ? job.description.substring(0, 180) + "..."
+                          : "Ver detalles..."
                       }}
                     />
 
@@ -283,16 +283,16 @@ function Jobs() {
                           Ver detalles
                         </Link>
                         {/* Botón Compartir Mejorado */}
-                        <button 
-                          className="job-card-icon-btn" 
+                        <button
+                          className="job-card-icon-btn"
                           onClick={() => handleShare(job._id)}
                           title="Copiar enlace"
-                          style={{border: "none", background: "transparent", cursor: "pointer", fontSize: "1.2rem"}}
+                          style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: "1.2rem" }}
                         >
                           {copiedId === job._id ? "✅" : "🔗"}
                         </button>
                       </div>
-                      
+
                       <Link to={`/jobs/${job._id}`} className="job-card-cta">
                         Ver oferta
                       </Link>
@@ -311,15 +311,15 @@ function Jobs() {
 // Pequeño componente visual para cuando carga
 function JobSkeleton() {
   return (
-    <div className="job-card" style={{opacity: 0.7}}>
-      <div style={{display: "flex", gap: "1rem", marginBottom: "1rem"}}>
-        <div style={{width: 48, height: 48, background: "#e5e7eb", borderRadius: 8}}></div>
-        <div style={{flex: 1}}>
-          <div style={{width: "60%", height: 20, background: "#e5e7eb", marginBottom: 8, borderRadius: 4}}></div>
-          <div style={{width: "40%", height: 16, background: "#e5e7eb", borderRadius: 4}}></div>
+    <div className="job-card" style={{ opacity: 0.7 }}>
+      <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
+        <div style={{ width: 48, height: 48, background: "#e5e7eb", borderRadius: 8 }}></div>
+        <div style={{ flex: 1 }}>
+          <div style={{ width: "60%", height: 20, background: "#e5e7eb", marginBottom: 8, borderRadius: 4 }}></div>
+          <div style={{ width: "40%", height: 16, background: "#e5e7eb", borderRadius: 4 }}></div>
         </div>
       </div>
-      <div style={{width: "100%", height: 60, background: "#f3f4f6", borderRadius: 4}}></div>
+      <div style={{ width: "100%", height: 60, background: "#f3f4f6", borderRadius: 4 }}></div>
     </div>
   );
 }

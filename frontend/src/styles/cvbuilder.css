@@ -736,3 +736,15 @@
   background-size: 200% 200%;
   animation: shine 3s ease infinite;
 }
+
+/* ===========================
+   🖨️ PDF Generation Helpers
+   =========================== */
+
+/* Evita que las secciones se corten a la mitad en el PDF */
+.cv-preview-section,
+.cv-preview-contact,
+.cv-preview-header {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}

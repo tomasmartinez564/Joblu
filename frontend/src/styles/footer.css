@@ -1,5 +1,5 @@
 .app-footer {
-  background-color: var(--joblu-primary); /* Using primary color for a strong footer */
+  background: linear-gradient(180deg, var(--joblu-primary), var(--joblu-secondary));
   color: var(--joblu-surface);
   padding: 3rem 1rem 1.5rem;
   margin-top: auto; /* Push to bottom if content is short */

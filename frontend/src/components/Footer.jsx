@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa';
 
 export default function Footer() {
     return (
@@ -37,12 +38,10 @@ export default function Footer() {
                 <div className="footer-section">
                     <h4 className="footer-title">Síguenos</h4>
                     <div className="footer-socials">
-                        {/* Using text/emojis as placeholders for icons if libraries aren't available, 
-                or simple styled divs. For now simple placeholders. */}
-                        <a href="#" className="social-icon" aria-label="Facebook">F</a>
-                        <a href="#" className="social-icon" aria-label="Twitter">X</a>
-                        <a href="#" className="social-icon" aria-label="Instagram">I</a>
-                        <a href="#" className="social-icon" aria-label="LinkedIn">L</a>
+                        <a href="#" className="social-icon" aria-label="Facebook"><FaFacebook /></a>
+                        <a href="#" className="social-icon" aria-label="Twitter"><FaTwitter /></a>
+                        <a href="#" className="social-icon" aria-label="Instagram"><FaInstagram /></a>
+                        <a href="#" className="social-icon" aria-label="LinkedIn"><FaLinkedin /></a>
                     </div>
                 </div>
             </div>

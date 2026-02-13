@@ -68,3 +68,14 @@ h3, h4, .settings-subtitle, .account-subtitle { font-family: var(--font-subtitle
 
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; }
+
+@keyframes joblu-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

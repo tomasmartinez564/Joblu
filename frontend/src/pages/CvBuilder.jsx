@@ -101,18 +101,70 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
   const loadCvForEdit = async (cvId) => {
     try {
-      const data = await cvService.getById(cvId);
-      // Backend devuelve { ..., data: { ...contenido... } }
-      // Ajustamos según la estructura que guardamos
-      if (data.data) {
-        setCvData({ ...emptyCv, ...data.data });
-      } else {
-        // Fallback por si la estructura es plana (depende de cómo guardaste)
-        setCvData({ ...emptyCv, ...data });
-      }
+      const response = await cvService.getById(cvId);
+
+      // El backend devuelve el objeto CV completo: { _id, title, puesto, data: {...}, ... }
+      // La propiedad 'data' contiene los campos del CV (perfil, experiencias, etc.)
+      const cvContent = response.data || {};
+
+      // Fusionamos con emptyCv para garantizar que existan todas las claves
+      // Si cvContent está vacío o le faltan claves, emptyCv las suple.
+      // Si response.data no existe, usamos response directamente por si acaso (fallback legacy)
+      const mergedData = { ...emptyCv, ...(Object.keys(cvContent).length > 0 ? cvContent : response) };
+
+      // Nos aseguramos de que data.foto no sea undefined/null para evitar errores en el input file
+      if (!mergedData.foto) mergedData.foto = "";
+
+      // Si el CV tiene título/puesto en la raíz, los sincronizamos si faltan dentro de data
+      if (!mergedData.nombre && response.title) mergedData.nombre = response.title;
+      if (!mergedData.puesto && response.puesto) mergedData.puesto = response.puesto;
+
+
+      // Sanitización: Convertir todo a string legible para el usuario
+      Object.keys(mergedData).forEach(key => {
+        const val = mergedData[key];
+
+        if (typeof val === 'object' && val !== null) {
+          // Si es array (común en experiencias, educación, skills)
+          if (Array.isArray(val)) {
+            mergedData[key] = val.map(item => {
+              if (typeof item === 'object' && item !== null) {
+                // Intentar formatear objetos conocidos (Experiencia, Educación)
+                // Buscamos campos comunes en español o inglés
+                const titulo = item.puesto || item.title || item.role || item.position || item.titulo || item.degree || item.name || item.nombre || "";
+                const entidad = item.empresa || item.company || item.institucion || item.institution || item.university || item.school || "";
+                const fecha = item.fecha || item.date || item.period || item.years || item.year || "";
+                const descripcion = item.descripcion || item.description || item.summary || item.details || "";
+
+                // Si encontramos al menos título o entidad, formateamos bonito
+                if (titulo || entidad) {
+                  let linea1 = [titulo, entidad, fecha].filter(Boolean).join(" · ");
+                  let bloque = linea1;
+                  if (descripcion) bloque += `\n${descripcion}`;
+                  return bloque;
+                }
+
+                // Si es un objeto genérico sin esas claves, stringify legible (sin corchetes si es posible)
+                return Object.values(item).join(" · ");
+              }
+              return String(item);
+            }).join('\n\n'); // Separar items con doble salto
+          } else {
+            // Si es objeto único
+            // Intentamos aplanar valores
+            mergedData[key] = Object.values(val).join("\n");
+          }
+        } else if (val === null || val === undefined) {
+          mergedData[key] = "";
+        } else {
+          // Primitivos a string
+          mergedData[key] = String(val);
+        }
+      });
+
+      setCvData(mergedData);
     } catch (error) {
       console.error("Error cargando CV:", error);
-      // Si falla, quizás redirigir o mostrar error
     }
   };
 
@@ -137,11 +189,12 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
     const element = cvRef.current;
     const opt = {
-      margin: 0,
+      margin: [10, 10], // 10mm margins for better layout
       filename: `${cvData.nombre || "mi_cv"}.pdf`,
       image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2 },
+      html2canvas: { scale: 2, useCORS: true },
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      pagebreak: { mode: ["avoid-all", "css", "legacy"] },
     };
 
     html2pdf().set(opt).from(element).save();
@@ -602,7 +655,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
               className="cv-action-btn ai-btn"
               onClick={() => setAiOpen(true)}
             >
-              💡 {cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
+              ✨ {cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
             </button>
 
             {(saveError || saveSuccess) && (
