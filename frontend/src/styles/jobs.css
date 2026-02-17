@@ -116,6 +116,31 @@
 .job-card-time {
   font-size: 0.85rem;
   color: var(--joblu-text-muted);
+  white-space: nowrap; /* Evita que la fecha se rompa en dos líneas si es muy larga */
+}
+
+/* LOGO DE LA EMPRESA */
+.job-card-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain; /* Mantiene la proporción */
+  border-radius: 6px;
+  background: white; /* Fondo blanco por si el logo tiene transparencia */
+  padding: 2px;
+  border: 1px solid var(--joblu-border-soft);
+  flex-shrink: 0; /* Evita que el logo se aplaste */
+}
+
+.job-card-logo-placeholder {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eee;
+  border-radius: 6px;
+  font-size: 1.5rem;
+  flex-shrink: 0;
 }
 
 .job-card-meta {

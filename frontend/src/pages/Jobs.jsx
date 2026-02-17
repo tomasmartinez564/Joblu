@@ -180,7 +180,7 @@ function Jobs() {
 
       {/* --- Layout Principal --- */}
       <div className="jobs-layout">
-        
+
         {/* Columna: Filtros Laterales */}
         <aside className="jobs-filters">
           <details className="jobs-filter-section" open>
@@ -248,14 +248,13 @@ function Jobs() {
 
                     <div className="job-card-meta">📍 {job.location || "Remoto"} &nbsp;•&nbsp; 💼 {formatJobType(job.type)}</div>
 
-                    <div 
-                      className="job-card-description" 
-                      dangerouslySetInnerHTML={{ __html: job.description ? job.description.substring(0, 180) + "..." : "Ver detalles..." }} 
+                    <div
+                      className="job-card-description"
+                      dangerouslySetInnerHTML={{ __html: job.description ? job.description.substring(0, 180) + "..." : "Ver detalles..." }}
                     />
 
                     <div className="job-card-footer">
                       <div className="job-card-footer-left">
-                        <Link to={`/jobs/${job._id}`} className="job-card-detail-link">Ver detalles</Link>
                         <button className="job-card-icon-btn" onClick={() => handleShare(job._id)}>
                           {copiedId === job._id ? "✅" : "🔗"}
                         </button>
