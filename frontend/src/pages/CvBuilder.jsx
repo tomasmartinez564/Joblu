@@ -85,7 +85,21 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   const [pasoTutorial, setPasoTutorial] = useState(0);
   const [posicionPaso, setPosicionPaso] = useState(null);
 
-  // --- 6. Refs ---
+  // --- 6. Estados: Navegación por Pasos (Slides) ---
+  const [activeStep, setActiveStep] = useState(0);
+
+  const STEPS = [
+    { key: "datos", label: "Datos Personales" },
+    { key: "perfil", label: "Perfil Profesional" },
+    { key: "experiencias", label: "Experiencia Laboral" },
+    { key: "educacion", label: "Educación" },
+    { key: "habilidades", label: "Habilidades" },
+    { key: "idiomas", label: "Idiomas" },
+    { key: "proyectos", label: "Proyectos" },
+    { key: "otros", label: "Información Adicional" }
+  ];
+
+  // --- 7. Refs ---
   const cvRef = useRef(null);
   const refBtnConfiguracion = useRef(null);
   const refTextareaPerfil = useRef(null);
@@ -93,6 +107,8 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   const refVistaPrevia = useRef(null);
   const refTutorialModal = useRef(null);
   const pasoTutorialRef = useRef(pasoTutorial);
+
+  // ... (Efectos y lógica de carga se mantienen igual) ...
 
   // ==========================================
   // 🧠 LÓGICA DE CARGA Y PERSISTENCIA
@@ -113,7 +129,13 @@ function CvBuilder({ user, settings, onChangeSettings }) {
       if (!mergedData.nombre && response.title) mergedData.nombre = response.title;
       if (!mergedData.puesto && response.puesto) mergedData.puesto = response.puesto;
 
-      // Sanitización de objetos complejos a texto legible
+      // Sanitización simplificada (se mantiene la lógica existente)
+      // ... (código de sanitización omitido por brevedad, se asume que sigue igual) ...
+      // Nota: Si no incluimos la sanitización completa aquí, asegúrate de no borrarla si no se muestra en el original.
+      // Como replace_file_content reemplaza el bloque, debo asegurarme de incluir todo lo que estoy reemplazando.
+      // Voy a asumir que el bloque original llega hasta la línea 391. 
+      // Re-copiaré la lógica de sanitización para estar seguro.
+
       Object.keys(mergedData).forEach(key => {
         const val = mergedData[key];
         if (typeof val === 'object' && val !== null) {
@@ -185,6 +207,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   // ==========================================
   // ✨ LÓGICA DE INTELIGENCIA ARTIFICIAL
   // ==========================================
+  const [aiContent, setAiContent] = useState("");
 
   const handleAskAi = async () => {
     setAiLoading(true);
@@ -194,16 +217,22 @@ function CvBuilder({ user, settings, onChangeSettings }) {
     try {
       const data = await cvService.optimize({
         section: aiSection,
-        content: cvData[aiSection],
+        content: aiContent || cvData[aiSection], // Usar contenido específico o fallback al general
         jobDescription: jobDesc,
         language: cvLanguage,
         targetIndustry,
         tone: aiTone,
         goal: aiGoal
       });
+      // ... (rest of handleAskAi is same just ensure closing brace matches)
 
       if (!data.suggestion) throw new Error("La respuesta no contiene 'suggestion'");
-      setAiSuggestion(data.suggestion);
+
+      // Limpieza extra por si la IA devuelve "**Perfil**: Texto..."
+      let cleanSuggestion = data.suggestion.trim();
+      cleanSuggestion = cleanSuggestion.replace(/^\*\*.*?\*\*:?\s*/, "").replace(/^".*?"$/, "$1");
+
+      setAiSuggestion(cleanSuggestion);
     } catch (err) {
       setAiError(cvLanguage === "en" ? "There was a problem connecting to the AI." : "Hubo un problema al conectarse con la IA.");
     } finally {
@@ -217,8 +246,9 @@ function CvBuilder({ user, settings, onChangeSettings }) {
     setAiOpen(false);
   };
 
-  const handleOpenAiForSection = (sectionName) => {
+  const handleOpenAiForSection = (sectionName, currentContent = "") => {
     setAiSection(sectionName);
+    setAiContent(currentContent || cvData[sectionName] || ""); // Guardar contenido inicial
     setAiOpen(true);
     setAiSuggestion("");
     setAiError("");
@@ -293,6 +323,28 @@ function CvBuilder({ user, settings, onChangeSettings }) {
     setTutorialActivo(true);
     setPasoTutorial(0);
   }, [showTips]);
+
+  // ==========================================
+  // 🛠️ MANEJADORES DE NAVEGACIÓN (Slides)
+  // ==========================================
+  const handleNext = () => {
+    if (activeStep < STEPS.length - 1) {
+      setActiveStep(prev => prev + 1);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const handlePrev = () => {
+    if (activeStep > 0) {
+      setActiveStep(prev => prev - 1);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const handleGoToStep = (index) => {
+    setActiveStep(index);
+    window.scrollTo(0, 0);
+  };
 
   // ==========================================
   // 🛠️ MANEJADORES DE INTERFAZ (UI)
@@ -386,10 +438,39 @@ function CvBuilder({ user, settings, onChangeSettings }) {
           </div>
 
           <h2>Completa tu CV</h2>
+
+          {/* Indicador de Pasos */}
+          <div className="cv-steps-indicator">
+            <div className="steps-progress-bar">
+              <div
+                className="steps-progress-fill"
+                style={{ width: `${((activeStep + 1) / STEPS.length) * 100}%` }}
+              />
+            </div>
+            <p className="steps-text">
+              Paso {activeStep + 1} de {STEPS.length}: <strong>{STEPS[activeStep].label}</strong>
+            </p>
+          </div>
+
           {showTips && <div className="cv-settings-tip"><strong>Preferencias Joblu: </strong><span>{settingsSummary}</span></div>}
 
-          <CvForm cvData={cvData} onChange={handleChange} settings={settings} sectionsVisible={sectionsVisible} toggleSection={toggleSection} onPhotoChange={handlePhotoChange} onRemovePhoto={handleRemovePhoto} onImprove={handleOpenAiForSection} refs={{ refTextareaPerfil }} />
+          <CvForm
+            cvData={cvData}
+            onChange={handleChange}
+            settings={settings}
+            sectionsVisible={sectionsVisible}
+            onPhotoChange={handlePhotoChange}
+            onRemovePhoto={handleRemovePhoto}
+            onImprove={handleOpenAiForSection}
+            refs={{ refTextareaPerfil }}
+            activeStep={activeStep}
+            steps={STEPS}
+            onNext={handleNext}
+            onPrev={handlePrev}
+            onGoToStep={handleGoToStep}
+          />
 
+          {/* Botones de Acción Globales (Guardar/Descargar/IA) movidos al final o integrados en el paso final */}
           <div className="cv-actions">
             <button type="button" className="cv-action-btn save-btn" onClick={handleSave} disabled={isSaving} style={{ opacity: isSaving ? 0.7 : 1, cursor: isSaving ? "wait" : "pointer" }}>
               {isSaving ? "Guardando..." : (cvLanguage === "en" ? "Save CV" : "Guardar CV")}
@@ -464,8 +545,12 @@ function CvBuilder({ user, settings, onChangeSettings }) {
                   <button type="button" className="cv-ai-close" onClick={closeAiPanel}>✕</button>
                 </div>
                 <div className="cv-ai-body">
-                  <label>{cvLanguage === "en" ? "Job description:" : "Descripción del puesto:"}
-                    <textarea rows="4" value={jobDesc} onChange={(e) => setJobDesc(e.target.value)} placeholder="..." />
+                  <label>{cvLanguage === "en" ? "Text to improve:" : "Texto a mejorar:"}
+                    <textarea rows="6" value={aiContent} onChange={(e) => setAiContent(e.target.value)} placeholder={cvLanguage === "en" ? "Content..." : "Contenido..."} />
+                  </label>
+
+                  <label>{cvLanguage === "en" ? "Job description (optional):" : "Descripción del puesto (opcional):"}
+                    <textarea rows="3" value={jobDesc} onChange={(e) => setJobDesc(e.target.value)} placeholder={cvLanguage === "en" ? "Paste the job offer here..." : "Pegá la oferta laboral aquí..."} />
                   </label>
                   <div className="cv-ai-options">
                     <label>{cvLanguage === "en" ? "Tone:" : "Tono:"}
@@ -479,13 +564,13 @@ function CvBuilder({ user, settings, onChangeSettings }) {
                       </select>
                     </label>
                   </div>
-                  <button type="button" className="cv-ai-generate" onClick={handleAskAi} disabled={aiLoading}>
+                  <button type="button" className="cv-ai-generate" onClick={handleAskAi} disabled={aiLoading || !aiContent}>
                     {aiLoading ? "Pensando..." : "Generar sugerencia"}
                   </button>
                   {aiError && <p className="cv-ai-error">{aiError}</p>}
                   {aiSuggestion && (
                     <div className="cv-ai-comparison">
-                      <div className="cv-ai-col"><h4>Original</h4><div className="cv-ai-box original">{cvData[aiSection]}</div></div>
+                      <div className="cv-ai-col"><h4>Original</h4><div className="cv-ai-box original">{aiContent}</div></div>
                       <div className="cv-ai-col"><h4>Sugerido</h4><div className="cv-ai-box suggested">{aiSuggestion}</div></div>
                     </div>
                   )}
@@ -498,7 +583,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
           </>
         )}
       </section>
-    </div>
+    </div >
   );
 }
 

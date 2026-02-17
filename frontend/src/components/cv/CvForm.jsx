@@ -7,379 +7,187 @@ function CvForm({
     cvData,
     onChange,
     settings = {},
-    sectionsVisible,
-    toggleSection,
+    // sectionsVisible, // Ya no se usa para ocultar/mostrar secciones en acordeón
     onPhotoChange,
     onRemovePhoto,
     onImprove,
     refs = {},
+    activeStep,
+    steps,
+    onNext,
+    onPrev,
+    onGoToStep
 }) {
     const { cvLanguage = "es", includePhoto = true } = settings;
 
-    return (
-        <form className="cv-form">
-            
-            {/* --- 1. DATOS PERSONALES --- */}
-            <h3 className="cv-form-sectionTitle" id="contacto">Datos personales</h3>
+    // Helper para verificar si es el paso actual
+    const isStep = (key) => steps[activeStep].key === key;
 
+    const renderDatosPersonales = () => (
+        <div className="cv-form-slide fade-in">
+            <h3 className="cv-form-sectionTitle">Datos personales</h3>
             <div className="cv-form-group-inline">
                 <label>
                     {cvLanguage === "en" ? "Full name:" : "Nombre completo:"}
-                    <input
-                        type="text"
-                        name="nombre"
-                        value={cvData.nombre}
-                        onChange={onChange}
-                        placeholder={cvLanguage === "en" ? "e.g. Sofia Martinez" : "Ej: Sofía Martínez"}
-                    />
+                    <input type="text" name="nombre" value={cvData.nombre} onChange={onChange} placeholder={cvLanguage === "en" ? "e.g. Sofia Martinez" : "Ej: Sofía Martínez"} />
                 </label>
-
                 <label>
                     {cvLanguage === "en" ? "Job title / role:" : "Puesto o título profesional:"}
-                    <input
-                        type="text"
-                        name="puesto"
-                        value={cvData.puesto}
-                        onChange={onChange}
-                        placeholder={cvLanguage === "en" ? "e.g. Frontend Developer" : "Ej: Desarrolladora Frontend"}
-                    />
+                    <input type="text" name="puesto" value={cvData.puesto} onChange={onChange} placeholder={cvLanguage === "en" ? "e.g. Frontend Developer" : "Ej: Desarrolladora Frontend"} />
                 </label>
             </div>
-
             <div className="cv-form-group-inline">
                 <label>
                     Email:
-                    <input
-                        type="email"
-                        name="email"
-                        value={cvData.email}
-                        onChange={onChange}
-                        placeholder={cvLanguage === "en" ? "e.g. sofia.martinez@mail.com" : "Ej: sofi.martinez@mail.com"}
-                    />
+                    <input type="email" name="email" value={cvData.email} onChange={onChange} placeholder={cvLanguage === "en" ? "e.g. sofia.martinez@mail.com" : "Ej: sofi.martinez@mail.com"} />
                 </label>
-
                 <label>
                     {cvLanguage === "en" ? "Phone:" : "Teléfono:"}
-                    <input
-                        type="text"
-                        name="telefono"
-                        value={cvData.telefono}
-                        onChange={onChange}
-                        placeholder={cvLanguage === "en" ? "e.g. +54 9 11 0000-0000" : "Ej: +54 9 11 0000-0000"}
-                    />
+                    <input type="text" name="telefono" value={cvData.telefono} onChange={onChange} placeholder={cvLanguage === "en" ? "e.g. +54 9 11 0000-0000" : "Ej: +54 9 11 0000-0000"} />
                 </label>
             </div>
-
             <div className="cv-form-group-inline">
                 <label>
                     {cvLanguage === "en" ? "Location:" : "Ubicación:"}
-                    <input
-                        type="text"
-                        name="ubicacion"
-                        value={cvData.ubicacion}
-                        onChange={onChange}
-                        placeholder={cvLanguage === "en" ? "e.g. Buenos Aires, Argentina" : "Ej: Buenos Aires, Argentina"}
-                    />
+                    <input type="text" name="ubicacion" value={cvData.ubicacion} onChange={onChange} placeholder={cvLanguage === "en" ? "e.g. Buenos Aires, Argentina" : "Ej: Buenos Aires, Argentina"} />
                 </label>
-
                 <label>
                     {cvLanguage === "en" ? "Website / Portfolio:" : "Sitio web / Portfolio:"}
-                    <input
-                        type="text"
-                        name="sitioWeb"
-                        value={cvData.sitioWeb}
-                        onChange={onChange}
-                        placeholder={cvLanguage === "en" ? "e.g. myportfolio.com" : "Ej: miportfolio.com"}
-                    />
+                    <input type="text" name="sitioWeb" value={cvData.sitioWeb} onChange={onChange} placeholder={cvLanguage === "en" ? "e.g. myportfolio.com" : "Ej: miportfolio.com"} />
                 </label>
             </div>
-
             <div className="cv-form-group-inline">
                 <label>
                     LinkedIn:
-                    <input
-                        type="text"
-                        name="linkedin"
-                        value={cvData.linkedin}
-                        onChange={onChange}
-                        placeholder={cvLanguage === "en" ? "e.g. linkedin.com/in/user" : "Ej: linkedin.com/in/usuario"}
-                    />
+                    <input type="text" name="linkedin" value={cvData.linkedin} onChange={onChange} placeholder={cvLanguage === "en" ? "e.g. linkedin.com/in/user" : "Ej: linkedin.com/in/usuario"} />
                 </label>
-
                 <label>
                     GitHub:
-                    <input
-                        type="text"
-                        name="github"
-                        value={cvData.github}
-                        onChange={onChange}
-                        placeholder={cvLanguage === "en" ? "e.g. github.com/user" : "Ej: github.com/usuario"}
-                    />
+                    <input type="text" name="github" value={cvData.github} onChange={onChange} placeholder={cvLanguage === "en" ? "e.g. github.com/user" : "Ej: github.com/usuario"} />
                 </label>
             </div>
-
-            {/* --- 2. GESTIÓN DE FOTO --- */}
             {includePhoto && (
                 <div className="cv-form-photo">
                     <label>
                         {cvLanguage === "en" ? "Profile picture:" : "Foto de perfil:"}
                         <input type="file" accept="image/*" onChange={onPhotoChange} />
                     </label>
-
                     {cvData.foto && (
-                        <button
-                            type="button"
-                            className="cv-photo-remove-btn"
-                            onClick={onRemovePhoto}
-                        >
+                        <button type="button" className="cv-photo-remove-btn" onClick={onRemovePhoto}>
                             {cvLanguage === "en" ? "Remove photo" : "Quitar foto"}
                         </button>
                     )}
                 </div>
             )}
+        </div>
+    );
 
-            {/* --- 3. SECCIÓN: PERFIL PROFESIONAL --- */}
-            <div className="cv-form-sectionHeader">
-                <h3 className="cv-form-sectionTitle" id="perfil">
-                    {cvLanguage === "en" ? "Professional profile" : "Perfil profesional"}
-                    {onImprove && (
-                        <button
-                            type="button"
-                            className="cv-improve-btn animated"
-                            onClick={() => onImprove("perfil")}
-                            title={cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
-                        >
-                            ✨
-                        </button>
-                    )}
-                </h3>
-                <button
-                    type="button"
-                    className="cv-section-toggle"
-                    onClick={() => toggleSection("perfil")}
-                >
-                    {sectionsVisible.perfil ? "− Ocultar del CV" : "+ Mostrar en el CV"}
-                </button>
-            </div>
-
-            <label>
-                {cvLanguage === "en" ? "Summary:" : "Resumen:"}
-                <textarea
-                    ref={refs.refTextareaPerfil}
-                    name="perfil"
-                    value={cvData.perfil}
-                    onChange={onChange}
-                    placeholder={cvLanguage === "en" ? "Write a short summary..." : "Escribe una breve descripción sobre vos..."}
-                    rows="3"
-                ></textarea>
-            </label>
-
-            {/* --- 4. SECCIÓN: EXPERIENCIA LABORAL --- */}
-            <div className="cv-form-sectionHeader">
-                <h3 className="cv-form-sectionTitle" id="experiencia">
-                    {cvLanguage === "en" ? "Work experience" : "Experiencia laboral"}
-                    {onImprove && (
-                        <button
-                            type="button"
-                            className="cv-improve-btn animated"
-                            onClick={() => onImprove("experiencias")}
-                            title={cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
-                        >
-                            ✨
-                        </button>
-                    )}
-                </h3>
-                <button
-                    type="button"
-                    className="cv-section-toggle"
-                    onClick={() => toggleSection("experiencias")}
-                >
-                    {sectionsVisible.experiencias ? "− Ocultar del CV" : "+ Mostrar en el CV"}
-                </button>
-            </div>
-
-            <label>
-                <textarea
-                    name="experiencias"
-                    value={cvData.experiencias}
-                    onChange={onChange}
-                    placeholder={cvLanguage === "en" ? "Company X · Frontend Developer..." : "Empresa X · Desarrollador Frontend..."}
-                    rows="4"
-                ></textarea>
-            </label>
-
-            {/* --- 5. SECCIÓN: EDUCACIÓN --- */}
-            <div className="cv-form-sectionHeader">
-                <h3 className="cv-form-sectionTitle" id="educacion">
-                    {cvLanguage === "en" ? "Education" : "Educación"}
-                    {onImprove && (
-                        <button
-                            type="button"
-                            className="cv-improve-btn animated"
-                            onClick={() => onImprove("educacion")}
-                            title={cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
-                        >
-                            ✨
-                        </button>
-                    )}
-                </h3>
-                <button
-                    type="button"
-                    className="cv-section-toggle"
-                    onClick={() => toggleSection("educacion")}
-                >
-                    {sectionsVisible.educacion ? "− Ocultar del CV" : "+ Mostrar en el CV"}
-                </button>
-            </div>
-
-            <label>
-                <textarea
-                    name="educacion"
-                    value={cvData.educacion}
-                    onChange={onChange}
-                    placeholder={cvLanguage === "en" ? "University X · Web Development..." : "Universidad X · Tecnicatura..."}
-                    rows="3"
-                ></textarea>
-            </label>
-
-            {/* --- 6. SECCIÓN: HABILIDADES --- */}
-            <div className="cv-form-sectionHeader">
-                <h3 className="cv-form-sectionTitle" id="habilidades">
-                    {cvLanguage === "en" ? "Skills" : "Habilidades"}
-                    {onImprove && (
-                        <button
-                            type="button"
-                            className="cv-improve-btn animated"
-                            onClick={() => onImprove("habilidades")}
-                            title={cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
-                        >
-                            ✨
-                        </button>
-                    )}
-                </h3>
-                <button
-                    type="button"
-                    className="cv-section-toggle"
-                    onClick={() => toggleSection("habilidades")}
-                >
-                    {sectionsVisible.habilidades ? "− Ocultar del CV" : "+ Mostrar en el CV"}
-                </button>
-            </div>
-
-            <label>
-                {cvLanguage === "en" ? "Skills (comma or dash separated):" : "Habilidades (separadas por coma o guiones):"}
-                <input
-                    type="text"
-                    name="habilidades"
-                    value={cvData.habilidades}
-                    onChange={onChange}
-                    placeholder={cvLanguage === "en" ? "e.g.: HTML, CSS, React..." : "Ej: HTML, CSS, React..."}
-                />
-            </label>
-
-            {/* --- 7. SECCIÓN: IDIOMAS --- */}
+    const renderSection = (key, title, placeholder, rows = 4, isInput = false) => (
+        <div className="cv-form-slide fade-in">
             <div className="cv-form-sectionHeader">
                 <h3 className="cv-form-sectionTitle">
-                    {cvLanguage === "en" ? "Languages" : "Idiomas"}
+                    {title}
                     {onImprove && (
-                        <button
-                            type="button"
-                            className="cv-improve-btn animated"
-                            onClick={() => onImprove("idiomas")}
-                            title={cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
-                        >
+                        <button type="button" className="cv-improve-btn animated" onClick={() => onImprove(key, cvData[key])} title={cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}>
                             ✨
                         </button>
                     )}
                 </h3>
+            </div>
+            <label>
+                {isInput ? (
+                    <input type="text" name={key} value={cvData[key]} onChange={onChange} placeholder={placeholder} />
+                ) : (
+                    <textarea
+                        name={key}
+                        value={cvData[key]}
+                        onChange={onChange}
+                        placeholder={placeholder}
+                        rows={rows}
+                        ref={key === 'perfil' ? refs.refTextareaPerfil : null}
+                    ></textarea>
+                )}
+            </label>
+        </div>
+    );
+
+    return (
+        <div className="cv-form-container">
+            <form className="cv-form">
+                {isStep("datos") && renderDatosPersonales()}
+
+                {isStep("perfil") && renderSection(
+                    "perfil",
+                    cvLanguage === "en" ? "Professional profile" : "Perfil profesional",
+                    cvLanguage === "en" ? "Write a short summary..." : "Escribe una breve descripción sobre vos...",
+                    6
+                )}
+
+                {isStep("experiencias") && renderSection(
+                    "experiencias",
+                    cvLanguage === "en" ? "Work experience" : "Experiencia laboral",
+                    cvLanguage === "en" ? "Company X · Frontend Developer..." : "Empresa X · Desarrollador Frontend...",
+                    8
+                )}
+
+                {isStep("educacion") && renderSection(
+                    "educacion",
+                    cvLanguage === "en" ? "Education" : "Educación",
+                    cvLanguage === "en" ? "University X · Web Development..." : "Universidad X · Tecnicatura...",
+                    6
+                )}
+
+                {isStep("habilidades") && renderSection(
+                    "habilidades",
+                    cvLanguage === "en" ? "Skills" : "Habilidades",
+                    cvLanguage === "en" ? "e.g.: HTML, CSS, React..." : "Ej: HTML, CSS, React...",
+                    1,
+                    true
+                )}
+
+                {isStep("idiomas") && renderSection(
+                    "idiomas",
+                    cvLanguage === "en" ? "Languages" : "Idiomas",
+                    cvLanguage === "en" ? "e.g.: English B2..." : "Ej: Inglés B2...",
+                    1,
+                    true
+                )}
+
+                {isStep("proyectos") && renderSection(
+                    "proyectos",
+                    cvLanguage === "en" ? "Projects" : "Proyectos",
+                    cvLanguage === "en" ? "Personal portfolio..." : "Proyecto portafolio personal...",
+                    6
+                )}
+
+                {isStep("otros") && renderSection(
+                    "otros",
+                    cvLanguage === "en" ? "Additional information" : "Información adicional",
+                    cvLanguage === "en" ? "e.g.: online courses..." : "Ej: Cursos online...",
+                    5
+                )}
+            </form>
+
+            {/* --- Navegación entre Pasos --- */}
+            <div className="cv-form-navigation">
                 <button
                     type="button"
-                    className="cv-section-toggle"
-                    onClick={() => toggleSection("idiomas")}
+                    className="cv-action-btn cv-nav-prev"
+                    onClick={onPrev}
+                    disabled={activeStep === 0}
                 >
-                    {sectionsVisible.idiomas ? "− Ocultar del CV" : "+ Mostrar en el CV"}
+                    {cvLanguage === "en" ? "Previous" : "Anterior"}
                 </button>
+
+                {activeStep < steps.length - 1 ? (
+                    <button type="button" className="cv-action-btn cv-nav-next" onClick={onNext}>
+                        {cvLanguage === "en" ? "Next" : "Siguiente"}
+                    </button>
+                ) : (
+                    <div className="cv-nav-spacer"></div> // Espaciador si es el último paso, o mostrar botón "Finalizar"
+                )}
             </div>
-
-            <label>
-                <input
-                    type="text"
-                    name="idiomas"
-                    value={cvData.idiomas}
-                    onChange={onChange}
-                    placeholder={cvLanguage === "en" ? "e.g.: English B2..." : "Ej: Inglés B2..."}
-                />
-            </label>
-
-            {/* --- 8. SECCIÓN: PROYECTOS --- */}
-            <div className="cv-form-sectionHeader">
-                <h3 className="cv-form-sectionTitle">
-                    {cvLanguage === "en" ? "Projects" : "Proyectos"}
-                    {onImprove && (
-                        <button
-                            type="button"
-                            className="cv-improve-btn animated"
-                            onClick={() => onImprove("proyectos")}
-                            title={cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
-                        >
-                            ✨
-                        </button>
-                    )}
-                </h3>
-                <button
-                    type="button"
-                    className="cv-section-toggle"
-                    onClick={() => toggleSection("proyectos")}
-                >
-                    {sectionsVisible.proyectos ? "− Ocultar del CV" : "+ Mostrar en el CV"}
-                </button>
-            </div>
-
-            <label>
-                <textarea
-                    name="proyectos"
-                    value={cvData.proyectos}
-                    onChange={onChange}
-                    placeholder={cvLanguage === "en" ? "Personal portfolio..." : "Proyecto portafolio personal..."}
-                    rows="3"
-                ></textarea>
-            </label>
-
-            {/* --- 9. SECCIÓN: INFORMACIÓN ADICIONAL --- */}
-            <div className="cv-form-sectionHeader">
-                <h3 className="cv-form-sectionTitle">
-                    {cvLanguage === "en" ? "Additional information" : "Información adicional"}
-                    {onImprove && (
-                        <button
-                            type="button"
-                            className="cv-improve-btn animated"
-                            onClick={() => onImprove("otros")}
-                            title={cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
-                        >
-                            ✨
-                        </button>
-                    )}
-                </h3>
-                <button
-                    type="button"
-                    className="cv-section-toggle"
-                    onClick={() => toggleSection("otros")}
-                >
-                    {sectionsVisible.otros ? "− Ocultar del CV" : "+ Mostrar en el CV"}
-                </button>
-            </div>
-
-            <label>
-                {cvLanguage === "en" ? "Courses, certifications, etc.:" : "Cursos, certificaciones, etc.:"}
-                <textarea
-                    name="otros"
-                    value={cvData.otros}
-                    onChange={onChange}
-                    placeholder={cvLanguage === "en" ? "e.g.: online courses..." : "Ej: Cursos online..."}
-                    rows="3"
-                ></textarea>
-            </label>
-        </form>
+        </div>
     );
 }
 

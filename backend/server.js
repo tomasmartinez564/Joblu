@@ -527,7 +527,7 @@ app.post("/api/optimizar-cv", aiLimiter, async (req, res) => {
     else if (goal === 'keywords') userPrompt += "\nObjetivo: Agregar palabras clave.";
     else userPrompt += "\nObjetivo: Mejorar impacto y profesionalismo.";
 
-    userPrompt += "\n\nSolo devuelve el texto mejorado.";
+    userPrompt += "\n\nDevuelve ÚNICAMENTE el texto mejorado. No incluyas títulos, etiquetas, ni el nombre de la sección. No uses markdown (negritas, comillas) salvo que sea parte del contenido del CV.";
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
