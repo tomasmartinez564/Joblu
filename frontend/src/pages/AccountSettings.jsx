@@ -1,20 +1,30 @@
 import { useState, useRef, useEffect } from "react";
+
+// --- Estilos y Configuración ---
 import API_BASE_URL from "../config/api";
 import "../styles/account.css";
 
+// ==========================================
+// 👤 PÁGINA: AJUSTES DE CUENTA (AccountSettings)
+// ==========================================
 function AccountSettings({ user, onUpdateUser }) {
-  // Sincronizar estados locales con los datos del usuario cuando estos cambian
+  
+  // --- 1. Estados: Información de Perfil ---
   const [displayName, setDisplayName] = useState(user?.name || "");
   const [avatarPreview, setAvatarPreview] = useState(user?.avatar || "");
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
+  // --- 2. Estados: Seguridad (Contraseñas) ---
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
 
-  // IMPORTANTE: Este efecto asegura que si el usuario cambia (ej: por un reload o update), 
-  // los campos del formulario se actualicen.
+  // --- 3. Efectos: Sincronización ---
+  /**
+   * Asegura que los campos locales se actualicen si los datos del usuario 
+   * cambian externamente (ej. recarga o actualización global).
+   */
   useEffect(() => {
     if (user) {
       setDisplayName(user.name || "");
@@ -22,13 +32,18 @@ function AccountSettings({ user, onUpdateUser }) {
     }
   }, [user]);
 
+  // --- 4. Manejadores de Eventos: Avatar ---
+
   const handleAvatarClick = () => fileInputRef.current.click();
 
+  /**
+   * Gestiona la subida de la imagen de perfil al servidor.
+   */
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Previsualización local inmediata para feedback UX
+    // Previsualización local inmediata para mejorar el UX
     setAvatarPreview(URL.createObjectURL(file));
     setIsUploading(true);
 
@@ -44,40 +59,41 @@ function AccountSettings({ user, onUpdateUser }) {
         body: formData,
       });
 
-      // Verificar si la respuesta es exitosa
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Error del servidor:", response.status, errorText);
 
-        // Intentar extraer un mensaje de error más específico
         if (errorText.includes("File too large")) {
-          alert("El archivo es demasiado grande. El tamaño máximo permitido es 5MB.");
+          alert("El archivo es demasiado grande. Máximo 5MB.");
         } else if (errorText.includes("Solo se permiten imágenes")) {
           alert("Solo se permiten archivos de imagen (JPG, PNG, etc.).");
         } else {
-          alert(`Error del servidor (${response.status}). Por favor intenta de nuevo.`);
+          alert(`Error del servidor (${response.status}). Intenta de nuevo.`);
         }
         return;
       }
 
       const data = await response.json();
       if (data.avatarUrl) {
-        // Actualizamos el usuario global. El useEffect de arriba se encargará 
-        // de refrescar esta pantalla.
+        // Actualización en el estado global de la aplicación
         onUpdateUser({ avatar: data.avatarUrl });
-
-        // Mostrar mensaje de éxito (opcional, puedes agregar un toast si tienes uno)
         console.log("✅ Avatar actualizado correctamente");
       } else if (data.error) {
-        console.error("Error del servidor:", data.error);
         alert(`Error: ${data.error}`);
       }
     } catch (error) {
       console.error("Error subiendo avatar:", error);
-      alert("Error al subir el avatar. Por favor intenta de nuevo.");
+      alert("Error al subir el avatar.");
     } finally {
       setIsUploading(false);
     }
+  };
+
+  // --- 5. Manejadores de Eventos: Perfil y Seguridad ---
+
+  const handleProfileSubmit = (e) => {
+    e.preventDefault();
+    onUpdateUser({ name: displayName });
   };
 
   const handlePasswordSubmit = (e) => {
@@ -85,14 +101,17 @@ function AccountSettings({ user, onUpdateUser }) {
     alert("Cambio de contraseña simulado.");
   };
 
+  // --- 6. Renderizado ---
   return (
     <section className="account">
+      {/* Cabecera */}
       <div className="account-header">
         <h2>Mi Cuenta</h2>
         <p>Gestioná tu identidad y la seguridad de tu acceso.</p>
       </div>
 
       <div className="account-grid">
+        {/* Tarjeta 1: Información de Perfil */}
         <div className="account-card">
           <div className="avatar-section">
             <div
@@ -116,10 +135,7 @@ function AccountSettings({ user, onUpdateUser }) {
             <p className="hint">JPG o PNG, máx 5MB</p>
           </div>
 
-          <form className="account-form" onSubmit={(e) => {
-            e.preventDefault();
-            onUpdateUser({ name: displayName });
-          }}>
+          <form className="account-form" onSubmit={handleProfileSubmit}>
             <div className="input-group">
               <label>Nombre Visible</label>
               <input
@@ -143,6 +159,7 @@ function AccountSettings({ user, onUpdateUser }) {
           </form>
         </div>
 
+        {/* Tarjeta 2: Seguridad */}
         <div className="account-card full-width">
           <div className="security-content">
             <h3>Seguridad</h3>
@@ -152,15 +169,30 @@ function AccountSettings({ user, onUpdateUser }) {
               <div className="password-grid">
                 <div className="input-group">
                   <label>Contraseña Actual</label>
-                  <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="••••••••" />
+                  <input 
+                    type="password" 
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)} 
+                    placeholder="••••••••" 
+                  />
                 </div>
                 <div className="input-group">
                   <label>Nueva Contraseña</label>
-                  <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Mínimo 8 caracteres" />
+                  <input 
+                    type="password" 
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)} 
+                    placeholder="Mínimo 8 caracteres" 
+                  />
                 </div>
                 <div className="input-group">
                   <label>Repetir Nueva Contraseña</label>
-                  <input type="password" value={repeatPassword} onChange={(e) => setRepeatPassword(e.target.value)} placeholder="Confirmá tu contraseña" />
+                  <input 
+                    type="password" 
+                    value={repeatPassword}
+                    onChange={(e) => setRepeatPassword(e.target.value)} 
+                    placeholder="Confirmá tu contraseña" 
+                  />
                 </div>
               </div>
               <button type="submit" className="btn-secondary">Actualizar Contraseña</button>

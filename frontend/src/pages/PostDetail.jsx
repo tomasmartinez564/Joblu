@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useToast } from "../context/ToastContext";
+
+// --- Estilos y Utilidades ---
 import "../styles/postdetail.css";
-import API_BASE_URL from "../config/api";
 import { formatDate } from "../utils/dateUtils";
 
+// --- Contexto y Configuración ---
+import { useToast } from "../context/ToastContext";
+import API_BASE_URL from "../config/api";
 
+// ==========================================
+// 📋 CONSTANTES Y HELPERS DE PERSISTENCIA
+// ==========================================
 const STORAGE_KEY = "joblu_liked_posts";
 
 const getInitialLikedPosts = () => {
@@ -17,34 +23,43 @@ const getInitialLikedPosts = () => {
   }
 };
 
+// ==========================================
+// 📝 PÁGINA: DETALLE DE POST (PostDetail)
+// ==========================================
 function PostDetail({ user }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToast } = useToast();
 
+  // --- 1. Estados: Datos del Post ---
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [deleting, setDeleting] = useState(false);
 
+  // --- 2. Estados: Gestión de Comentarios ---
   const [commentContent, setCommentContent] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
 
+  // --- 3. Estados: UI y Persistencia Local (Likes) ---
+  const [deleting, setDeleting] = useState(false);
   const [likedPosts, setLikedPosts] = useState(() => getInitialLikedPosts());
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(likedPosts));
-  }, [likedPosts]);
-
+  // --- 4. Lógica Derivada (Calculada) ---
   const isLiked = post && likedPosts.includes(post._id);
+  const canDelete = user && post && post.authorEmail && user.email === post.authorEmail;
 
+  // ==========================================
+  // 🧠 EFECTOS (Efectos de carga y sincronización)
+  // ==========================================
+
+  /**
+   * Carga los datos del post al montar el componente.
+   */
   useEffect(() => {
     const fetchPost = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/api/community/posts/${id}`);
-        if (!res.ok) {
-          throw new Error("No se pudo obtener el post.");
-        }
+        if (!res.ok) throw new Error("No se pudo obtener el post.");
         const data = await res.json();
         setPost(data);
       } catch (err) {
@@ -58,9 +73,97 @@ function PostDetail({ user }) {
     fetchPost();
   }, [id]);
 
-  const canDelete =
-    user && post && post.authorEmail && user.email && user.email === post.authorEmail;
+  /**
+   * Sincroniza los posts con "like" en el localStorage.
+   */
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(likedPosts));
+  }, [likedPosts]);
 
+  // ==========================================
+  // 📡 MANEJADORES DE EVENTOS (Handlers)
+  // ==========================================
+
+  /**
+   * Gestiona la lógica de dar/quitar like.
+   */
+  const handleToggleLike = async () => {
+    if (!post) return;
+
+    const alreadyLiked = likedPosts.includes(post._id);
+    const action = alreadyLiked ? "unlike" : "like";
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/community/posts/${post._id}/like`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("joblu_token")}`
+        },
+        body: JSON.stringify({ action }),
+      });
+
+      if (!res.ok) throw new Error("No se pudo actualizar el like.");
+
+      const updatedPost = await res.json();
+      
+      // Actualizamos el contador en el post y el registro local
+      setPost((prev) => (prev ? { ...prev, likes: updatedPost.likes } : prev));
+      setLikedPosts((prev) =>
+        alreadyLiked ? prev.filter((id) => id !== post._id) : [...prev, post._id]
+      );
+    } catch (err) {
+      console.error(err);
+      addToast("Hubo un problema al actualizar el like.", "error");
+    }
+  };
+
+  /**
+   * Envía un nuevo comentario al post.
+   */
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+
+    if (!commentContent.trim()) {
+      addToast("Escribí un comentario antes de publicar.", "info");
+      return;
+    }
+
+    try {
+      setCommentLoading(true);
+      const res = await fetch(`${API_BASE_URL}/api/community/posts/${id}/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("joblu_token")}`
+        },
+        body: JSON.stringify({
+          authorName: user?.name || "Usuario anónimo",
+          authorEmail: user?.email || "",
+          content: commentContent,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "No se pudo agregar el comentario.");
+      }
+
+      const updatedPost = await res.json();
+      setPost(updatedPost);
+      setCommentContent("");
+      addToast("Comentario agregado", "success");
+    } catch (err) {
+      console.error(err);
+      addToast(err.message || "Hubo un problema al comentar.", "error");
+    } finally {
+      setCommentLoading(false);
+    }
+  };
+
+  /**
+   * Elimina la publicación (Solo autores).
+   */
   const handleDelete = async () => {
     if (!window.confirm("¿Seguro que querés eliminar este post?")) return;
 
@@ -73,6 +176,7 @@ function PostDetail({ user }) {
         }
       });
       if (!res.ok) throw new Error("No se pudo borrar el post.");
+      
       addToast("Post eliminado correctamente", "success");
       navigate("/comunidad");
     } catch (err) {
@@ -83,96 +187,11 @@ function PostDetail({ user }) {
     }
   };
 
-  const handleAddComment = async (e) => {
-    e.preventDefault();
+  // ==========================================
+  // 📦 RENDERIZADO (JSX)
+  // ==========================================
 
-    if (!commentContent.trim()) {
-      addToast("Escribí un comentario antes de publicar.", "info");
-      return;
-    }
-
-    const authorName = user?.name || "Usuario anónimo";
-    const authorEmail = user?.email || "";
-
-    try {
-      setCommentLoading(true);
-
-      const res = await fetch(
-        `${API_BASE_URL}/api/community/posts/${id}/comments`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem("joblu_token")}`
-          },
-          body: JSON.stringify({
-            authorName,
-            authorEmail,
-            content: commentContent,
-          }),
-        }
-      );
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "No se pudo agregar el comentario.");
-      }
-
-      const updatedPost = await res.json();
-      setPost(updatedPost);
-
-      setCommentContent("");
-      addToast("Comentario agregado", "success");
-    } catch (err) {
-      console.error(err);
-      addToast(err.message || "Hubo un problema al comentar.", "error");
-    } finally {
-      setCommentLoading(false);
-    }
-  };
-
-  const handleToggleLike = async () => {
-    if (!post) return;
-
-    const alreadyLiked = likedPosts.includes(post._id);
-    const action = alreadyLiked ? "unlike" : "like";
-
-    try {
-      const res = await fetch(
-        `${API_BASE_URL}/api/community/posts/${post._id}/like`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem("joblu_token")}`
-          },
-          body: JSON.stringify({ action }),
-        }
-      );
-
-      if (!res.ok) {
-        throw new Error("No se pudo actualizar el like.");
-      }
-
-      const updatedPost = await res.json();
-
-      setPost((prev) =>
-        prev ? { ...prev, likes: updatedPost.likes } : prev
-      );
-
-      setLikedPosts((prev) =>
-        alreadyLiked
-          ? prev.filter((id) => id !== post._id)
-          : [...prev, post._id]
-      );
-    } catch (err) {
-      console.error(err);
-      addToast("Hubo un problema al actualizar el like.", "error");
-    }
-
-  };
-
-  // Estados de carga y error
+  // --- Estados de Carga y Error ---
   if (loading) {
     return (
       <section className="community postdetail">
@@ -184,68 +203,52 @@ function PostDetail({ user }) {
   if (error || !post) {
     return (
       <section className="community postdetail">
-        <p className="postdetail-status">
-          {error || "Post no encontrado."}
-        </p>
-        <Link to="/comunidad" className="postdetail-back-link">
-          ← Volver a la comunidad
-        </Link>
+        <p className="postdetail-status">{error || "Post no encontrado."}</p>
+        <Link to="/comunidad" className="postdetail-back-link">← Volver a la comunidad</Link>
       </section>
     );
   }
 
   return (
     <section className="community postdetail">
-      {/* Botón claro para volver */}
+      {/* Navegación de regreso */}
       <div className="postdetail-back">
-        <Link to="/comunidad" className="postdetail-back-link">
-          ← Volver a la comunidad
-        </Link>
+        <Link to="/comunidad" className="postdetail-back-link">← Volver a la comunidad</Link>
       </div>
 
-      {/* Título y meta */}
+      {/* Cabecera del Post */}
       <h2 className="postdetail-title">{post.title}</h2>
-
       <p className="postdetail-meta">
         por {post.authorName || "Usuario"} · {formatDate(post.createdAt)}
       </p>
 
-      {/* Likes */}
+      {/* Interacción: Likes */}
       <div className="postdetail-like-row">
-        <button
-          type="button"
-          onClick={handleToggleLike}
-          className="postdetail-like-button"
-        >
+        <button type="button" onClick={handleToggleLike} className="postdetail-like-button">
           {isLiked ? "💙 Quitar like" : "🤍 Me gusta"}
         </button>
-
         <span className="postdetail-like-count">
-          {(post.likes ?? 0)} like{(post.likes ?? 0) === 1 ? "" : "s"}
+          {(post.likes ?? 0)} { (post.likes === 1) ? "like" : "likes" }
         </span>
       </div>
 
-      {/* Contenido principal del post */}
+      {/* Cuerpo del Post */}
       <div className="postdetail-content">
         {post.content}
       </div>
 
-      {/* Botón de borrar (solo autor) */}
+      {/* Acciones de Autor */}
       {canDelete && (
-        <button
-          onClick={handleDelete}
-          disabled={deleting}
-          className="postdetail-delete-btn"
-        >
+        <button onClick={handleDelete} disabled={deleting} className="postdetail-delete-btn">
           {deleting ? "Eliminando..." : "Eliminar post"}
         </button>
       )}
 
-      {/* Sección de comentarios */}
+      {/* --- Sección de Comentarios --- */}
       <section className="postdetail-comments">
         <h3 className="postdetail-comments-title">Comentarios</h3>
 
-        {/* Lista de comentarios */}
+        {/* Lista de Comentarios */}
         {(!post.comments || post.comments.length === 0) ? (
           <p className="postdetail-comments-empty">
             Todavía no hay comentarios. ¡Sé la primera persona en comentar!
@@ -255,12 +258,8 @@ function PostDetail({ user }) {
             {post.comments.map((c, index) => (
               <li key={index} className="postdetail-comment">
                 <p className="postdetail-comment-header">
-                  <span className="postdetail-comment-author">
-                    {c.authorName || "Usuario anónimo"}
-                  </span>
-                  <span className="postdetail-comment-meta">
-                    {formatDate(c.createdAt)}
-                  </span>
+                  <span className="postdetail-comment-author">{c.authorName || "Usuario anónimo"}</span>
+                  <span className="postdetail-comment-meta">{formatDate(c.createdAt)}</span>
                 </p>
                 <p className="postdetail-comment-body">{c.content}</p>
               </li>
@@ -268,11 +267,8 @@ function PostDetail({ user }) {
           </ul>
         )}
 
-        {/* Formulario para agregar comentario */}
-        <form
-          onSubmit={handleAddComment}
-          className="community-form community-form--compact"
-        >
+        {/* Formulario de Comentarios */}
+        <form onSubmit={handleAddComment} className="community-form community-form--compact">
           <textarea
             placeholder="Escribí tu comentario..."
             value={commentContent}
@@ -280,12 +276,7 @@ function PostDetail({ user }) {
             rows={3}
             className="community-textarea community-input"
           />
-
-          <button
-            type="submit"
-            disabled={commentLoading}
-            className="btn-joblu"
-          >
+          <button type="submit" disabled={commentLoading} className="btn-joblu">
             {commentLoading ? "Publicando..." : "Publicar comentario"}
           </button>
         </form>

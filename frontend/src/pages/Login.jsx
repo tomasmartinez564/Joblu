@@ -1,70 +1,87 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useToast } from '../context/ToastContext' // Importamos nuestros Toasts
-import '../styles/login.css'
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
+// --- Contexto y Estilos ---
+import { useToast } from '../context/ToastContext';
+import '../styles/login.css';
+
+import API_BASE_URL from "../config/api";
+
+// ==========================================
+// 🔐 PÁGINA: LOGIN / REGISTRO (Login)
+// ==========================================
 function Login({ onLogin }) {
-  const [isRegistering, setIsRegistering] = useState(false)
+  // --- 1. Estados ---
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: ''
-  })
-  const [isLoading, setIsLoading] = useState(false)
+  });
 
-  const navigate = useNavigate()
-  const { addToast } = useToast() // Hook de notificaciones
+  // --- 2. Hooks ---
+  const navigate = useNavigate();
+  const { addToast } = useToast();
 
-  // Manejo de inputs
+  // --- 3. Manejadores de Eventos (Handlers) ---
+
+  /**
+   * Actualiza el estado del formulario al escribir en los inputs.
+   */
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
-    })
-  }
+    });
+  };
 
-  // Submit del formulario
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
+/**
+ * Gestiona el envío del formulario para Login o Registro.
+ */
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
 
-    const endpoint = isRegistering 
-      ? 'http://localhost:3000/api/auth/register' 
-      : 'http://localhost:3000/api/auth/login'
+  // Usamos API_BASE_URL para que coincida con la configuración global
+  const endpoint = isRegistering 
+    ? `${API_BASE_URL}/api/auth/register` 
+    : `${API_BASE_URL}/api/auth/login`;
 
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
 
-      const data = await response.json()
+    const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Ocurrió un error inesperado')
-      }
-
-      if (isRegistering) {
-        // Éxito en registro
-        addToast('¡Cuenta creada! Ahora iniciá sesión.', 'success')
-        setIsRegistering(false) // Cambiar a modo login
-      } else {
-        // Éxito en login
-        addToast(`Bienvenido de nuevo, ${data.user.name} 👋`, 'success')
-        onLogin(data.user, data.token) // Pasamos user y token a App.jsx
-      }
-
-    } catch (error) {
-      addToast(error.message, 'error')
-    } finally {
-      setIsLoading(false)
+    if (!response.ok) {
+      throw new Error(data.error || 'Ocurrió un error inesperado');
     }
-  }
 
+    if (isRegistering) {
+      // Éxito en registro: notificamos y pasamos a modo login
+      addToast('¡Cuenta creada! Ahora iniciá sesión.', 'success');
+      setIsRegistering(false);
+    } else {
+      // Éxito en login: notificamos y actualizamos estado global
+      addToast(`Bienvenido de nuevo, ${data.user.name} 👋`, 'success');
+      onLogin(data.user, data.token); // Pasamos user y token a App.jsx
+    }
+
+  } catch (error) {
+    addToast(error.message, 'error');
+  } finally {
+    setIsLoading(false);
+  }
+};
+  // --- 4. Renderizado ---
   return (
     <div className="login-page">
       <div className="login-card">
+        {/* Cabecera dinámica */}
         <h2 className="login-title">
           {isRegistering ? 'Crear cuenta en Joblu' : 'Iniciar Sesión'}
         </h2>
@@ -74,6 +91,7 @@ function Login({ onLogin }) {
             : 'Accedé a tus CVs y empleos guardados.'}
         </p>
 
+        {/* Formulario de acceso */}
         <form onSubmit={handleSubmit} className="login-form">
           {isRegistering && (
             <div className="form-group">
@@ -128,6 +146,7 @@ function Login({ onLogin }) {
           </button>
         </form>
 
+        {/* Alternar entre Login y Registro */}
         <div className="login-footer">
           <p>
             {isRegistering ? '¿Ya tenés cuenta?' : '¿No tenés cuenta?'}
@@ -142,7 +161,7 @@ function Login({ onLogin }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

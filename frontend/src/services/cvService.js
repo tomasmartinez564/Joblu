@@ -1,7 +1,15 @@
 import API_BASE_URL from "../config/api";
 
+// ==========================================
+// 🚀 SERVICIO: CV (Currículums)
+// ==========================================
 const cvService = {
-    // Obtener headers de autenticación
+    
+    // --- 1. Utilidades y Autenticación ---
+
+    /**
+     * Genera los headers necesarios para peticiones autenticadas.
+     */
     getAuthHeaders: () => {
         const token = localStorage.getItem("joblu_token");
         return {
@@ -10,7 +18,11 @@ const cvService = {
         };
     },
 
-    // Obtener todos los CVs
+    // --- 2. Operaciones de Datos (CRUD) ---
+
+    /**
+     * Obtiene todos los CVs del usuario actual.
+     */
     getAll: async () => {
         const response = await fetch(`${API_BASE_URL}/api/cvs`, {
             headers: cvService.getAuthHeaders(),
@@ -22,7 +34,9 @@ const cvService = {
         return await response.json();
     },
 
-    // Obtener un CV por ID
+    /**
+     * Obtiene un CV específico por su ID.
+     */
     getById: async (id) => {
         const response = await fetch(`${API_BASE_URL}/api/cvs/${id}`, {
             headers: cvService.getAuthHeaders(),
@@ -34,7 +48,9 @@ const cvService = {
         return await response.json();
     },
 
-    // Crear un nuevo CV
+    /**
+     * Crea un nuevo currículum.
+     */
     create: async (cvData) => {
         const response = await fetch(`${API_BASE_URL}/api/cvs`, {
             method: "POST",
@@ -48,7 +64,9 @@ const cvService = {
         return await response.json();
     },
 
-    // Actualizar un CV existente
+    /**
+     * Actualiza los datos de un CV existente.
+     */
     update: async (id, cvData) => {
         const response = await fetch(`${API_BASE_URL}/api/cvs/${id}`, {
             method: "PUT",
@@ -62,7 +80,23 @@ const cvService = {
         return await response.json();
     },
 
-    // Importar un CV desde archivo (PDF/TXT)
+    /**
+     * Elimina un CV permanentemente.
+     */
+    delete: async (id) => {
+        const response = await fetch(`${API_BASE_URL}/api/cvs/${id}`, {
+            method: "DELETE",
+            headers: cvService.getAuthHeaders(),
+        });
+        if (!response.ok) throw new Error("Error al eliminar el CV");
+        return await response.json();
+    },
+
+    // --- 3. Funciones Especiales e IA ---
+
+    /**
+     * Importa un archivo (PDF o TXT) y lo procesa para crear un CV.
+     */
     importCv: async (file) => {
         const formData = new FormData();
         formData.append("file", file);
@@ -72,7 +106,7 @@ const cvService = {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${token}`,
-                // No Content-Type header when sending FormData, browser sets multipart/form-data with boundary
+                // No enviamos Content-Type para que el navegador configure el multipart/form-data
             },
             body: formData,
         });
@@ -83,17 +117,9 @@ const cvService = {
         return await response.json();
     },
 
-    // Eliminar un CV
-    delete: async (id) => {
-        const response = await fetch(`${API_BASE_URL}/api/cvs/${id}`, {
-            method: "DELETE",
-            headers: cvService.getAuthHeaders(),
-        });
-        if (!response.ok) throw new Error("Error al eliminar el CV");
-        return await response.json();
-    },
-
-    // Optimizar CV con IA
+    /**
+     * Envía contenido a la IA para recibir sugerencias de mejora.
+     */
     optimize: async ({ section, content, jobDescription, language, targetIndustry, tone, goal }) => {
         const response = await fetch(`${API_BASE_URL}/api/optimizar-cv`, {
             method: "POST",

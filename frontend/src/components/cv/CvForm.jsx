@@ -1,5 +1,8 @@
 import React from "react";
 
+// ==========================================
+// 📝 COMPONENTE: FORMULARIO DE CV (CvForm)
+// ==========================================
 function CvForm({
     cvData,
     onChange,
@@ -15,7 +18,8 @@ function CvForm({
 
     return (
         <form className="cv-form">
-            {/* DATOS PERSONALES */}
+            
+            {/* --- 1. DATOS PERSONALES --- */}
             <h3 className="cv-form-sectionTitle">Datos personales</h3>
 
             <div className="cv-form-group-inline">
@@ -26,26 +30,18 @@ function CvForm({
                         name="nombre"
                         value={cvData.nombre}
                         onChange={onChange}
-                        placeholder={
-                            cvLanguage === "en" ? "e.g. Sofia Martinez" : "Ej: Sofía Martínez"
-                        }
+                        placeholder={cvLanguage === "en" ? "e.g. Sofia Martinez" : "Ej: Sofía Martínez"}
                     />
                 </label>
 
                 <label>
-                    {cvLanguage === "en"
-                        ? "Job title / role:"
-                        : "Puesto o título profesional:"}
+                    {cvLanguage === "en" ? "Job title / role:" : "Puesto o título profesional:"}
                     <input
                         type="text"
                         name="puesto"
                         value={cvData.puesto}
                         onChange={onChange}
-                        placeholder={
-                            cvLanguage === "en"
-                                ? "e.g. Frontend Developer"
-                                : "Ej: Desarrolladora Frontend"
-                        }
+                        placeholder={cvLanguage === "en" ? "e.g. Frontend Developer" : "Ej: Desarrolladora Frontend"}
                     />
                 </label>
             </div>
@@ -58,11 +54,7 @@ function CvForm({
                         name="email"
                         value={cvData.email}
                         onChange={onChange}
-                        placeholder={
-                            cvLanguage === "en"
-                                ? "e.g. sofia.martinez@mail.com"
-                                : "Ej: sofi.martinez@mail.com"
-                        }
+                        placeholder={cvLanguage === "en" ? "e.g. sofia.martinez@mail.com" : "Ej: sofi.martinez@mail.com"}
                     />
                 </label>
 
@@ -73,11 +65,7 @@ function CvForm({
                         name="telefono"
                         value={cvData.telefono}
                         onChange={onChange}
-                        placeholder={
-                            cvLanguage === "en"
-                                ? "e.g. +54 9 11 0000-0000"
-                                : "Ej: +54 9 11 0000-0000"
-                        }
+                        placeholder={cvLanguage === "en" ? "e.g. +54 9 11 0000-0000" : "Ej: +54 9 11 0000-0000"}
                     />
                 </label>
             </div>
@@ -90,28 +78,18 @@ function CvForm({
                         name="ubicacion"
                         value={cvData.ubicacion}
                         onChange={onChange}
-                        placeholder={
-                            cvLanguage === "en"
-                                ? "e.g. Buenos Aires, Argentina"
-                                : "Ej: Buenos Aires, Argentina"
-                        }
+                        placeholder={cvLanguage === "en" ? "e.g. Buenos Aires, Argentina" : "Ej: Buenos Aires, Argentina"}
                     />
                 </label>
 
                 <label>
-                    {cvLanguage === "en"
-                        ? "Website / Portfolio:"
-                        : "Sitio web / Portfolio:"}
+                    {cvLanguage === "en" ? "Website / Portfolio:" : "Sitio web / Portfolio:"}
                     <input
                         type="text"
                         name="sitioWeb"
                         value={cvData.sitioWeb}
                         onChange={onChange}
-                        placeholder={
-                            cvLanguage === "en"
-                                ? "e.g. myportfolio.com"
-                                : "Ej: miportfolio.com"
-                        }
+                        placeholder={cvLanguage === "en" ? "e.g. myportfolio.com" : "Ej: miportfolio.com"}
                     />
                 </label>
             </div>
@@ -124,11 +102,7 @@ function CvForm({
                         name="linkedin"
                         value={cvData.linkedin}
                         onChange={onChange}
-                        placeholder={
-                            cvLanguage === "en"
-                                ? "e.g. linkedin.com/in/user"
-                                : "Ej: linkedin.com/in/usuario"
-                        }
+                        placeholder={cvLanguage === "en" ? "e.g. linkedin.com/in/user" : "Ej: linkedin.com/in/usuario"}
                     />
                 </label>
 
@@ -139,16 +113,12 @@ function CvForm({
                         name="github"
                         value={cvData.github}
                         onChange={onChange}
-                        placeholder={
-                            cvLanguage === "en"
-                                ? "e.g. github.com/user"
-                                : "Ej: github.com/usuario"
-                        }
+                        placeholder={cvLanguage === "en" ? "e.g. github.com/user" : "Ej: github.com/usuario"}
                     />
                 </label>
             </div>
 
-            {/* FOTO */}
+            {/* --- 2. GESTIÓN DE FOTO --- */}
             {includePhoto && (
                 <div className="cv-form-photo">
                     <label>
@@ -168,7 +138,7 @@ function CvForm({
                 </div>
             )}
 
-            {/* PERFIL */}
+            {/* --- 3. SECCIÓN: PERFIL PROFESIONAL --- */}
             <div className="cv-form-sectionHeader">
                 <h3 className="cv-form-sectionTitle">
                     {cvLanguage === "en" ? "Professional profile" : "Perfil profesional"}
@@ -188,9 +158,7 @@ function CvForm({
                     className="cv-section-toggle"
                     onClick={() => toggleSection("perfil")}
                 >
-                    {sectionsVisible.perfil
-                        ? "− Ocultar del CV"
-                        : "+ Mostrar en el CV"}
+                    {sectionsVisible.perfil ? "− Ocultar del CV" : "+ Mostrar en el CV"}
                 </button>
             </div>
 
@@ -201,16 +169,12 @@ function CvForm({
                     name="perfil"
                     value={cvData.perfil}
                     onChange={onChange}
-                    placeholder={
-                        cvLanguage === "en"
-                            ? "Write a short summary about your background, experience and goals..."
-                            : "Escribe una breve descripción sobre vos, tu experiencia y objetivos..."
-                    }
+                    placeholder={cvLanguage === "en" ? "Write a short summary..." : "Escribe una breve descripción sobre vos..."}
                     rows="3"
                 ></textarea>
             </label>
 
-            {/* EXPERIENCIA */}
+            {/* --- 4. SECCIÓN: EXPERIENCIA LABORAL --- */}
             <div className="cv-form-sectionHeader">
                 <h3 className="cv-form-sectionTitle">
                     {cvLanguage === "en" ? "Work experience" : "Experiencia laboral"}
@@ -230,9 +194,7 @@ function CvForm({
                     className="cv-section-toggle"
                     onClick={() => toggleSection("experiencias")}
                 >
-                    {sectionsVisible.experiencias
-                        ? "− Ocultar del CV"
-                        : "+ Mostrar en el CV"}
+                    {sectionsVisible.experiencias ? "− Ocultar del CV" : "+ Mostrar en el CV"}
                 </button>
             </div>
 
@@ -241,22 +203,12 @@ function CvForm({
                     name="experiencias"
                     value={cvData.experiencias}
                     onChange={onChange}
-                    placeholder={
-                        cvLanguage === "en"
-                            ? `e.g.:
-Company X · Frontend Developer · 2023 - Present
-- Responsibility or achievement 1
-- Responsibility or achievement 2`
-                            : `Ej:
-Empresa X · Desarrollador Frontend · 2023 - Actualidad
-- Responsabilidad o logro 1
-- Responsabilidad o logro 2`
-                    }
+                    placeholder={cvLanguage === "en" ? "Company X · Frontend Developer..." : "Empresa X · Desarrollador Frontend..."}
                     rows="4"
                 ></textarea>
             </label>
 
-            {/* EDUCACIÓN */}
+            {/* --- 5. SECCIÓN: EDUCACIÓN --- */}
             <div className="cv-form-sectionHeader">
                 <h3 className="cv-form-sectionTitle">
                     {cvLanguage === "en" ? "Education" : "Educación"}
@@ -276,9 +228,7 @@ Empresa X · Desarrollador Frontend · 2023 - Actualidad
                     className="cv-section-toggle"
                     onClick={() => toggleSection("educacion")}
                 >
-                    {sectionsVisible.educacion
-                        ? "− Ocultar del CV"
-                        : "+ Mostrar en el CV"}
+                    {sectionsVisible.educacion ? "− Ocultar del CV" : "+ Mostrar en el CV"}
                 </button>
             </div>
 
@@ -287,18 +237,12 @@ Empresa X · Desarrollador Frontend · 2023 - Actualidad
                     name="educacion"
                     value={cvData.educacion}
                     onChange={onChange}
-                    placeholder={
-                        cvLanguage === "en"
-                            ? `e.g.:
-University X · Web Development · 2022 - Present`
-                            : `Ej:
-Universidad X · Tecnicatura en Desarrollo Web · 2022 - Actualidad`
-                    }
+                    placeholder={cvLanguage === "en" ? "University X · Web Development..." : "Universidad X · Tecnicatura..."}
                     rows="3"
                 ></textarea>
             </label>
 
-            {/* HABILIDADES */}
+            {/* --- 6. SECCIÓN: HABILIDADES --- */}
             <div className="cv-form-sectionHeader">
                 <h3 className="cv-form-sectionTitle">
                     {cvLanguage === "en" ? "Skills" : "Habilidades"}
@@ -318,30 +262,22 @@ Universidad X · Tecnicatura en Desarrollo Web · 2022 - Actualidad`
                     className="cv-section-toggle"
                     onClick={() => toggleSection("habilidades")}
                 >
-                    {sectionsVisible.habilidades
-                        ? "− Ocultar del CV"
-                        : "+ Mostrar en el CV"}
+                    {sectionsVisible.habilidades ? "− Ocultar del CV" : "+ Mostrar en el CV"}
                 </button>
             </div>
 
             <label>
-                {cvLanguage === "en"
-                    ? "Skills (comma or dash separated):"
-                    : "Habilidades (separadas por coma o guiones):"}
+                {cvLanguage === "en" ? "Skills (comma or dash separated):" : "Habilidades (separadas por coma o guiones):"}
                 <input
                     type="text"
                     name="habilidades"
                     value={cvData.habilidades}
                     onChange={onChange}
-                    placeholder={
-                        cvLanguage === "en"
-                            ? "e.g.: HTML, CSS, JavaScript, React, Git, teamwork..."
-                            : "Ej: HTML, CSS, JavaScript, React, Git, trabajo en equipo..."
-                    }
+                    placeholder={cvLanguage === "en" ? "e.g.: HTML, CSS, React..." : "Ej: HTML, CSS, React..."}
                 />
             </label>
 
-            {/* IDIOMAS */}
+            {/* --- 7. SECCIÓN: IDIOMAS --- */}
             <div className="cv-form-sectionHeader">
                 <h3 className="cv-form-sectionTitle">
                     {cvLanguage === "en" ? "Languages" : "Idiomas"}
@@ -361,9 +297,7 @@ Universidad X · Tecnicatura en Desarrollo Web · 2022 - Actualidad`
                     className="cv-section-toggle"
                     onClick={() => toggleSection("idiomas")}
                 >
-                    {sectionsVisible.idiomas
-                        ? "− Ocultar del CV"
-                        : "+ Mostrar en el CV"}
+                    {sectionsVisible.idiomas ? "− Ocultar del CV" : "+ Mostrar en el CV"}
                 </button>
             </div>
 
@@ -373,15 +307,11 @@ Universidad X · Tecnicatura en Desarrollo Web · 2022 - Actualidad`
                     name="idiomas"
                     value={cvData.idiomas}
                     onChange={onChange}
-                    placeholder={
-                        cvLanguage === "en"
-                            ? "e.g.: Native Spanish · English B2 · Portuguese A2"
-                            : "Ej: Español nativo · Inglés B2 · Portugués A2"
-                    }
+                    placeholder={cvLanguage === "en" ? "e.g.: English B2..." : "Ej: Inglés B2..."}
                 />
             </label>
 
-            {/* PROYECTOS */}
+            {/* --- 8. SECCIÓN: PROYECTOS --- */}
             <div className="cv-form-sectionHeader">
                 <h3 className="cv-form-sectionTitle">
                     {cvLanguage === "en" ? "Projects" : "Proyectos"}
@@ -401,9 +331,7 @@ Universidad X · Tecnicatura en Desarrollo Web · 2022 - Actualidad`
                     className="cv-section-toggle"
                     onClick={() => toggleSection("proyectos")}
                 >
-                    {sectionsVisible.proyectos
-                        ? "− Ocultar del CV"
-                        : "+ Mostrar en el CV"}
+                    {sectionsVisible.proyectos ? "− Ocultar del CV" : "+ Mostrar en el CV"}
                 </button>
             </div>
 
@@ -412,25 +340,15 @@ Universidad X · Tecnicatura en Desarrollo Web · 2022 - Actualidad`
                     name="proyectos"
                     value={cvData.proyectos}
                     onChange={onChange}
-                    placeholder={
-                        cvLanguage === "en"
-                            ? `e.g.:
-Personal portfolio · React · 2024
-- Responsive website to showcase my work`
-                            : `Ej:
-Proyecto portafolio personal · React · 2024
-- Sitio web responsive para mostrar mis trabajos`
-                    }
+                    placeholder={cvLanguage === "en" ? "Personal portfolio..." : "Proyecto portafolio personal..."}
                     rows="3"
                 ></textarea>
             </label>
 
-            {/* OTROS */}
+            {/* --- 9. SECCIÓN: INFORMACIÓN ADICIONAL --- */}
             <div className="cv-form-sectionHeader">
                 <h3 className="cv-form-sectionTitle">
-                    {cvLanguage === "en"
-                        ? "Additional information"
-                        : "Información adicional"}
+                    {cvLanguage === "en" ? "Additional information" : "Información adicional"}
                     {onImprove && (
                         <button
                             type="button"
@@ -447,25 +365,17 @@ Proyecto portafolio personal · React · 2024
                     className="cv-section-toggle"
                     onClick={() => toggleSection("otros")}
                 >
-                    {sectionsVisible.otros
-                        ? "− Ocultar del CV"
-                        : "+ Mostrar en el CV"}
+                    {sectionsVisible.otros ? "− Ocultar del CV" : "+ Mostrar en el CV"}
                 </button>
             </div>
 
             <label>
-                {cvLanguage === "en"
-                    ? "Courses, certifications, interests, etc.:"
-                    : "Cursos, certificaciones, intereses, etc.:"}
+                {cvLanguage === "en" ? "Courses, certifications, etc.:" : "Cursos, certificaciones, etc.:"}
                 <textarea
                     name="otros"
                     value={cvData.otros}
                     onChange={onChange}
-                    placeholder={
-                        cvLanguage === "en"
-                            ? "e.g.: online courses, certifications, volunteering, relevant interests..."
-                            : "Ej: Cursos online, certificaciones, voluntariados, intereses relevantes..."
-                    }
+                    placeholder={cvLanguage === "en" ? "e.g.: online courses..." : "Ej: Cursos online..."}
                     rows="3"
                 ></textarea>
             </label>

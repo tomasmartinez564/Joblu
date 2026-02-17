@@ -1,5 +1,8 @@
 import { Link, NavLink } from "react-router-dom";
 
+// ==========================================
+// 🧭 COMPONENTE: NAVBAR
+// ==========================================
 export default function Navbar({
   user,
   isMobileMenuOpen,
@@ -13,10 +16,12 @@ export default function Navbar({
 }) {
   return (
     <header className="app-header">
+      {/* --- 1. Logotipo --- */}
       <Link to="/" className="app-logo">
         <img src="/logo2.png" alt="Joblu" className="app-logo-img" />
       </Link>
 
+      {/* --- 2. Navegación Desktop --- */}
       <nav className="nav nav-desktop">
         <NavLink
           to="/"
@@ -63,6 +68,7 @@ export default function Navbar({
         )}
       </nav>
 
+      {/* --- 3. Toggle Menú Móvil (Solo si hay usuario) --- */}
       {user && !isMobileMenuOpen && (
         <button
           className="mobile-menu-toggle"
@@ -75,6 +81,7 @@ export default function Navbar({
         </button>
       )}
 
+      {/* --- 4. Área de Usuario (Login o Menú de Cuenta) --- */}
       <div className="app-user-area">
         {!user && (
           <NavLink
@@ -100,6 +107,7 @@ export default function Navbar({
               )}
             </button>
 
+            {/* Menú Desplegable Desktop */}
             <div className={`account-menu ${isAccountMenuOpen ? "open" : ""}`}>
               <button
                 type="button"
@@ -116,27 +124,28 @@ export default function Navbar({
                 type="button"
                 className="account-menu-item"
                 onClick={() => {
-                  setIsAccountMenuOpen(false);
-                  handleLogout();
+                  goToAccount();
                 }}
               >
-                Cerrar sesión
+                Mi cuenta
               </button>
 
               <button
                 type="button"
                 className="account-menu-item"
                 onClick={() => {
-                  goToAccount();
+                  setIsAccountMenuOpen(false);
+                  handleLogout();
                 }}
               >
-                Mi cuenta
+                Cerrar sesión
               </button>
             </div>
           </div>
         )}
       </div>
 
+      {/* --- 5. Navegación Móvil (Backdrop y Drawer) --- */}
       {user && (
         <>
           <div
@@ -149,6 +158,7 @@ export default function Navbar({
               ✕
             </button>
 
+            {/* Info de Usuario en Drawer */}
             <button
               type="button"
               className="drawer-user"
@@ -170,18 +180,43 @@ export default function Navbar({
               </div>
             </button>
 
+            {/* Enlaces del Drawer */}
             <nav className="drawer-nav" onClick={() => setIsMobileMenuOpen(false)}>
-              <NavLink to="/" className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}>Inicio</NavLink>
+              <NavLink 
+                to="/" 
+                className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}
+              >
+                Inicio
+              </NavLink>
               <NavLink 
                 to="/cv" 
                 className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}
-                onClick={(e) => { e.preventDefault(); onCreateCv(); setIsMobileMenuOpen(false); }}
+                onClick={(e) => { 
+                  e.preventDefault(); 
+                  onCreateCv(); 
+                  setIsMobileMenuOpen(false); 
+                }}
               >
                 Crear CV
               </NavLink>
-              <NavLink to="/comunidad" className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}>Comunidad</NavLink>
-              <NavLink to="/jobs" className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}>Bolsa de Trabajo</NavLink>
-              <NavLink to="/mis-cvs" className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}>Mis cvs</NavLink>
+              <NavLink 
+                to="/comunidad" 
+                className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}
+              >
+                Comunidad
+              </NavLink>
+              <NavLink 
+                to="/jobs" 
+                className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}
+              >
+                Bolsa de Trabajo
+              </NavLink>
+              <NavLink 
+                to="/mis-cvs" 
+                className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}
+              >
+                Mis cvs
+              </NavLink>
             </nav>
 
             <button

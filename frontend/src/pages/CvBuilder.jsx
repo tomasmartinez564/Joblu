@@ -1,15 +1,22 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import html2pdf from "html2pdf.js";
+
+// --- Estilos ---
 import "../styles/cvbuilder.css";
+
+// --- Componentes y Páginas ---
 import Settings from "./Settings";
 import CvForm from "../components/cv/CvForm";
+
+// --- Servicios y Configuración ---
 import API_BASE_URL from "../config/api";
 import cvService from "../services/cvService";
 
-// Estado base vacío de un CV
+// ==========================================
+// 📋 CONSTANTES Y ESTADOS INICIALES
+// ==========================================
 const emptyCv = {
-  // Datos personales
   nombre: "",
   puesto: "",
   email: "",
@@ -18,8 +25,6 @@ const emptyCv = {
   sitioWeb: "",
   linkedin: "",
   github: "",
-
-  // Contenido del CV
   perfil: "",
   experiencias: "",
   educacion: "",
@@ -27,17 +32,18 @@ const emptyCv = {
   idiomas: "",
   proyectos: "",
   otros: "",
-
-  // Foto en base64
   foto: "",
 };
 
+// ==========================================
+// 🏗️ COMPONENTE: CV BUILDER
+// ==========================================
 function CvBuilder({ user, settings, onChangeSettings }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const isLogged = !!user;
 
-  // Preferencias del usuario (con defaults por si no vienen)
+  // --- 1. Desestructuración de Preferencias ---
   const {
     cvLanguage = "es",
     cvStyle = "ats",
@@ -46,10 +52,8 @@ function CvBuilder({ user, settings, onChangeSettings }) {
     targetIndustry = "",
   } = settings || {};
 
+  // --- 2. Estados: Datos del CV ---
   const [cvData, setCvData] = useState(emptyCv);
-
-  const [showSettings, setShowSettings] = useState(false);
-
   const [sectionsVisible, setSectionsVisible] = useState({
     perfil: true,
     experiencias: true,
@@ -60,104 +64,81 @@ function CvBuilder({ user, settings, onChangeSettings }) {
     otros: true,
   });
 
-  const cvRef = useRef(null);
+  // --- 3. Estados: Interfaz (UI) ---
+  const [showSettings, setShowSettings] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saveSuccess, setSaveSuccess] = useState("");
 
-
+  // --- 4. Estados: Inteligencia Artificial ---
   const [aiOpen, setAiOpen] = useState(false);
   const [aiSection, setAiSection] = useState("perfil");
   const [jobDesc, setJobDesc] = useState("");
   const [aiSuggestion, setAiSuggestion] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
-  const [saveError, setSaveError] = useState("");
-  const [saveSuccess, setSaveSuccess] = useState("");
-  const [isSaving, setIsSaving] = useState(false); // Estado para evitar doble click
-
-  // 🧠 Estados extra para IA mejorada
   const [aiTone, setAiTone] = useState("Professional");
-  const [aiGoal, setAiGoal] = useState("improve"); // improve, fix, keywords, shorter
+  const [aiGoal, setAiGoal] = useState("improve");
 
-  // Tutorial guiado (onboarding)
+  // --- 5. Estados: Tutorial (Onboarding) ---
   const [tutorialActivo, setTutorialActivo] = useState(false);
   const [pasoTutorial, setPasoTutorial] = useState(0);
+  const [posicionPaso, setPosicionPaso] = useState(null);
 
+  // --- 6. Refs ---
+  const cvRef = useRef(null);
   const refBtnConfiguracion = useRef(null);
   const refTextareaPerfil = useRef(null);
   const refBtnIA = useRef(null);
   const refVistaPrevia = useRef(null);
   const refTutorialModal = useRef(null);
+  const pasoTutorialRef = useRef(pasoTutorial);
 
+  // ==========================================
+  // 🧠 LÓGICA DE CARGA Y PERSISTENCIA
+  // ==========================================
 
-
-
-  // Cargar CV si hay ID en la URL
   useEffect(() => {
-    if (id) {
-      loadCvForEdit(id);
-    } else {
-      setCvData(emptyCv);
-    }
+    if (id) loadCvForEdit(id);
+    else setCvData(emptyCv);
   }, [id]);
 
   const loadCvForEdit = async (cvId) => {
     try {
       const response = await cvService.getById(cvId);
-
-      // El backend devuelve el objeto CV completo: { _id, title, puesto, data: {...}, ... }
-      // La propiedad 'data' contiene los campos del CV (perfil, experiencias, etc.)
       const cvContent = response.data || {};
-
-      // Fusionamos con emptyCv para garantizar que existan todas las claves
-      // Si cvContent está vacío o le faltan claves, emptyCv las suple.
-      // Si response.data no existe, usamos response directamente por si acaso (fallback legacy)
       const mergedData = { ...emptyCv, ...(Object.keys(cvContent).length > 0 ? cvContent : response) };
 
-      // Nos aseguramos de que data.foto no sea undefined/null para evitar errores en el input file
       if (!mergedData.foto) mergedData.foto = "";
-
-      // Si el CV tiene título/puesto en la raíz, los sincronizamos si faltan dentro de data
       if (!mergedData.nombre && response.title) mergedData.nombre = response.title;
       if (!mergedData.puesto && response.puesto) mergedData.puesto = response.puesto;
 
-
-      // Sanitización: Convertir todo a string legible para el usuario
+      // Sanitización de objetos complejos a texto legible
       Object.keys(mergedData).forEach(key => {
         const val = mergedData[key];
-
         if (typeof val === 'object' && val !== null) {
-          // Si es array (común en experiencias, educación, skills)
           if (Array.isArray(val)) {
             mergedData[key] = val.map(item => {
               if (typeof item === 'object' && item !== null) {
-                // Intentar formatear objetos conocidos (Experiencia, Educación)
-                // Buscamos campos comunes en español o inglés
                 const titulo = item.puesto || item.title || item.role || item.position || item.titulo || item.degree || item.name || item.nombre || "";
                 const entidad = item.empresa || item.company || item.institucion || item.institution || item.university || item.school || "";
                 const fecha = item.fecha || item.date || item.period || item.years || item.year || "";
                 const descripcion = item.descripcion || item.description || item.summary || item.details || "";
 
-                // Si encontramos al menos título o entidad, formateamos bonito
                 if (titulo || entidad) {
                   let linea1 = [titulo, entidad, fecha].filter(Boolean).join(" · ");
-                  let bloque = linea1;
-                  if (descripcion) bloque += `\n${descripcion}`;
-                  return bloque;
+                  return descripcion ? `${linea1}\n${descripcion}` : linea1;
                 }
-
-                // Si es un objeto genérico sin esas claves, stringify legible (sin corchetes si es posible)
                 return Object.values(item).join(" · ");
               }
               return String(item);
-            }).join('\n\n'); // Separar items con doble salto
+            }).join('\n\n');
           } else {
-            // Si es objeto único
-            // Intentamos aplanar valores
             mergedData[key] = Object.values(val).join("\n");
           }
         } else if (val === null || val === undefined) {
           mergedData[key] = "";
         } else {
-          // Primitivos a string
           mergedData[key] = String(val);
         }
       });
@@ -168,57 +149,13 @@ function CvBuilder({ user, settings, onChangeSettings }) {
     }
   };
 
-  useEffect(() => {
-    if (!showTips) return;
-
-    const yaVioTutorial = localStorage.getItem("joblu_tutorial_cv_v1");
-    if (yaVioTutorial) return;
-
-    setTutorialActivo(true);
-    setPasoTutorial(0);
-  }, [showTips]);
-
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setCvData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleDownloadPDF = () => {
-    if (!cvRef.current) return;
-
-    const element = cvRef.current;
-    const opt = {
-      margin: [10, 10], // 10mm margins for better layout
-      filename: `${cvData.nombre || "mi_cv"}.pdf`,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      pagebreak: { mode: ["avoid-all", "css", "legacy"] },
-    };
-
-    html2pdf().set(opt).from(element).save();
-  };
-
-  const toggleSection = (key) => {
-    setSectionsVisible((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
-
   const handleSave = async () => {
     if (isSaving) return;
-
     setSaveError("");
     setSaveSuccess("");
 
     if (!isLogged) {
-      setSaveError(
-        cvLanguage === "en"
-          ? "You need to log in to save your CVs."
-          : "Tenés que iniciar sesión para guardar tus CVs."
-      );
+      setSaveError(cvLanguage === "en" ? "You need to log in to save your CVs." : "Tenés que iniciar sesión para guardar tus CVs.");
       return;
     }
 
@@ -231,118 +168,30 @@ function CvBuilder({ user, settings, onChangeSettings }) {
       };
 
       if (id) {
-        // Update
         await cvService.update(id, payload);
-        setSaveSuccess(
-          cvLanguage === "en" ? "CV updated." : "CV actualizado correctamente."
-        );
+        setSaveSuccess(cvLanguage === "en" ? "CV updated." : "CV actualizado correctamente.");
       } else {
-        // Create
         const newCv = await cvService.create(payload);
-        setSaveSuccess(
-          cvLanguage === "en" ? "CV created." : "CV creado correctamente."
-        );
-        // Navegar a la URL del nuevo CV para modo edición
+        setSaveSuccess(cvLanguage === "en" ? "CV created." : "CV creado correctamente.");
         navigate(`/cv/${newCv._id}`, { replace: true });
       }
-
     } catch (error) {
-      console.error(error);
       setSaveError(error.message || "Error al guardar.");
     } finally {
       setIsSaving(false);
     }
   };
 
+  // ==========================================
+  // ✨ LÓGICA DE INTELIGENCIA ARTIFICIAL
+  // ==========================================
 
-  //  subir foto
-  const handlePhotoChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setCvData((prev) => ({
-        ...prev,
-        foto: reader.result, // base64
-      }));
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleRemovePhoto = () => {
-    setCvData((prev) => ({
-      ...prev,
-      foto: "",
-    }));
-  };
-
-  const contactoLinea1 =
-    [cvData.email, cvData.telefono, cvData.ubicacion].filter(Boolean).join(" · ") ||
-    (cvLanguage === "en"
-      ? "email@example.com · +54 9 11 0000-0000 · Buenos Aires, Argentina"
-      : "email@ejemplo.com · +54 9 11 0000-0000 · Buenos Aires, Argentina");
-
-  const contactoLinea2 =
-    [cvData.linkedin, cvData.github, cvData.sitioWeb].filter(Boolean).join(" · ") ||
-    (cvLanguage === "en"
-      ? "linkedin.com/in/user · github.com/user · portfolio.com"
-      : "linkedin.com/in/usuario · github.com/usuario · portfolio.com");
-
-  const socialLinks = [
-    { type: "linkedin", value: cvData.linkedin },
-    { type: "github", value: cvData.github },
-    {
-      type: "web",
-      value: cvData.sitioWeb,
-    },
-  ].filter((link) => !!link.value && link.value.trim() !== "");
-
-
-  // Títulos de secciones según idioma
-  const sectionLabels = {
-    perfil: cvLanguage === "en" ? "Profile" : "Perfil",
-    experiencias: cvLanguage === "en" ? "Experience" : "Experiencias",
-    educacion: cvLanguage === "en" ? "Education" : "Educación",
-    habilidades: cvLanguage === "en" ? "Skills" : "Habilidades",
-    idiomas: cvLanguage === "en" ? "Languages" : "Idiomas",
-    proyectos: cvLanguage === "en" ? "Projects" : "Proyectos",
-    otros: cvLanguage === "en" ? "Additional information" : "Información adicional",
-  };
-
-  // Clase según estilo del CV
-  const previewPaperClass = (() => {
-    if (cvStyle === "visual") return "cv-preview-paper cv-preview-paper-visual";
-    if (cvStyle === "balanceado") return "cv-preview-paper cv-preview-paper-balanced";
-    return "cv-preview-paper cv-preview-paper-ats";
-  })();
-
-  // Pequeño resumen de preferencias
-  const settingsSummary = (() => {
-    const langLabel = cvLanguage === "en" ? "Inglés" : "Español";
-    const styleLabel =
-      cvStyle === "visual"
-        ? "Visual"
-        : cvStyle === "balanceado"
-          ? "Balanceado"
-          : "Compatibilidad ATS";
-
-    let base = `Idioma: ${langLabel} · Estilo: ${styleLabel}`;
-    if (targetIndustry) {
-      base += ` · Rubro: ${targetIndustry}`;
-    }
-    return base;
-  })();
-
-
-  // 🧠 IA real: llamada al backend
   const handleAskAi = async () => {
     setAiLoading(true);
     setAiError("");
     setAiSuggestion("");
 
     try {
-      // Usamos el nuevo método optimize del servicio
       const data = await cvService.optimize({
         section: aiSection,
         content: cvData[aiSection],
@@ -353,614 +202,297 @@ function CvBuilder({ user, settings, onChangeSettings }) {
         goal: aiGoal
       });
 
-      // cvService.optimize ya devuelve el JSON parseado
-
-      if (!data.suggestion) {
-        throw new Error("La respuesta no contiene 'suggestion'");
-      }
-
+      if (!data.suggestion) throw new Error("La respuesta no contiene 'suggestion'");
       setAiSuggestion(data.suggestion);
     } catch (err) {
-      console.error("Error en handleAskAi:", err);
-      setAiError(
-        cvLanguage === "en"
-          ? "There was a problem connecting to the AI."
-          : "Hubo un problema al conectarse con la IA."
-      );
+      setAiError(cvLanguage === "en" ? "There was a problem connecting to the AI." : "Hubo un problema al conectarse con la IA.");
     } finally {
       setAiLoading(false);
     }
   };
 
-
-
-
   const applyAiSection = () => {
     if (!aiSuggestion) return;
-    setCvData((prev) => ({
-      ...prev,
-      [aiSection]: aiSuggestion,
-    }));
+    setCvData((prev) => ({ ...prev, [aiSection]: aiSuggestion }));
     setAiOpen(false);
   };
 
-  const closeAiPanel = () => {
-    if (aiLoading) return;
-    setAiOpen(false);
-  };
-
-  // Función para abrir la IA desde el botón "Mejorar" de cada sección
   const handleOpenAiForSection = (sectionName) => {
     setAiSection(sectionName);
     setAiOpen(true);
-    // Resetear estados si se quiere
     setAiSuggestion("");
     setAiError("");
   };
 
+  const closeAiPanel = () => { if (!aiLoading) setAiOpen(false); };
+
+  // ==========================================
+  // 🎓 LÓGICA DEL TUTORIAL (Onboarding)
+  // ==========================================
+
   const pasos = [
-    {
-      titulo: "Elegí la configuración del CV",
-      descripcion: "Acá podés seleccionar el rubro/estilo del CV antes de completarlo.",
-      ref: refBtnConfiguracion,
-    },
-    {
-      titulo: "Completá tu perfil profesional",
-      descripcion: "Escribí un resumen breve y claro de quién sos y qué buscás.",
-      ref: refTextareaPerfil,
-    },
-    {
-      titulo: "Mejoralo con IA",
-      descripcion: "Usá la IA para mejorar el texto y hacerlo más profesional.",
-      ref: refBtnIA,
-    },
-    {
-      titulo: "Revisá la vista previa",
-      descripcion: "La vista previa se actualiza en tiempo real mientras completás los datos.",
-      ref: refVistaPrevia,
-    },
+    { titulo: "Elegí la configuración del CV", descripcion: "Acá podés seleccionar el rubro/estilo del CV.", ref: refBtnConfiguracion },
+    { titulo: "Completá tu perfil profesional", descripcion: "Escribí un resumen breve y claro de quién sos.", ref: refTextareaPerfil },
+    { titulo: "Mejoralo con IA", descripcion: "Usá la IA para hacerlo más profesional.", ref: refBtnIA },
+    { titulo: "Revisá la vista previa", descripcion: "Se actualiza en tiempo real mientras completás los datos.", ref: refVistaPrevia },
   ];
 
   const pasoActual = pasos[pasoTutorial];
 
-  const pasoTutorialRef = useRef(pasoTutorial);
-
   useEffect(() => {
     pasoTutorialRef.current = pasoTutorial;
-  }, [pasoTutorial]);
-
-
-  const [posicionPaso, setPosicionPaso] = useState(null);
-
-  const calcularPosicionPaso = (indicePaso) => {
-    if (!tutorialActivo) return;
-
-    const paso = pasos[indicePaso];
-    if (!paso?.ref?.current) return;
-
-    const el = paso.ref.current;
-    const rect = el.getBoundingClientRect();
-
-    // Dimensiones del viewport
-    const vh = window.innerHeight;
-    const vw = window.innerWidth;
-
-    // Configuración
-    const margen = 16;
-    const anchoModal = 520; // Coincide con el max-width del CSS
-
-    // 1. Lógica Vertical: ¿Arriba o Abajo?
-    // Si el elemento está más abajo del 60% de la pantalla, ponemos el modal ARRIBA.
-    const ponerArriba = rect.top > (vh * 0.6);
-
-    // 2. Lógica Horizontal: Centrado Inteligente con Clamp
-    // Intentamos centrar el modal respecto al elemento resaltado
-    let leftCalculado = rect.left + (rect.width / 2) - (anchoModal / 2);
-
-    // Clamp: Evitamos que se salga por la izquierda (mínimo margen)
-    if (leftCalculado < margen) leftCalculado = margen;
-
-    // Clamp: Evitamos que se salga por la derecha
-    if (leftCalculado + anchoModal > vw - margen) {
-      leftCalculado = vw - anchoModal - margen;
-    }
-
-    setPosicionPaso({
-      // Coordenadas para el Highlight (caja hueca)
-      top: rect.top,
-      left: rect.left,
-      width: rect.width,
-      height: rect.height,
-
-      // Datos para posicionar el Modal
-      modalLeft: leftCalculado,
-      ponerArriba, // Booleano clave
-      // Puntos de anclaje
-      anchorTop: rect.top - margen,       // Dónde termina el modal si va arriba
-      anchorBottom: rect.bottom + margen, // Dónde empieza el modal si va abajo
-    });
-  };
-
-
-
-  useEffect(() => {
     if (!tutorialActivo) return;
 
     const paso = pasos[pasoTutorial];
     if (!paso?.ref?.current) return;
 
-    const el = paso.ref.current;
-
-    el.scrollIntoView({ behavior: "auto", block: "center", inline: "nearest" });
+    paso.ref.current.scrollIntoView({ behavior: "auto", block: "center", inline: "nearest" });
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         calcularPosicionPaso(pasoTutorial);
-
-        if (pasoTutorial === 2) {
-          setTimeout(() => {
-            if (!tutorialActivo) return;
-            if (pasoTutorialRef.current !== 2) return;
-            calcularPosicionPaso(2);
-          }, 120);
-        }
       });
     });
   }, [tutorialActivo, pasoTutorial]);
 
+  const calcularPosicionPaso = (indicePaso) => {
+    const paso = pasos[indicePaso];
+    if (!paso?.ref?.current) return;
 
+    const rect = paso.ref.current.getBoundingClientRect();
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
+    const margen = 16;
+    const anchoModal = 520;
 
-  const marcarTutorialComoVisto = () => {
-    localStorage.setItem("joblu_tutorial_cv_v1", "1");
+    const ponerArriba = rect.top > (vh * 0.6);
+    let leftCalculado = rect.left + (rect.width / 2) - (anchoModal / 2);
+
+    if (leftCalculado < margen) leftCalculado = margen;
+    if (leftCalculado + anchoModal > vw - margen) leftCalculado = vw - anchoModal - margen;
+
+    setPosicionPaso({
+      top: rect.top, left: rect.left, width: rect.width, height: rect.height,
+      modalLeft: leftCalculado, ponerArriba,
+      anchorTop: rect.top - margen, anchorBottom: rect.bottom + margen,
+    });
   };
 
   const cerrarTutorial = () => {
     setTutorialActivo(false);
-    marcarTutorialComoVisto();
+    localStorage.setItem("joblu_tutorial_cv_v1", "1");
   };
 
   const siguientePaso = () => {
-    const ultimo = pasoTutorial >= pasos.length - 1;
-    if (ultimo) {
-      cerrarTutorial();
-      return;
-    }
-    setPasoTutorial((prev) => prev + 1);
+    if (pasoTutorial >= pasos.length - 1) cerrarTutorial();
+    else setPasoTutorial((prev) => prev + 1);
   };
 
+  useEffect(() => {
+    if (!showTips || localStorage.getItem("joblu_tutorial_cv_v1")) return;
+    setTutorialActivo(true);
+    setPasoTutorial(0);
+  }, [showTips]);
 
+  // ==========================================
+  // 🛠️ MANEJADORES DE INTERFAZ (UI)
+  // ==========================================
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCvData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => setCvData((prev) => ({ ...prev, foto: reader.result }));
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = () => setCvData((prev) => ({ ...prev, foto: "" }));
+
+  const toggleSection = (key) => setSectionsVisible((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const handleDownloadPDF = () => {
+    if (!cvRef.current) return;
+    const opt = {
+      margin: [10, 10],
+      filename: `${cvData.nombre || "mi_cv"}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+    };
+    html2pdf().set(opt).from(cvRef.current).save();
+  };
+
+  // --- Helpers de Renderizado ---
+  const sectionLabels = {
+    perfil: cvLanguage === "en" ? "Profile" : "Perfil",
+    experiencias: cvLanguage === "en" ? "Experience" : "Experiencias",
+    educacion: cvLanguage === "en" ? "Education" : "Educación",
+    habilidades: cvLanguage === "en" ? "Skills" : "Habilidades",
+    idiomas: cvLanguage === "en" ? "Languages" : "Idiomas",
+    proyectos: cvLanguage === "en" ? "Projects" : "Proyectos",
+    otros: cvLanguage === "en" ? "Additional information" : "Información adicional",
+  };
+
+  const previewPaperClass = `cv-preview-paper ${cvStyle === 'visual' ? 'cv-preview-paper-visual' : cvStyle === 'balanceado' ? 'cv-preview-paper-balanced' : 'cv-preview-paper-ats'}`;
+
+  const settingsSummary = `Idioma: ${cvLanguage === "en" ? "Inglés" : "Español"} · Estilo: ${cvStyle === "visual" ? "Visual" : cvStyle === "balanceado" ? "Balanceado" : "Compatibilidad ATS"}${targetIndustry ? ` · Rubro: ${targetIndustry}` : ""}`;
+
+  const contactoLinea1 = [cvData.email, cvData.telefono, cvData.ubicacion].filter(Boolean).join(" · ") || (cvLanguage === "en" ? "email@example.com · +54 9 11 0000-0000 · Buenos Aires" : "email@ejemplo.com · +54 9 11 0000-0000 · Buenos Aires");
+  const contactoLinea2 = [cvData.linkedin, cvData.github, cvData.sitioWeb].filter(Boolean).join(" · ") || (cvLanguage === "en" ? "linkedin.com/in/user · github.com/user · portfolio.com" : "linkedin.com/in/usuario · github.com/usuario · portfolio.com");
+
+  const socialLinks = [{ type: "linkedin", value: cvData.linkedin }, { type: "github", value: cvData.github }, { type: "web", value: cvData.sitioWeb }].filter(l => !!l.value && l.value.trim() !== "");
+
+  // ==========================================
+  // 📦 RENDERIZADO (JSX)
+  // ==========================================
   return (
     <div className="cv-page">
+      {/* --- Tutorial Overlay --- */}
       {tutorialActivo && pasoActual?.ref?.current && (
         <div className="tutorial-overlay">
           {posicionPaso && (
-            <div
-              className="tutorial-highlight"
-              style={{
-                top: posicionPaso.top,
-                left: posicionPaso.left,
-                width: posicionPaso.width,
-                height: posicionPaso.height,
-              }}
-            />
+            <div className="tutorial-highlight" style={{ top: posicionPaso.top, left: posicionPaso.left, width: posicionPaso.width, height: posicionPaso.height }} />
           )}
-
-          <div
-            ref={refTutorialModal}
-            className="tutorial-modal"
-            style={
-              posicionPaso
-                ? {
-                  left: posicionPaso.modalLeft,
-                  // Si va arriba: Anulamos 'top' y usamos 'bottom' calculado desde el borde inferior
-                  top: posicionPaso.ponerArriba ? "auto" : posicionPaso.anchorBottom,
-                  bottom: posicionPaso.ponerArriba
-                    ? (window.innerHeight - posicionPaso.anchorTop)
-                    : "auto",
-                }
-                : undefined
-            }
-          >
-
-
-
-
+          <div ref={refTutorialModal} className="tutorial-modal" style={posicionPaso ? { left: posicionPaso.modalLeft, top: posicionPaso.ponerArriba ? "auto" : posicionPaso.anchorBottom, bottom: posicionPaso.ponerArriba ? (window.innerHeight - posicionPaso.anchorTop) : "auto" } : undefined}>
             <p className="tutorial-paso">Paso {pasoTutorial + 1} de {pasos.length}</p>
             <h3 className="tutorial-titulo">{pasoActual.titulo}</h3>
             <p className="tutorial-descripcion">{pasoActual.descripcion}</p>
-
             <div className="tutorial-acciones">
-              <button type="button" className="tutorial-btn-secundario" onClick={cerrarTutorial}>
-                Omitir
-              </button>
-              <button type="button" className="tutorial-btn-principal" onClick={siguientePaso}>
-                Siguiente
-              </button>
+              <button type="button" className="tutorial-btn-secundario" onClick={cerrarTutorial}>Omitir</button>
+              <button type="button" className="tutorial-btn-principal" onClick={siguientePaso}>Siguiente</button>
             </div>
           </div>
         </div>
       )}
 
-
       <section className="cv-builder">
-        {/* 📝 Columna izquierda - Formulario */}
+        {/* --- Columna Formulario --- */}
         <div className="cv-column">
-
           <div className="cv-settings-toggle">
-            <button
-              ref={refBtnConfiguracion}
-              type="button"
-              className="cv-settings-toggle-btn"
-              onClick={() => setShowSettings((prev) => !prev)}
-            >
-              {showSettings
-                ? "Ocultar configuración de CV"
-                : "Mostrar configuración de CV"}
+            <button ref={refBtnConfiguracion} type="button" className="cv-settings-toggle-btn" onClick={() => setShowSettings(!showSettings)}>
+              {showSettings ? "Ocultar configuración de CV" : "Mostrar configuración de CV"}
             </button>
-
             {showSettings && (
               <div className="cv-settings-panel">
-                <Settings
-                  user={user}
-                  settings={settings}
-                  onChangeSettings={onChangeSettings}
-                />
+                <Settings user={user} settings={settings} onChangeSettings={onChangeSettings} />
               </div>
             )}
           </div>
 
           <h2>Completa tu CV</h2>
+          {showTips && <div className="cv-settings-tip"><strong>Preferencias Joblu: </strong><span>{settingsSummary}</span></div>}
 
-          {showTips && (
-            <div className="cv-settings-tip">
-              <strong>Preferencias Joblu: </strong>
-              <span>{settingsSummary}</span>
-            </div>
-          )}
-
-          <CvForm
-            cvData={cvData}
-            onChange={handleChange}
-            settings={settings}
-            sectionsVisible={sectionsVisible}
-            toggleSection={toggleSection}
-            onPhotoChange={handlePhotoChange}
-            onRemovePhoto={handleRemovePhoto}
-            onImprove={handleOpenAiForSection}
-            refs={{ refTextareaPerfil }}
-          />
+          <CvForm cvData={cvData} onChange={handleChange} settings={settings} sectionsVisible={sectionsVisible} toggleSection={toggleSection} onPhotoChange={handlePhotoChange} onRemovePhoto={handleRemovePhoto} onImprove={handleOpenAiForSection} refs={{ refTextareaPerfil }} />
 
           <div className="cv-actions">
-            <button
-              type="button"
-              className="cv-action-btn save-btn"
-              onClick={handleSave}
-              disabled={isSaving}
-              style={{ opacity: isSaving ? 0.7 : 1, cursor: isSaving ? "wait" : "pointer" }}
-            >
+            <button type="button" className="cv-action-btn save-btn" onClick={handleSave} disabled={isSaving} style={{ opacity: isSaving ? 0.7 : 1, cursor: isSaving ? "wait" : "pointer" }}>
               {isSaving ? "Guardando..." : (cvLanguage === "en" ? "Save CV" : "Guardar CV")}
             </button>
-
-            <button
-              type="button"
-              className="cv-action-btn download-btn"
-              onClick={handleDownloadPDF}
-            >
+            <button type="button" className="cv-action-btn download-btn" onClick={handleDownloadPDF}>
               {cvLanguage === "en" ? "Download PDF" : "Descargar PDF"}
             </button>
-
-            <button
-              ref={refBtnIA}
-              type="button"
-              className="cv-action-btn ai-btn"
-              onClick={() => setAiOpen(true)}
-            >
-              ✨ {cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
+            <button ref={refBtnIA} type="button" className="cv-action-btn ai-btn" onClick={() => setAiOpen(true)}>
+              ✨ {cvLanguage === "en" ? "Improve with IA" : "Mejorar con IA"}
             </button>
-
             {(saveError || saveSuccess) && (
-              <p
-                className={
-                  "cv-save-message " +
-                  (saveError
-                    ? "cv-save-message--error"
-                    : "cv-save-message--success")
-                }
-              >
+              <p className={"cv-save-message " + (saveError ? "cv-save-message--error" : "cv-save-message--success")}>
                 {saveError || saveSuccess}
               </p>
             )}
           </div>
         </div>
 
-        {/* 👀 Columna derecha - Vista previa */}
+        {/* --- Columna Vista Previa --- */}
         <div className="cv-column">
           <h2>{cvLanguage === "en" ? "Preview" : "Vista previa"}</h2>
           <div className="cv-preview-wrapper" ref={refVistaPrevia}>
             <div className={previewPaperClass} ref={cvRef}>
               <div className="cv-preview-header">
                 <div>
-                  <h1>
-                    {cvData.nombre ||
-                      (cvLanguage === "en" ? "Name Surname" : "Nombre Apellido")}
-                  </h1>
-                  <h3 className="cv-preview-job-title">
-                    {cvData.puesto ||
-                      (cvLanguage === "en"
-                        ? "Desired role / Job title"
-                        : "Puesto deseado / Rol profesional")}
-                  </h3>
+                  <h1>{cvData.nombre || (cvLanguage === "en" ? "Name Surname" : "Nombre Apellido")}</h1>
+                  <h3 className="cv-preview-job-title">{cvData.puesto || (cvLanguage === "en" ? "Desired role / Job title" : "Puesto deseado / Rol profesional")}</h3>
                 </div>
-
-                {includePhoto &&
-                  (cvData.foto ? (
-                    <img
-                      src={cvData.foto}
-                      alt="Foto de perfil"
-                      className="cv-photo-preview"
-                    />
-                  ) : (
-                    <div className="cv-photo-placeholder">
-                      {cvLanguage === "en" ? "Photo" : "Foto"}
-                    </div>
-                  ))}
+                {includePhoto && (cvData.foto ? <img src={cvData.foto} alt="Foto" className="cv-photo-preview" /> : <div className="cv-photo-placeholder">{cvLanguage === "en" ? "Photo" : "Foto"}</div>)}
               </div>
 
               <section className="cv-preview-contact">
                 <p>{contactoLinea1}</p>
-
                 {socialLinks.length > 0 ? (
                   <div className="cv-contact-social">
-                    {socialLinks.map((link) => {
-                      const raw = link.value.trim();
-                      const needsProtocol = !raw.startsWith("http://") && !raw.startsWith("https://");
-                      const url = needsProtocol ? `https://${raw}` : raw;
-
-                      let iconLabel = "";
-                      if (link.type === "linkedin") iconLabel = "in";
-                      else if (link.type === "github") iconLabel = "<>";
-                      else iconLabel = "🌐";
-
+                    {socialLinks.map(link => {
+                      const url = link.value.trim().startsWith("http") ? link.value.trim() : `https://${link.value.trim()}`;
                       return (
-                        <a
-                          key={link.type}
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="cv-contact-link"
-                        >
-                          <span className="cv-contact-icon">{iconLabel}</span>
-                          <span className="cv-contact-text">{raw}</span>
+                        <a key={link.type} href={url} target="_blank" rel="noopener noreferrer" className="cv-contact-link">
+                          <span className="cv-contact-icon">{link.type === 'linkedin' ? 'in' : link.type === 'github' ? '<>' : '🌐'}</span>
+                          <span className="cv-contact-text">{link.value.trim()}</span>
                         </a>
                       );
                     })}
                   </div>
-                ) : (
-                  <p>{contactoLinea2}</p>
-                )}
+                ) : <p>{contactoLinea2}</p>}
               </section>
-
 
               <hr className="cv-preview-divider" />
 
-              {sectionsVisible.perfil && (
-                <section>
-                  <h4>{sectionLabels.perfil}</h4>
-                  <p className="cv-preview-paragraph">
-                    {cvData.perfil ||
-                      (cvLanguage === "en"
-                        ? "Short introduction about your profile and goals..."
-                        : "Texto de presentación breve sobre tu perfil profesional...")}
+              {/* Secciones del CV */}
+              {Object.entries(sectionsVisible).map(([key, visible]) => visible && (
+                <section key={key} className="cv-preview-section">
+                  <h4>{sectionLabels[key]}</h4>
+                  <p className={`cv-preview-paragraph${['experiencias', 'educacion', 'proyectos', 'otros'].includes(key) ? '-preline' : ''}`}>
+                    {cvData[key] || (cvLanguage === "en" ? "Add details..." : "Agregá detalles...")}
                   </p>
                 </section>
-              )}
-
-              {sectionsVisible.experiencias && (
-                <section className="cv-preview-section">
-                  <h4>{sectionLabels.experiencias}</h4>
-                  <p className="cv-preview-paragraph-preline">
-                    {cvData.experiencias ||
-                      (cvLanguage === "en"
-                        ? "Mian work experience..."
-                        : "Tu experiencia laboral...")}
-                  </p>
-                </section>
-              )}
-
-              {sectionsVisible.educacion && (
-                <section className="cv-preview-section">
-                  <h4>{sectionLabels.educacion}</h4>
-                  <p className="cv-preview-paragraph-preline">
-                    {cvData.educacion ||
-                      (cvLanguage === "en"
-                        ? "Main academic background..."
-                        : "Formación académica principal...")}
-                  </p>
-                </section>
-              )}
-
-              {sectionsVisible.habilidades && (
-                <section className="cv-preview-section">
-                  <h4>{sectionLabels.habilidades}</h4>
-                  <p className="cv-preview-paragraph">
-                    {cvData.habilidades ||
-                      (cvLanguage === "en"
-                        ? "e.g.: HTML · CSS · JavaScript · React · Teamwork"
-                        : "Ej: HTML · CSS · JavaScript · React · Trabajo en equipo")}
-                  </p>
-                </section>
-              )}
-
-              {sectionsVisible.idiomas && (
-                <section className="cv-preview-section">
-                  <h4>{sectionLabels.idiomas}</h4>
-                  <p className="cv-preview-paragraph">
-                    {cvData.idiomas ||
-                      (cvLanguage === "en"
-                        ? "e.g.: Native Spanish · English B2"
-                        : "Ej: Español nativo · Inglés B2")}
-                  </p>
-                </section>
-              )}
-
-              {sectionsVisible.proyectos && (
-                <section className="cv-preview-section">
-                  <h4>{sectionLabels.proyectos}</h4>
-                  <p className="cv-preview-paragraph-preline">
-                    {cvData.proyectos ||
-                      (cvLanguage === "en"
-                        ? "Relevant projects you want to highlight..."
-                        : "Proyectos relevantes que quieras destacar...")}
-                  </p>
-                </section>
-              )}
-
-              {sectionsVisible.otros && (
-                <section className="cv-preview-section">
-                  <h4>{sectionLabels.otros}</h4>
-                  <p className="cv-preview-paragraph-preline">
-                    {cvData.otros ||
-                      (cvLanguage === "en"
-                        ? "Courses, certifications, volunteering, interests..."
-                        : "Cursos, certificaciones, voluntariados, intereses...")}
-                  </p>
-                </section>
-              )}
+              ))}
             </div>
           </div>
         </div>
 
-        {/* 🧠 Panel lateral de IA */}
+        {/* --- Panel IA --- */}
         {aiOpen && (
           <>
             <div className="cv-ai-backdrop" onClick={closeAiPanel} />
-
             <div className="cv-ai-panel">
-              {/* Contenido scrollable del panel */}
               <div className="cv-ai-content">
                 <div className="cv-ai-header">
                   <h3>Joblu IA</h3>
-                  <button
-                    type="button"
-                    className="cv-ai-close"
-                    onClick={closeAiPanel}
-                  >
-                    ✕
-                  </button>
+                  <button type="button" className="cv-ai-close" onClick={closeAiPanel}>✕</button>
                 </div>
-
-                <p className="cv-ai-tagline">
-                  {cvLanguage === "en"
-                    ? "Simulated assistant to improve your CV."
-                    : "Asistente simulado para mejorar tu CV."}
-                </p>
-
                 <div className="cv-ai-body">
-                  <label>
-                    {cvLanguage === "en"
-                      ? "Job description (optional, paste the job ad):"
-                      : "Descripción del puesto (opcional, pega la oferta de trabajo):"}
-                    <textarea
-                      rows="4"
-                      value={jobDesc}
-                      onChange={(e) => setJobDesc(e.target.value)}
-                      placeholder={
-                        cvLanguage === "en"
-                          ? "Paste here the job description or main requirements..."
-                          : "Pegá acá la descripción del puesto o los requisitos principales..."
-                      }
-                    ></textarea>
+                  <label>{cvLanguage === "en" ? "Job description:" : "Descripción del puesto:"}
+                    <textarea rows="4" value={jobDesc} onChange={(e) => setJobDesc(e.target.value)} placeholder="..." />
                   </label>
-
                   <div className="cv-ai-options">
-                    <label>
-                      {cvLanguage === "en" ? "Tone:" : "Tono:"}
+                    <label>{cvLanguage === "en" ? "Tone:" : "Tono:"}
                       <select value={aiTone} onChange={(e) => setAiTone(e.target.value)}>
-                        <option value="Professional">{cvLanguage === "en" ? "Professional" : "Profesional"}</option>
-                        <option value="Creative">{cvLanguage === "en" ? "Creative" : "Creativo"}</option>
-                        <option value="Academic">{cvLanguage === "en" ? "Academic" : "Académico"}</option>
-                        <option value="Direct">{cvLanguage === "en" ? "Direct" : "Directo"}</option>
+                        <option value="Professional">Profesional</option><option value="Creative">Creativo</option>
                       </select>
                     </label>
-
-                    <label>
-                      {cvLanguage === "en" ? "Goal:" : "Objetivo:"}
+                    <label>{cvLanguage === "en" ? "Goal:" : "Objetivo:"}
                       <select value={aiGoal} onChange={(e) => setAiGoal(e.target.value)}>
-                        <option value="improve">{cvLanguage === "en" ? "Improve writing" : "Mejorar redacción"}</option>
-                        <option value="fix">{cvLanguage === "en" ? "Fix grammar" : "Corregir gramática"}</option>
-                        <option value="make_shorter">{cvLanguage === "en" ? "Make shorter" : "Hacer más corto"}</option>
-                        <option value="keywords">{cvLanguage === "en" ? "Optimize keywords" : "Optimizar palabras clave"}</option>
+                        <option value="improve">Mejorar redacción</option><option value="fix">Corregir gramática</option>
                       </select>
                     </label>
                   </div>
-
-                  <label>
-                    {cvLanguage === "en"
-                      ? "Which section do you want to improve?"
-                      : "¿Qué sección querés mejorar?"}
-                    <select
-                      value={aiSection}
-                      onChange={(e) => setAiSection(e.target.value)}
-                    >
-                      <option value="perfil">
-                        {cvLanguage === "en" ? "Profile" : "Perfil profesional"}
-                      </option>
-                      <option value="experiencias">
-                        {cvLanguage === "en"
-                          ? "Experience"
-                          : "Experiencia laboral"}
-                      </option>
-                      <option value="educacion">
-                        {cvLanguage === "en" ? "Education" : "Educación"}
-                      </option>
-                      <option value="habilidades">
-                        {cvLanguage === "en" ? "Skills" : "Habilidades"}
-                      </option>
-                      <option value="otros">
-                        {cvLanguage === "en"
-                          ? "Additional information"
-                          : "Información adicional"}
-                      </option>
-                    </select>
-                  </label>
-
-                  <button
-                    type="button"
-                    className="cv-ai-generate"
-                    onClick={handleAskAi}
-                    disabled={aiLoading}
-                  >
-                    {aiLoading
-                      ? (cvLanguage === "en" ? "Thinking..." : "Pensando...")
-                      : (cvLanguage === "en" ? "Generate suggestion" : "Generar sugerencia")}
+                  <button type="button" className="cv-ai-generate" onClick={handleAskAi} disabled={aiLoading}>
+                    {aiLoading ? "Pensando..." : "Generar sugerencia"}
                   </button>
-
                   {aiError && <p className="cv-ai-error">{aiError}</p>}
-
                   {aiSuggestion && (
                     <div className="cv-ai-comparison">
-                      <div className="cv-ai-col">
-                        <h4>{cvLanguage === "en" ? "Original" : "Original"}</h4>
-                        <div className="cv-ai-box original">{cvData[aiSection]}</div>
-                      </div>
-                      <div className="cv-ai-col">
-                        <h4>{cvLanguage === "en" ? "Suggested" : "Sugerido"}</h4>
-                        <div className="cv-ai-box suggested">{aiSuggestion}</div>
-                      </div>
+                      <div className="cv-ai-col"><h4>Original</h4><div className="cv-ai-box original">{cvData[aiSection]}</div></div>
+                      <div className="cv-ai-col"><h4>Sugerido</h4><div className="cv-ai-box suggested">{aiSuggestion}</div></div>
                     </div>
                   )}
                 </div>
               </div>
-
               <div className="cv-ai-footer">
-                <button
-                  type="button"
-                  className="cv-ai-apply"
-                  onClick={applyAiSection}
-                  disabled={!aiSuggestion}
-                >
-                  {cvLanguage === "en" ? "Apply suggestion" : "Aplicar sugerencia"}
-                </button>
+                <button type="button" className="cv-ai-apply" onClick={applyAiSection} disabled={!aiSuggestion}>Aplicar sugerencia</button>
               </div>
             </div>
           </>
@@ -969,6 +501,5 @@ function CvBuilder({ user, settings, onChangeSettings }) {
     </div>
   );
 }
-
 
 export default CvBuilder;

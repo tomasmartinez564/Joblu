@@ -1,6 +1,11 @@
 import "../styles/settings.css";
 
+// ==========================================
+// ⚙️ PÁGINA: CONFIGURACIÓN (Settings)
+// ==========================================
 function Settings({ user, settings, onChangeSettings }) {
+  
+  // --- 1. Validación de Sesión ---
   if (!user) {
     return (
       <section className="settings">
@@ -10,6 +15,11 @@ function Settings({ user, settings, onChangeSettings }) {
     );
   }
 
+  // --- 2. Manejadores de Eventos (Handlers) ---
+
+  /**
+   * Cambia el valor booleano de una preferencia (switches).
+   */
   const handleToggle = (name) => {
     onChangeSettings({
       ...settings,
@@ -17,6 +27,9 @@ function Settings({ user, settings, onChangeSettings }) {
     });
   };
 
+  /**
+   * Actualiza el valor de un campo de texto o selección (inputs/selects).
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     onChangeSettings({
@@ -25,15 +38,18 @@ function Settings({ user, settings, onChangeSettings }) {
     });
   };
 
+  // --- 3. Renderizado ---
   return (
     <section className="settings">
+      {/* Cabecera de la página */}
       <div className="settings-header">
         <h2>Configuración</h2>
         <p>Personalizá cómo Joblu te ayuda a conseguir trabajo.</p>
       </div>
 
       <div className="settings-grid">
-        {/* Preferencias de Aplicación */}
+        
+        {/* Tarjeta: Experiencia de Usuario */}
         <div className="settings-card">
           <h3>Experiencia de Usuario</h3>
           
@@ -70,7 +86,7 @@ function Settings({ user, settings, onChangeSettings }) {
           </div>
         </div>
 
-        {/* Preferencias de IA y Contenido */}
+        {/* Tarjeta: IA y Contenido */}
         <div className="settings-card">
           <h3>IA y Contenido</h3>
           

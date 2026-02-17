@@ -1,8 +1,19 @@
-import "../styles/mycvs.css";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
+// --- Estilos ---
+import "../styles/mycvs.css";
+
+// --- Servicios ---
 import cvService from "../services/cvService";
 
+// ==========================================
+// 🛠️ UTILIDADES (Helpers)
+// ==========================================
+
+/**
+ * Formatea una cadena de fecha al estándar local de Argentina.
+ */
 function formatDate(dateString) {
   try {
     const d = new Date(dateString);
@@ -18,14 +29,20 @@ function formatDate(dateString) {
   }
 }
 
+// ==========================================
+// 📂 COMPONENTE: MIS CVs (MyCvs)
+// ==========================================
 function MyCvs({ user }) {
   const navigate = useNavigate();
+
+  // --- 1. Estados ---
   const [cvs, setCvs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cvToConfirm, setCvToConfirm] = useState(null);
-  const [isImporting, setIsImporting] = useState(false); // Estado para loading de importación
+  const [isImporting, setIsImporting] = useState(false);
 
+  // --- 2. Efectos ---
   useEffect(() => {
     if (user) {
       loadCvs();
@@ -34,6 +51,11 @@ function MyCvs({ user }) {
     }
   }, [user]);
 
+  // --- 3. Lógica de Carga y Acciones ---
+
+  /**
+   * Obtiene la lista de CVs desde el servicio.
+   */
   const loadCvs = async () => {
     setLoading(true);
     try {
@@ -47,9 +69,13 @@ function MyCvs({ user }) {
     }
   };
 
+  /**
+   * Gestiona la eliminación de un CV con actualización optimista.
+   */
   const handleDelete = async (id) => {
-    // Optimistic update
     const previousCvs = [...cvs];
+    
+    // Actualización optimista: removemos del estado antes de la respuesta del servidor
     setCvs((prev) => prev.filter((cv) => cv._id !== id));
     setCvToConfirm(null);
 
@@ -57,16 +83,15 @@ function MyCvs({ user }) {
       await cvService.delete(id);
     } catch (err) {
       console.error("Error al eliminar CV:", err);
-      // Rollback
+      // Revertimos cambios si falla la petición
       setCvs(previousCvs);
       alert("Hubo un error al eliminar el CV.");
     }
   };
 
-  const handleImportClick = () => {
-    document.getElementById("import-cv-input").click();
-  };
-
+  /**
+   * Maneja la importación de archivos PDF/TXT.
+   */
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -76,7 +101,7 @@ function MyCvs({ user }) {
 
     try {
       const newCv = await cvService.importCv(file);
-      // Redirigir al editor con el ID del nuevo CV
+      // Redirigir al editor con el nuevo CV generado
       navigate(`/cv/${newCv._id}`);
     } catch (err) {
       console.error(err);
@@ -85,6 +110,15 @@ function MyCvs({ user }) {
     }
   };
 
+  const handleImportClick = () => {
+    document.getElementById("import-cv-input").click();
+  };
+
+  // ==========================================
+  // 📦 RENDERIZADO (Vistas condicionales)
+  // ==========================================
+
+  // Caso: Usuario no autenticado
   if (!user) {
     return (
       <section className="mycvs">
@@ -92,13 +126,12 @@ function MyCvs({ user }) {
         <p className="mycvs-subtitle">
           Tenés que iniciar sesión para ver y gestionar tus CVs guardados.
         </p>
-        <Link to="/login" className="mycvs-link">
-          Iniciar sesión
-        </Link>
+        <Link to="/login" className="mycvs-link">Iniciar sesión</Link>
       </section>
     );
   }
 
+  // Caso: Cargando datos
   if (loading) {
     return (
       <section className="mycvs">
@@ -108,14 +141,15 @@ function MyCvs({ user }) {
     );
   }
 
+  // Vista principal
   return (
     <section className="mycvs">
-      <h2>Mis CVs</h2>
-      <p className="mycvs-subtitle">
-        Acá vas a encontrar todos los CVs que guardaste.
-      </p>
+      <header>
+        <h2>Mis CVs</h2>
+        <p className="mycvs-subtitle">Acá vas a encontrar todos los CVs que guardaste.</p>
+      </header>
 
-      {/* Botón de Importar (oculto input) */}
+      {/* Barra de Acciones */}
       <div className="mycvs-actions-bar" style={{ marginBottom: "1rem" }}>
         <input
           type="file"
@@ -146,9 +180,7 @@ function MyCvs({ user }) {
       {cvs.length === 0 ? (
         <div className="mycvs-empty">
           <p>Todavía no guardaste ningún CV.</p>
-          <Link to="/cv" className="mycvs-link">
-            Crear mi primer CV →
-          </Link>
+          <Link to="/cv" className="mycvs-link">Crear mi primer CV →</Link>
         </div>
       ) : (
         <div className="mycvs-list">
@@ -189,9 +221,7 @@ function MyCvs({ user }) {
               </div>
 
               {cvToConfirm === cv._id && (
-                <p className="mycvs-confirm-hint">
-                  Volvé a hacer clic para eliminar este CV.
-                </p>
+                <p className="mycvs-confirm-hint">Volvé a hacer clic para eliminar este CV.</p>
               )}
             </article>
           ))}

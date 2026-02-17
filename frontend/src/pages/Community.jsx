@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useToast } from "../context/ToastContext"; // 🔔 Importamos el hook
-import API_BASE_URL from "../config/api";
+
+// --- Estilos y Utilidades ---
 import "../styles/community.css";
 import { formatDate } from "../utils/dateUtils";
 
-// Categorías disponibles
+// --- Contexto y Configuración ---
+import { useToast } from "../context/ToastContext";
+import API_BASE_URL from "../config/api";
+
+// ==========================================
+// 📋 CONSTANTES
+// ==========================================
 const CATEGORIES = [
   "General",
   "Consejos CV",
@@ -15,25 +21,30 @@ const CATEGORIES = [
   "Dudas Técnicas"
 ];
 
+// ==========================================
+// 👥 PÁGINA: COMUNIDAD (Community)
+// ==========================================
 function Community({ user }) {
+  // --- 1. Hooks ---
+  const { addToast } = useToast();
+  const isLogged = !!user;
+
+  // --- 2. Estados: Datos del Feed ---
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // States para el formulario
+  // --- 3. Estados: Formulario de Nuevo Post ---
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("General");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // States para comentarios (mapa pid -> booleano/texto)
-  const [openComments, setOpenComments] = useState({});
-  const [commentText, setCommentText] = useState({});
-  const [submittingComment, setSubmittingComment] = useState({});
+  // --- 4. Estados: Gestión de Comentarios ---
+  const [openComments, setOpenComments] = useState({}); // { postId: boolean }
+  const [commentText, setCommentText] = useState({}); // { postId: string }
+  const [submittingComment, setSubmittingComment] = useState({}); // { postId: boolean }
 
-  const { addToast } = useToast(); // 🔔 Instanciamos
-  const isLogged = !!user;
-
-  // Cargar Posts
+  // --- 5. Efectos: Carga inicial ---
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -52,7 +63,13 @@ function Community({ user }) {
     fetchPosts();
   }, [addToast]);
 
-  // Crear Post
+  // ==========================================
+  // 📡 LÓGICA DE POSTS
+  // ==========================================
+
+  /**
+   * Crea una nueva publicación en la comunidad.
+   */
   const handleCreatePost = async (e) => {
     e.preventDefault();
 
@@ -67,9 +84,6 @@ function Community({ user }) {
     }
 
     setIsSubmitting(true);
-    const authorName = user?.name || "Usuario anónimo";
-    const authorEmail = user?.email || "";
-
     try {
       const res = await fetch(`${API_BASE_URL}/api/community/posts`, {
         method: "POST",
@@ -78,8 +92,8 @@ function Community({ user }) {
           "Authorization": `Bearer ${localStorage.getItem("joblu_token")}`
         },
         body: JSON.stringify({
-          authorName,
-          authorEmail,
+          authorName: user?.name || "Usuario anónimo",
+          authorEmail: user?.email || "",
           title: title.trim(),
           content: content.trim(),
           category
@@ -87,15 +101,13 @@ function Community({ user }) {
       });
 
       if (!res.ok) throw new Error("Error al crear post");
-
       const newPost = await res.json();
 
-      setPosts((prev) => [newPost, ...prev]); // Agregamos arriba
+      setPosts((prev) => [newPost, ...prev]);
       setTitle("");
       setContent("");
       setCategory("General");
       addToast("¡Post publicado con éxito! 🎉", "success");
-
     } catch (err) {
       addToast("Hubo un problema al publicar. Intentalo de nuevo.", "error");
     } finally {
@@ -103,7 +115,9 @@ function Community({ user }) {
     }
   };
 
-  // Manejar Likes (❤️)
+  /**
+   * Gestiona los likes de forma optimista.
+   */
   const handleLike = async (postId) => {
     if (!isLogged) {
       addToast("Debes iniciar sesión para dar like", "info");
@@ -116,20 +130,14 @@ function Community({ user }) {
       return;
     }
 
-    // 1. UI Optimista
+    // Actualización optimista en la UI
     setPosts((prevPosts) =>
       prevPosts.map((p) => {
         if (p._id !== postId) return p;
-
         const alreadyLiked = p.likedBy?.includes(user.id);
         let newLikedBy = p.likedBy ? [...p.likedBy] : [];
-
-        if (alreadyLiked) {
-          newLikedBy = newLikedBy.filter((uid) => uid !== user.id);
-        } else {
-          newLikedBy.push(user.id);
-        }
-
+        if (alreadyLiked) newLikedBy = newLikedBy.filter((uid) => uid !== user.id);
+        else newLikedBy.push(user.id);
         return { ...p, likedBy: newLikedBy };
       })
     );
@@ -142,26 +150,32 @@ function Community({ user }) {
           "Authorization": `Bearer ${token}`
         },
       });
-
       if (!res.ok) throw new Error("Error al dar like");
-
       const updatedData = await res.json();
-
-      setPosts((prev) =>
-        prev.map(p => p._id === postId ? { ...p, likedBy: updatedData.likedBy } : p)
-      );
-
+      setPosts((prev) => prev.map(p => p._id === postId ? { ...p, likedBy: updatedData.likedBy } : p));
     } catch (error) {
       addToast("No pudimos registrar tu like", "error");
     }
   };
 
-  // Toggle Comentarios
+  /**
+   * Copia el enlace del post al portapapeles.
+   */
+  const handleShare = (postId) => {
+    const url = `${window.location.origin}/comunidad/${postId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      addToast("Enlace copiado al portapapeles 📋", "success");
+    });
+  };
+
+  // ==========================================
+  // 💬 LÓGICA DE COMENTARIOS
+  // ==========================================
+
   const toggleComments = (postId) => {
     setOpenComments(prev => ({ ...prev, [postId]: !prev[postId] }));
   };
 
-  // Manejar Comentario
   const handleCommentSubmit = async (e, postId) => {
     e.preventDefault();
     if (!isLogged) {
@@ -185,16 +199,11 @@ function Community({ user }) {
       });
 
       if (!res.ok) throw new Error("Error al comentar");
-
       const updatedPost = await res.json();
 
-      // Actualizar post en la lista
       setPosts(prev => prev.map(p => p._id === postId ? updatedPost : p));
-
-      // Limpiar input
       setCommentText(prev => ({ ...prev, [postId]: "" }));
       addToast("Comentario agregado", "success");
-
     } catch (err) {
       addToast("Error al enviar comentario", "error");
     } finally {
@@ -202,33 +211,21 @@ function Community({ user }) {
     }
   };
 
-  // Compartir Post (📋)
-  const handleShare = (postId) => {
-    const url = `${window.location.origin}/comunidad/${postId}`;
-    navigator.clipboard.writeText(url).then(() => {
-      addToast("Enlace copiado al portapapeles 📋", "success");
-    });
-  };
-
-
-
+  // ==========================================
+  // 📦 RENDERIZADO (JSX)
+  // ==========================================
   return (
     <section className="community">
       <div className="community-header">
         <h2>Comunidad Joblu</h2>
-        <p className="community-subtitle">
-          Compartí tus experiencias, dudas y tips con otros profesionales.
-        </p>
+        <p className="community-subtitle">Compartí tus experiencias, dudas y tips con otros profesionales.</p>
       </div>
 
-      {/* Formulario */}
+      {/* --- Sección: Crear Publicación --- */}
       <div className="community-create-card">
         <h3 className="community-create-title">Crear nueva publicación</h3>
-
         {!isLogged && (
-          <div className="community-alert-info">
-            💡 Para publicar necesitas <Link to="/login">iniciar sesión</Link>.
-          </div>
+          <div className="community-alert-info">💡 Para publicar necesitas <Link to="/login">iniciar sesión</Link>.</div>
         )}
 
         <form onSubmit={handleCreatePost} className="community-form">
@@ -269,17 +266,13 @@ function Community({ user }) {
         </form>
       </div>
 
-      {/* Feed */}
+      {/* --- Sección: Feed de la Comunidad --- */}
       <h3 className="community-list-title">Últimas conversaciones</h3>
 
       {loading ? (
-        <div className="community-loading">
-          <div className="spinner"></div> Cargando comunidad...
-        </div>
+        <div className="community-loading"><div className="spinner"></div> Cargando comunidad...</div>
       ) : posts.length === 0 ? (
-        <div className="community-empty">
-          <p>Todavía no hay nada por acá. ¡Sé el primero en romper el hielo! 🧊🔨</p>
-        </div>
+        <div className="community-empty"><p>Todavía no hay nada por acá. ¡Sé el primero en romper el hielo! 🧊🔨</p></div>
       ) : (
         <div className="community-list">
           {posts.map((post) => (
@@ -293,61 +286,32 @@ function Community({ user }) {
               </div>
 
               <div className="post-main">
-                <Link to={`/comunidad/${post._id}`} className="community-post-title">
-                  {post.title}
-                </Link>
-
-                <p className="community-post-excerpt">
-                  {post.content}
-                </p>
+                <Link to={`/comunidad/${post._id}`} className="community-post-title">{post.title}</Link>
+                <p className="community-post-excerpt">{post.content}</p>
               </div>
 
-              {/* Footer de Acciones */}
+              {/* Acciones del Post */}
               <div className="post-actions">
-                <button
-                  className={`action-btn ${user && post.likedBy?.includes(user.id) ? "liked" : ""}`}
-                  onClick={() => handleLike(post._id)}
-                  title="Me gusta"
-                >
-                  <span className="action-icon">
-                    {user && post.likedBy?.includes(user.id) ? "❤️" : "🤍"}
-                  </span>
-                  <span className="action-count">
-                    {post.likedBy?.length || 0}
-                  </span>
+                <button className={`action-btn ${user && post.likedBy?.includes(user.id) ? "liked" : ""}`} onClick={() => handleLike(post._id)}>
+                  <span className="action-icon">{user && post.likedBy?.includes(user.id) ? "❤️" : "🤍"}</span>
+                  <span className="action-count">{post.likedBy?.length || 0}</span>
                 </button>
-
-                <button
-                  className="action-btn"
-                  onClick={() => toggleComments(post._id)}
-                  title="Comentarios"
-                >
+                <button className="action-btn" onClick={() => toggleComments(post._id)}>
                   <span className="action-icon">💬</span>
                   <span className="action-count">{post.comments?.length || 0}</span>
                 </button>
-
-                <button
-                  className="action-btn"
-                  onClick={() => handleShare(post._id)}
-                  title="Compartir"
-                >
-                  <span className="action-icon">🔗</span>
-                </button>
+                <button className="action-btn" onClick={() => handleShare(post._id)} title="Compartir"><span className="action-icon">🔗</span></button>
               </div>
 
-              {/* Sección Comentarios */}
+              {/* Sección de Comentarios Desplegable */}
               {openComments[post._id] && (
                 <div className="community-comments-section">
                   <div className="comments-list">
                     {post.comments?.length > 0 ? (
                       post.comments.map((comment, idx) => (
-                        <div key={idx} className="comment-item">
-                          <strong>{comment.authorName}</strong>: {comment.content}
-                        </div>
+                        <div key={idx} className="comment-item"><strong>{comment.authorName}</strong>: {comment.content}</div>
                       ))
-                    ) : (
-                      <p className="no-comments">Sé el primero en comentar.</p>
-                    )}
+                    ) : <p className="no-comments">Sé el primero en comentar.</p>}
                   </div>
 
                   {isLogged && (
@@ -360,14 +324,11 @@ function Community({ user }) {
                         onChange={(e) => setCommentText(prev => ({ ...prev, [post._id]: e.target.value }))}
                         disabled={submittingComment[post._id]}
                       />
-                      <button type="submit" className="btn-comment" disabled={submittingComment[post._id]}>
-                        Enviar
-                      </button>
+                      <button type="submit" className="btn-comment" disabled={submittingComment[post._id]}>Enviar</button>
                     </form>
                   )}
                 </div>
               )}
-
             </article>
           ))}
         </div>
