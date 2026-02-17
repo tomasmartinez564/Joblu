@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { FaLinkedin, FaGithub, FaGlobe } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
 import html2pdf from "html2pdf.js";
 
@@ -478,7 +479,11 @@ function CvBuilder({ user, settings, onChangeSettings }) {
             <button type="button" className="cv-action-btn download-btn" onClick={handleDownloadPDF}>
               {cvLanguage === "en" ? "Download PDF" : "Descargar PDF"}
             </button>
-            <button ref={refBtnIA} type="button" className="cv-action-btn ai-btn" onClick={() => setAiOpen(true)}>
+            <button ref={refBtnIA} type="button" className="cv-action-btn ai-btn" onClick={() => {
+              const currentKey = STEPS[activeStep].key;
+              const sectionToUse = currentKey === "datos" ? "perfil" : currentKey; // Si está en datos, sugerir perfil
+              handleOpenAiForSection(sectionToUse, cvData[sectionToUse]);
+            }}>
               ✨ {cvLanguage === "en" ? "Improve with IA" : "Mejorar con IA"}
             </button>
             {(saveError || saveSuccess) && (
@@ -510,7 +515,9 @@ function CvBuilder({ user, settings, onChangeSettings }) {
                       const url = link.value.trim().startsWith("http") ? link.value.trim() : `https://${link.value.trim()}`;
                       return (
                         <a key={link.type} href={url} target="_blank" rel="noopener noreferrer" className="cv-contact-link">
-                          <span className="cv-contact-icon">{link.type === 'linkedin' ? 'in' : link.type === 'github' ? '<>' : '🌐'}</span>
+                          <span className="cv-contact-icon">
+                            {link.type === 'linkedin' ? <FaLinkedin size="1em" /> : link.type === 'github' ? <FaGithub size="1em" /> : <FaGlobe size="1em" />}
+                          </span>
                           <span className="cv-contact-text">{link.value.trim()}</span>
                         </a>
                       );
