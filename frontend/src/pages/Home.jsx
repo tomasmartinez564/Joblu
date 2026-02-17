@@ -10,29 +10,30 @@ import cvService from "../services/cvService";
 
 // Consejos para el "Tip del día"
 const JOBLU_TIPS = [
-  "Usá verbos de acción como 'Lideré', 'Desarrollé' o 'Incrementé' para dar más fuerza a tu experiencia.",
-  "Evitá poner 'Referencias a pedido'. Si el reclutador las necesita, te las va a pedir.",
-  "Personalizá tu resumen profesional según el rubro al que apuntás.",
-  "El diseño ATS-friendly es clave: mantené una estructura simple y clara.",
-  "En la sección de habilidades, mezclá tus conocimientos técnicos (Hard Skills) con tus habilidades blandas (Soft Skills)."
+  { text: "Usá verbos de acción como 'Lideré' o 'Desarrollé' en tu experiencia.", target: "experiencia" },
+  { text: "Tu resumen profesional debe ser breve y captar la atención en 5 segundos.", target: "perfil" },
+  { text: "No olvides incluir links a tu portfolio o perfiles profesionales.", target: "contacto" },
+  { text: "Agregá tus habilidades técnicas más importantes para superar filtros ATS.", target: "habilidades" },
+  { text: "La educación más reciente siempre debe ir primero.", target: "educacion" }
 ];
 
 export default function Home({ user }) {
   const navigate = useNavigate();
-  
   const [recommendedJobs, setRecommendedJobs] = useState([]);
   const [latestPost, setLatestPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lastCv, setLastCv] = useState(null);
-  const [dailyTip, setDailyTip] = useState("");
+  const [dailyTip, setDailyTip] = useState(null);
 
   useEffect(() => {
     if (user) {
       setLoading(true);
-      
-      // Seleccionar un consejo aleatorio al cargar
-      const randomTip = JOBLU_TIPS[Math.floor(Math.random() * JOBLU_TIPS.length)];
-      setDailyTip(randomTip);
+      // Seleccionar tip aleatorio
+      setDailyTip(JOBLU_TIPS[Math.floor(Math.random() * JOBLU_TIPS.length)]);
+
+      cvService.getAll().then(cvs => {
+        if (cvs && cvs.length > 0) setLastCv(cvs[0]);
+      }).catch(console.error);
 
       // Cargar CVs
       cvService.getAll()
@@ -64,68 +65,86 @@ export default function Home({ user }) {
   };
 
 if (user) {
-  const progress = calculateProgress(lastCv);
-  return (
-    <main className="home-dashboard">
-      <header className="dashboard-header">
-        <h1>¡Hola de nuevo, {user.name.split(" ")[0]}! 👋</h1>
-        <p>Tu centro de mando en <span className="brand-name">JOBLU</span>.</p>
-      </header>
+    const progress = calculateProgress(lastCv);
+    const cvData = lastCv?.data || {};
 
-      {/* Grid 2x2 Directo */}
-      <div className="dashboard-grid-layout">
-        
-        {/* 1. Progreso */}
-        <section className="stat-card progress-card">
-          <div className="stat-header">
-            <h3>Progreso de Perfil</h3>
-            <span className="stat-value">{progress}%</span>
-          </div>
-          <div className="progress-bar-container">
-            <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
-          </div>
-          <p className="stat-hint">
-            {progress < 100 ? "Completá tu info para que la IA te ayude mejor." : "¡Perfil optimizado al 100%!"}
-          </p>
-          <button onClick={() => navigate(lastCv ? `/cv/${lastCv._id}` : '/cv')} className="hero-cta btn-small">
-            {lastCv ? "Editar CV" : "Crear CV"}
-          </button>
-        </section>
+    return (
+      <main className="home-dashboard">
+        <header className="dashboard-header">
+          <h1>¡Hola, {user.name.split(" ")[0]}! 👋</h1>
+          <p>Tu centro de mando en <span className="brand-name">JOBLU</span>.</p>
+        </header>
 
-        {/* 2. Accesos Rápidos (Opcional) */}
-        <section className="stat-card quick-actions">
-          <h3>Accesos Rápidos</h3>
-          <div className="quick-links">
-            <Link to="/mis-cvs" className="quick-link brand-link">📂 Mis Documentos</Link>
-            <Link to="/jobs" className="quick-link brand-link">🔍 Buscar Empleos</Link>
-            <Link to="/cuenta" className="quick-link brand-link">👤 Ajustes</Link>
-          </div>
-        </section>
-
-        {/* 3. Tip del día */}
-        <section className="stat-card tip-card">
-          <div className="tip-content">
-            <div className="tip-header">
-              <span className="tip-icon">✨</span>
-              <h4>Tip <span className="brand-name">JOBLU</span></h4>
+        <div className="dashboard-grid-layout">
+          
+          {/* 1. Progreso de Perfil */}
+          <section className="stat-card progress-card brand-border">
+            <div className="card-content">
+              <h3>Estado de tu CV</h3>
+              <div className="progress-container-main">
+                <span className="stat-value">{progress}%</span>
+                <div className="progress-bar-container">
+                  <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
+                </div>
+              </div>
+              <p className="stat-hint">
+                {progress < 100 ? "Seguí completando datos para mejorar tu visibilidad." : "¡Tu perfil está impecable!"}
+              </p>
             </div>
-            <p className="tip-text">"{dailyTip}"</p>
-          </div>
-        </section>
+            <button onClick={() => navigate(lastCv ? `/cv/${lastCv._id}` : '/cv')} className="hero-cta btn-small">
+              {lastCv ? "Editar CV" : "Empezar CV"}
+            </button>
+          </section>
 
-        {/* 4. Último Post */}
-        <section className="stat-card latest-post-card">
-          <h3>Comunidad</h3>
-          {latestPost ? (
-            <div className="post-preview">
-              <span className="post-category">{latestPost.category}</span>
-              <h4>{latestPost.title}</h4>
-              <Link to={`/comunidad/${latestPost._id}`} className="post-link">Ver discusión →</Link>
+          {/* 2. Mi Perfil Profesional (Reemplazo de Acciones Rápidas) */}
+          <section className="stat-card profile-preview-card brand-border">
+            <div className="card-content">
+              <h3>Tu Identidad</h3>
+              <div className="profile-mini-info">
+                <p className="profile-name">{cvData.nombre || user.name}</p>
+                <p className="profile-job">{cvData.puesto || "Puesto no definido"}</p>
+                <p className="profile-location">📍 {cvData.ubicacion || "Ubicación no definida"}</p>
+              </div>
             </div>
-          ) : <p>Cargando novedades...</p>}
-        </section>
-        
-      </div>
+            <Link to="/cuenta" className="stat-link-secondary">Ajustes de cuenta</Link>
+          </section>
+
+          {/* 3. Tip del día con Link directo */}
+          <section className="stat-card tip-card brand-border">
+            <div className="card-content">
+              <div className="tip-header">
+                <span className="tip-icon">✨</span>
+                <h4>Tip <span className="brand-name">JOBLU</span></h4>
+              </div>
+              <p className="tip-text">"{dailyTip?.text}"</p>
+            </div>
+            {lastCv && (
+              <button 
+                onClick={() => navigate(`/cv/${lastCv._id}#${dailyTip?.target}`)} 
+                className="hero-cta btn-small secondary-cta"
+              >
+                Mejorar esta sección
+              </button>
+            )}
+          </section>
+
+          {/* 4. Comunidad con CTA de acción */}
+          <section className="stat-card latest-post-card brand-border">
+            <div className="card-content">
+              <h3>Comunidad</h3>
+              {latestPost ? (
+                <div className="post-preview-home">
+                  <span className="post-tag-mini">{latestPost.category}</span>
+                  <h4>{latestPost.title}</h4>
+                </div>
+              ) : <p className="empty-msg">Explorá dudas de otros usuarios.</p>}
+            </div>
+            <div className="card-actions-row">
+              <Link to="/comunidad" className="stat-link-secondary">Ver foro</Link>
+              <button onClick={() => navigate('/comunidad')} className="btn-icon-plus" title="Crear Post">+</button>
+            </div>
+          </section>
+        </div>
 
         {/* Sección Comunidad Protagónica */}
         <section className="dashboard-community-banner">

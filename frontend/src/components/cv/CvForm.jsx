@@ -20,7 +20,7 @@ function CvForm({
         <form className="cv-form">
             
             {/* --- 1. DATOS PERSONALES --- */}
-            <h3 className="cv-form-sectionTitle">Datos personales</h3>
+            <h3 className="cv-form-sectionTitle" id="contacto">Datos personales</h3>
 
             <div className="cv-form-group-inline">
                 <label>
@@ -140,7 +140,7 @@ function CvForm({
 
             {/* --- 3. SECCIÓN: PERFIL PROFESIONAL --- */}
             <div className="cv-form-sectionHeader">
-                <h3 className="cv-form-sectionTitle">
+                <h3 className="cv-form-sectionTitle" id="perfil">
                     {cvLanguage === "en" ? "Professional profile" : "Perfil profesional"}
                     {onImprove && (
                         <button
@@ -176,7 +176,7 @@ function CvForm({
 
             {/* --- 4. SECCIÓN: EXPERIENCIA LABORAL --- */}
             <div className="cv-form-sectionHeader">
-                <h3 className="cv-form-sectionTitle">
+                <h3 className="cv-form-sectionTitle" id="experiencia">
                     {cvLanguage === "en" ? "Work experience" : "Experiencia laboral"}
                     {onImprove && (
                         <button
@@ -210,7 +210,7 @@ function CvForm({
 
             {/* --- 5. SECCIÓN: EDUCACIÓN --- */}
             <div className="cv-form-sectionHeader">
-                <h3 className="cv-form-sectionTitle">
+                <h3 className="cv-form-sectionTitle" id="educacion">
                     {cvLanguage === "en" ? "Education" : "Educación"}
                     {onImprove && (
                         <button
@@ -244,7 +244,7 @@ function CvForm({
 
             {/* --- 6. SECCIÓN: HABILIDADES --- */}
             <div className="cv-form-sectionHeader">
-                <h3 className="cv-form-sectionTitle">
+                <h3 className="cv-form-sectionTitle" id="habilidades">
                     {cvLanguage === "en" ? "Skills" : "Habilidades"}
                     {onImprove && (
                         <button

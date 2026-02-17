@@ -1,5 +1,5 @@
 /* ==========================================================================
-   VARIABLES Y ANIMACIONES
+   1. VARIABLES Y ANIMACIONES
    ========================================================================== */
 @keyframes joblu-fade-in-up {
   from {
@@ -13,7 +13,7 @@
 }
 
 /* ==========================================================================
-   IDENTIDAD DE MARCA Y COMPONENTES GLOBALES
+   2. IDENTIDAD DE MARCA Y BOTONES UNIFICADOS
    ========================================================================== */
 .brand-name {
   color: var(--joblu-primary, #6366f1);
@@ -22,36 +22,60 @@
   letter-spacing: 0.5px;
 }
 
-.hero-cta {
+/* Base Común para Todos los Botones (Primary y Secondary) */
+.hero-cta,
+.stat-link-secondary,
+.secondary-cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.9rem 1.8rem;
-  border-radius: 999px;
+  width: fit-content;
+  min-width: 160px; /* Tamaño unificado */
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px; /* Bordes unificados (antes hero-cta era 999px) */
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none !important;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  
+  /* Alineación base */
+  margin-top: auto; 
+  align-self: flex-start; 
+}
+
+/* Estilo Botón Principal (Violeta Sólido) */
+.hero-cta {
   background: var(--joblu-primary, #6366f1);
   color: #ffffff;
-  font-weight: 600;
-  text-decoration: none;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.2);
-  border: none;
-  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
 .hero-cta:hover {
   background-color: #4f46e5;
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(79, 70, 229, 0.35);
-  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
 }
 
-.hero-cta:active {
-  transform: translateY(-1px);
+/* Estilo Botones Secundarios (Borde y Fondo Claro) */
+.stat-link-secondary,
+.secondary-cta {
+  background: #f5f3ff !important; 
+  border: 1.5px solid var(--joblu-primary) !important;
+  color: var(--joblu-primary) !important;
+}
+
+.stat-link-secondary:hover, 
+.secondary-cta:hover {
+  background: var(--joblu-primary) !important;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(99, 102, 241, 0.2) !important;
 }
 
 /* ==========================================================================
-   DASHBOARD (Usuario Logueado)
+   3. DASHBOARD (Usuario Logueado)
    ========================================================================== */
 .home-dashboard {
   max-width: 1024px;
@@ -64,40 +88,31 @@
   margin-bottom: 2rem;
 }
 
-.dashboard-header h1 {
-  font-size: 2rem;
-  margin: 0 0 0.5rem 0;
-  color: var(--joblu-text-main);
-}
-
-.dashboard-header p {
-  color: var(--joblu-text-muted);
-  font-size: 1.05rem;
-}
-
-.dashboard-stats {
+.dashboard-grid-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
+  align-items: stretch;
 }
 
 .stat-card {
-  background: var(--joblu-surface);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--joblu-border-soft);
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 1.8rem;
+  background: var(--joblu-surface);
+  border-radius: 1.25rem;
+  border: 1px solid var(--joblu-border-soft);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.stat-value {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--joblu-primary);
+.brand-border {
+  border-top: 4px solid var(--joblu-primary) !important;
 }
 
+/* Progress Bar */
 .progress-bar-container {
   height: 10px;
   background-color: #e5e7eb;
@@ -112,39 +127,28 @@
   transition: width 1s ease-in-out;
 }
 
-.quick-links {
+/* Tarjeta de Comunidad específica */
+.card-actions-row {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.quick-link {
-  display: flex;
+  justify-content: flex-start;
   align-items: center;
-  padding: 0.8rem 1rem;
-  background-color: var(--joblu-bg-main);
-  border-radius: 0.75rem;
-  text-decoration: none;
-  color: var(--joblu-text-main);
-  font-weight: 500;
-  transition: background-color 0.2s;
+  gap: 0.75rem;
+  margin-top: auto;
+  width: 100%;
 }
 
-.quick-link:hover {
-  background-color: var(--joblu-border-soft);
+.card-actions-row .stat-link-secondary {
+  margin-top: 0; 
 }
 
 /* ==========================================================================
-   LANDING PAGE (Invitado)
+   4. LANDING PAGE Y RESPONSIVE
    ========================================================================== */
-
-/* HERO SECTION */
 .home-hero {
   max-width: 1120px;
   margin: 2rem auto;
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr; /* Prioridad al texto */
+  grid-template-columns: 1.2fr 0.8fr;
   align-items: center;
   gap: 3rem;
   padding: 4rem 1.5rem;
@@ -154,450 +158,30 @@
   font-size: clamp(2.2rem, 4vw, 3.2rem);
   line-height: 1.1;
   font-weight: 800;
-  letter-spacing: -0.02em;
   margin-bottom: 1.5rem;
-  color: #111827;
-}
-
-.home-hero-texto p {
-  font-size: 1.15rem;
-  color: #4b5563;
-  max-width: 45ch;
-  margin-bottom: 2.5rem;
-  line-height: 1.6;
-}
-
-/* CONTENEDOR DE IMAGEN (El fix principal) */
-.home-hero-imagen {
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .home-hero-imagen img {
   width: 100%;
-  max-width: 450px; /* Limita el tamaño para que no se desborde */
+  max-width: 450px;
   height: auto;
   display: block;
-  filter: drop-shadow(0 20px 40px rgba(0,0,0,0.1));
 }
 
-/* SECCIÓN CÓMO FUNCIONA */
-.home-como-funciona {
-  padding: 5rem 1.5rem;
-  background-color: #ffffff;
-}
-
-.home-como-titulo {
-  font-size: 2.2rem;
-  text-align: center;
-  margin-bottom: 4rem;
-  font-weight: 700;
-}
-
-.home-como-pasos {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2.5rem;
-  max-width: 1120px;
-  margin: 0 auto;
-}
-
-.home-paso {
-  background: white;
-  padding: 3rem 2rem;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-  border: 1px solid #f3f4f6;
-  text-align: center;
-}
-
-.home-paso:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.1);
-  border-color: var(--joblu-primary);
-}
-
-.home-paso-numero {
-  background: var(--joblu-primary);
-  color: white;
-  width: 45px;
-  height: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  margin: 0 auto 1.5rem;
-  font-weight: bold;
-  font-size: 1.3rem;
-}
-
-.home-paso h3 {
-  font-size: 1.4rem;
-  margin-bottom: 1rem;
-}
-
-/* SECCIÓN SOBRE NOSOTROS (Historia) */
-.home-sobre {
-  padding: 6rem 1.5rem;
-  background-color: #ffffff;
-}
-
-.home-sobre-titulo {
-  font-size: 2.4rem;
-  text-align: center;
-  margin-bottom: 3rem;
-  font-weight: 700;
-}
-
-.home-sobre-contenido {
-  max-width: 850px;
-  margin: 0 auto;
-  line-height: 1.9;
-  font-size: 1.15rem;
-  color: #4b5563;
-}
-
-.home-sobre-contenido p {
-  margin-bottom: 2rem;
-}
-
-/* SECCIÓN CTA FINAL */
-.home-cta-final {
-  background: #f8fafc;
-  padding: 6rem 2rem;
-  text-align: center;
-  border-radius: 32px;
-  max-width: 1120px;
-  margin: 4rem auto 6rem;
-  border: 1px solid #e2e8f0;
-}
-
-.home-cta-final h2 {
-  font-size: 2.4rem;
-  margin-bottom: 1rem;
-  font-weight: 800;
-}
-
-.home-cta-final p {
-  font-size: 1.2rem;
-  margin-bottom: 2.5rem;
-  color: #64748b;
-}
-
-/* ==========================================================================
-   MODO OSCURO (Overrides)
-   ========================================================================== */
-body.dark-mode .stat-card,
-body.dark-mode .home-paso,
-body.dark-mode .home-cta-final {
-  background: var(--joblu-surface);
-  border-color: var(--joblu-border-soft);
-}
-
-body.dark-mode .home-hero-texto h1,
-body.dark-mode .home-como-titulo,
-body.dark-mode .home-sobre-titulo,
-body.dark-mode .home-cta-final h2 {
-  color: #f8fafc;
-}
-
-body.dark-mode .home-hero-texto p,
-body.dark-mode .home-sobre-contenido,
-body.dark-mode .home-cta-final p {
-  color: #cbd5e1;
-}
-
-/* ==========================================================================
-   RESPONSIVE
-   ========================================================================== */
 @media (max-width: 900px) {
+  .dashboard-grid-layout,
   .home-hero {
     grid-template-columns: 1fr;
     text-align: center;
-    padding: 3rem 1.5rem;
-    gap: 2rem;
   }
 
-  .home-hero-texto p {
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .home-hero-texto h1 {
-    font-size: 2.5rem;
+  .hero-cta,
+  .stat-link-secondary,
+  .secondary-cta {
+    align-self: center; /* Centrados en móvil */
   }
 
   .home-hero-imagen img {
-    max-width: 320px; /* Más pequeña en móviles */
-  }
-
-  .home-como-pasos {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ==========================================================================
-   DASHBOARD: ESTRUCTURA Y LAYOUT
-   ========================================================================== */
-.dashboard-grid-layout {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* Dos columnas iguales */
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-  align-items: stretch; /* Obliga a todas a tener la misma altura */
-}
-
-.dashboard-main-col, 
-.dashboard-side-col {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-/* ==========================================================================
-   ELEMENTOS INTERACTIVOS (Botones y Links)
-   ========================================================================== */
-.hero-cta.btn-small {
-  padding: 0.6rem 1.2rem;
-  font-size: 0.9rem;
-  align-self: flex-start;
-}
-
-.quick-link.brand-link {
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
-  color: #111827;
-  border-radius: 12px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.quick-link.brand-link:hover {
-  background-color: var(--joblu-primary);
-  color: white !important;
-  border-color: var(--joblu-primary);
-  transform: translateX(8px);
-}
-
-.btn-white {
-  display: inline-block;
-  background: white !important;
-  color: var(--joblu-primary) !important;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 700;
-  text-decoration: none;
-  margin-top: 1.5rem;
-  transition: transform 0.2s ease;
-}
-
-.btn-white:hover {
-  background: #f3f4f6 !important;
-  transform: scale(1.05);
-}
-
-/* ==========================================================================
-   TARJETAS DE INFORMACIÓN (Tips y Posts)
-   ========================================================================== */
-
-/* Tarjeta de Tip del Día */
-.tip-card {
-  border-left: 5px solid var(--joblu-primary) !important;
-  background: #fdfcff;
-}
-
-.tip-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.tip-text {
-  font-style: italic;
-  line-height: 1.5;
-  color: #4b5563;
-  margin: 0;
-}
-
-.tip-icon {
-  font-size: 2rem;
-}
-
-.tip-content h4 {
-  margin: 0 0 0.25rem 0;
-  font-size: 0.9rem;
-  color: #6366f1;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.tip-content p {
-  margin: 0;
-  font-style: italic;
-  color: #4b5563;
-  line-height: 1.4;
-}
-
-/* Vista Previa de Post en Comunidad */
-.latest-post-card .post-preview {
-  padding: 1.2rem;
-  background: #f9fafb;
-  border-radius: 12px;
-  border: 1px solid #f3f4f6;
-  margin-top: 0.5rem;
-}
-
-.post-category {
-  font-size: 0.7rem;
-  background: #e0e7ff;
-  color: #4338ca;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.post-preview h4 {
-  margin: 0.75rem 0;
-  font-size: 1.05rem;
-  line-height: 1.4;
-  color: #111827;
-}
-
-.post-link {
-  color: var(--joblu-primary);
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.post-link:hover {
-  text-decoration: underline;
-}
-
-/* ==========================================================================
-   BANNERS Y CARRUSEL
-   ========================================================================== */
-
-/* Banner de Comunidad */
-.dashboard-community-banner {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  padding: 3rem;
-  border-radius: 20px;
-  color: white;
-  margin: 2rem 0;
-  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.2);
-}
-
-.community-banner-content h2 {
-  font-size: 1.8rem;
-  margin-bottom: 0.5rem;
-  color: white;
-}
-
-.community-banner-content p {
-  color: #e0e7ff;
-  font-size: 1.1rem;
-}
-
-/* Carrusel de Empleos */
-.jobs-carousel-scroll {
-  display: flex;
-  gap: 1.5rem;
-  overflow-x: auto;
-  padding: 1rem 0 2rem;
-  scrollbar-width: none; /* Firefox */
-}
-
-.jobs-carousel-scroll::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
-}
-
-.home-card-trabajo-mini {
-  min-width: 260px;
-  background: white;
-  padding: 1.5rem;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
-  position: relative;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
-}
-
-.home-card-trabajo-mini:hover {
-  border-color: var(--joblu-primary);
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.1);
-}
-
-.job-tag {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  background: #ecfdf5;
-  color: #059669;
-  padding: 2px 8px;
-  border-radius: 99px;
-  font-weight: 700;
-}
-
-.card-link-overlay {
-  text-decoration: none;
-  color: var(--joblu-primary);
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-top: 1rem;
-  display: block;
-}
-
-/* Accesos Rápidos: Ajuste de espaciado */
-.quick-links {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.5rem;
-  flex-grow: 1;
-  justify-content: center;
-}
-
-.quick-link.brand-link {
-  padding: 0.75rem 1rem;
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
-  color: #111827;
-  border-radius: 10px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-}
-
-.quick-link.brand-link:hover {
-  background-color: var(--joblu-primary);
-  color: white !important;
-  transform: translateX(5px);
-}
-
-/* --- COMPONENTES DE MARCA --- */
-.hero-cta.btn-small {
-  padding: 0.6rem 1.2rem;
-  font-size: 0.85rem;
-  margin-top: auto; /* Empuja el botón al fondo de la card */
-}
-
-/* ==========================================================================
-   RESPONSIVO
-   ========================================================================== */
-@media (max-width: 850px) {
-  .dashboard-grid-layout {
-      grid-template-columns: 1fr; /* Una sola columna en tablets/móviles */
-    }
-  .dashboard-community-banner {
-    padding: 2rem;
+    margin: 0 auto;
   }
 }
