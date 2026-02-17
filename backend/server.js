@@ -10,10 +10,11 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
 import rateLimit from "express-rate-limit";
+import bcrypt from "bcryptjs"; // Importante para manejar contraseñas seguras
 
-// ====================
-// ⚙️ Configuración del Entorno
-// ====================
+// ==========================================
+// ⚙️ CONFIGURACIÓN Y VARIABLES DE ENTORNO
+// ==========================================
 dotenv.config();
 const require = createRequire(import.meta.url);
 const pdfParse = require("pdf-parse");
@@ -25,40 +26,13 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "secreto_super_seguro_cambiar_en_env";
 const MONGODB_URI = process.env.MONGODB_URI;
 
-// Inicializar Apps y Clientes
+// Inicialización de aplicaciones y clientes
 const app = express();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// ====================
-// 🛠️ Middleware
-// ====================
-app.use(cors());
-app.use(express.json({ limit: "50mb" }));
-
-// Servir archivos estáticos (uploads)
-const uploadDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
-app.use("/uploads", express.static(uploadDir));
-
-// Middleware de Autenticación
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) return res.status(401).json({ error: "Acceso denegado. Token no provisto." });
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ error: "Token inválido o expirado." });
-    req.user = user;
-    next();
-  });
-};
-
-// ====================
-// 🔗 Base de Datos (MongoDB)
-// ====================
+// ==========================================
+// 🔗 CONEXIÓN A BASE DE DATOS (MongoDB)
+// ==========================================
 if (!MONGODB_URI) {
   console.warn("⚠️ MONGODB_URI no encontrada en .env. La base de datos no funcionará.");
 } else {
@@ -68,9 +42,9 @@ if (!MONGODB_URI) {
     .catch((err) => console.error("❌ Error al conectar a MongoDB:", err));
 }
 
-// ====================
-// 📦 Modelos
-// ====================
+// ==========================================
+// 📦 MODELOS DE DATOS
+// ==========================================
 
 // 1. Usuario
 const userSchema = new mongoose.Schema({
@@ -138,13 +112,135 @@ const jobSchema = new mongoose.Schema({
 
 const Job = mongoose.models.Job || mongoose.model("Job", jobSchema);
 
+// ==========================================
+// 🛠️ MIDDLEWARES Y UTILIDADES
+// ==========================================
+app.use(cors());
+app.use(express.json({ limit: "50mb" }));
+
+// Configuración de archivos estáticos (uploads)
+const uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+app.use("/uploads", express.static(uploadDir));
+
+// Limitador para rutas de IA
+const aiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
+
+// Middleware de Autenticación
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) return res.status(401).json({ error: "Acceso denegado. Token no provisto." });
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: "Token inválido o expirado." });
+    req.user = user;
+    next();
+  });
+};
+
+// Configuración Multer para Importación de CVs
+const cvStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, `cv-import-${uniqueSuffix}${path.extname(file.originalname)}`);
+  },
+});
+
+const uploadCv = multer({
+  storage: cvStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ["application/pdf", "text/plain"];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Solo se permiten archivos PDF o de texto (.txt)."));
+    }
+  }
+});
+
+// ==========================================
+// 📡 RUTAS DE LA API
+// ==========================================
+
 // ====================
-// 📡 Rutas API
+// 🔐 Rutas de Autenticación
 // ====================
 
-// --- Comunidad ---
+// Registro de Usuario
+app.post("/api/auth/register", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
 
-// Obtener todos los posts
+    // Verificar si el usuario ya existe
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "El email ya está registrado." });
+    }
+
+    // Hashear la contraseña antes de guardarla
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword
+    });
+
+    await newUser.save();
+    res.status(201).json({ message: "Usuario creado con éxito" });
+  } catch (err) {
+    console.error("Error en registro:", err);
+    res.status(500).json({ error: "Error al registrar el usuario" });
+  }
+});
+
+// Inicio de Sesión (Login)
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Buscar usuario por email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ error: "Credenciales inválidas." });
+    }
+
+    // Comparar contraseña ingresada con la hasheada en la BD
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Credenciales inválidas." });
+    }
+
+    // Generar Token JWT
+    const token = jwt.sign(
+      { id: user._id, name: user.name, email: user.email },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Enviar respuesta (quitando la contraseña por seguridad)
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    res.json({
+      token,
+      user: userObj
+    });
+  } catch (err) {
+    console.error("Error en login:", err);
+    res.status(500).json({ error: "Error al iniciar sesión" });
+  }
+});
+
+
+// --- Sección: Comunidad ---
+
 app.get("/api/community/posts", async (req, res) => {
   try {
     const posts = await Post.find().sort({ createdAt: -1 }).lean();
@@ -154,7 +250,6 @@ app.get("/api/community/posts", async (req, res) => {
   }
 });
 
-// Obtener un post por ID
 app.get("/api/community/posts/:id", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id).lean();
@@ -165,7 +260,6 @@ app.get("/api/community/posts/:id", async (req, res) => {
   }
 });
 
-// Crear un Post
 app.post("/api/community/posts", authenticateToken, async (req, res) => {
   try {
     const { title, content, authorName, authorEmail, category } = req.body;
@@ -189,7 +283,6 @@ app.post("/api/community/posts", authenticateToken, async (req, res) => {
   }
 });
 
-// Eliminar Post
 app.delete("/api/community/posts/:id", authenticateToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -206,7 +299,6 @@ app.delete("/api/community/posts/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// Agregar Comentario
 app.post("/api/community/posts/:id/comments", authenticateToken, async (req, res) => {
   try {
     const { content, authorName } = req.body;
@@ -231,7 +323,6 @@ app.post("/api/community/posts/:id/comments", authenticateToken, async (req, res
   }
 });
 
-// Dar/Quitar Like
 app.post("/api/community/posts/:id/like", authenticateToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -248,9 +339,8 @@ app.post("/api/community/posts/:id/like", authenticateToken, async (req, res) =>
   }
 });
 
-// --- CVs ---
+// --- Sección: Currículums (CVs) ---
 
-// Obtener mis CVs
 app.get("/api/cvs", authenticateToken, async (req, res) => {
   try {
     const cvs = await Cv.find({ userId: req.user.id }).sort({ updatedAt: -1 });
@@ -260,7 +350,6 @@ app.get("/api/cvs", authenticateToken, async (req, res) => {
   }
 });
 
-// Obtener un CV por ID
 app.get("/api/cvs/:id", authenticateToken, async (req, res) => {
   try {
     const cv = await Cv.findOne({ _id: req.params.id, userId: req.user.id });
@@ -271,7 +360,6 @@ app.get("/api/cvs/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// Crear CV vacío/manual
 app.post("/api/cvs", authenticateToken, async (req, res) => {
   try {
     const newCv = new Cv({ userId: req.user.id, ...req.body });
@@ -282,7 +370,6 @@ app.post("/api/cvs", authenticateToken, async (req, res) => {
   }
 });
 
-// Actualizar CV
 app.put("/api/cvs/:id", authenticateToken, async (req, res) => {
   try {
     const updatedCv = await Cv.findOneAndUpdate(
@@ -297,7 +384,6 @@ app.put("/api/cvs/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// Eliminar CV
 app.delete("/api/cvs/:id", authenticateToken, async (req, res) => {
   try {
     const deletedCv = await Cv.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
@@ -308,29 +394,6 @@ app.delete("/api/cvs/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// Configuración Multer para Importación
-const cvStorage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, `cv-import-${uniqueSuffix}${path.extname(file.originalname)}`);
-  },
-});
-
-const uploadCv = multer({
-  storage: cvStorage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = ["application/pdf", "text/plain"];
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error("Solo se permiten archivos PDF o de texto (.txt)."));
-    }
-  }
-});
-
-// Importar CV (PDF/TXT)
 app.post("/api/cvs/import", authenticateToken, uploadCv.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No hay archivo para importar." });
@@ -345,14 +408,12 @@ app.post("/api/cvs/import", authenticateToken, uploadCv.single("file"), async (r
       extractedText = fs.readFileSync(req.file.path, "utf8");
     }
 
-    // Estructura por defecto
     let parsedData = {
       perfil: extractedText,
       experiencias: "", educacion: "", habilidades: "", idiomas: "", proyectos: "", otros: "",
       nombre: "", puesto: "", email: "", telefono: "", ubicacion: "", sitioWeb: "", linkedin: "", github: "",
     };
 
-    // Procesar con OpenAI si hay API Key
     if (process.env.OPENAI_API_KEY) {
       try {
         const completion = await openai.chat.completions.create({
@@ -382,7 +443,6 @@ app.post("/api/cvs/import", authenticateToken, uploadCv.single("file"), async (r
       }
     }
 
-    // Crear y guardar el CV
     const newCv = new Cv({
       userId: req.user.id,
       title: req.file.originalname,
@@ -391,8 +451,6 @@ app.post("/api/cvs/import", authenticateToken, uploadCv.single("file"), async (r
     });
 
     await newCv.save();
-
-    // Limpieza
     try { fs.unlinkSync(req.file.path); } catch (e) { }
 
     res.status(201).json(newCv);
@@ -402,8 +460,7 @@ app.post("/api/cvs/import", authenticateToken, uploadCv.single("file"), async (r
   }
 });
 
-// --- IA (Optimización) ---
-const aiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 }); // Aumentado un poco el límite
+// --- Sección: Inteligencia Artificial (Optimización) ---
 
 app.post("/api/optimizar-cv", aiLimiter, async (req, res) => {
   const { section, content, language, tone, goal, jobDescription } = req.body;
@@ -438,7 +495,8 @@ app.post("/api/optimizar-cv", aiLimiter, async (req, res) => {
   }
 });
 
-// --- Empleos ---
+// --- Sección: Empleos (Jobs) ---
+
 app.get("/api/jobs", async (req, res) => {
   try {
     const { search } = req.query;
@@ -467,9 +525,9 @@ app.get("/api/jobs/:id", async (req, res) => {
   }
 });
 
-// ====================
-// 🚀 Iniciar Servidor
-// ====================
+// ==========================================
+// 🚀 INICIO DEL SERVIDOR
+// ==========================================
 app.listen(PORT, () => {
   console.log(`✅ Joblu Backend corriendo en puerto ${PORT}`);
 });
