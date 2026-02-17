@@ -238,6 +238,51 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
+// Configuración Multer para Avatar
+const avatarStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, `avatar-${uniqueSuffix}${path.extname(file.originalname)}`);
+  },
+});
+
+const uploadAvatar = multer({
+  storage: avatarStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Solo se permiten imágenes (JPG, PNG, GIF, WEBP)."));
+    }
+  }
+});
+
+// Ruta para subir Avatar
+app.post("/api/user/upload-avatar", authenticateToken, uploadAvatar.single("avatar"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No se subió ninguna imagen." });
+    }
+
+    const avatarUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+
+    // Actualizar usuario en BD
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { avatar: avatarUrl },
+      { new: true }
+    );
+
+    res.json({ avatarUrl: user.avatar });
+  } catch (err) {
+    console.error("Error subiendo avatar:", err);
+    res.status(500).json({ error: "Error al procesar la imagen." });
+  }
+});
+
 
 // --- Sección: Comunidad ---
 
