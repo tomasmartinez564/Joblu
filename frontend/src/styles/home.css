@@ -6,6 +6,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -22,15 +23,21 @@
   letter-spacing: 0.5px;
 }
 
-/* Base para botones (Crear CV, Ajustes, Foro, Tip) */
+.brand-name-comunidad {
+  color: var(--joblu-primary-accent, #7c3aed);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .hero-cta,
 .stat-link-secondary,
-.secondary-cta {
+.secondary-cta,
+.view-all-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: fit-content;
-  min-width: 160px; /* Tamaño unificado */
+  min-width: 160px;
   padding: 0.75rem 1.5rem;
   border-radius: 10px;
   font-size: 0.9rem;
@@ -39,39 +46,33 @@
   transition: all 0.3s ease;
   cursor: pointer;
   border: none;
-  
-  /* Alineación al fondo y a la izquierda */
-  margin-top: auto; 
-  align-self: flex-start; 
 }
 
-/* Botón Principal (Violeta) */
-.hero-cta {
+.hero-cta,
+.view-all-btn {
   background: var(--joblu-primary, #6366f1);
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
-.hero-cta:hover {
+.hero-cta:hover,
+.view-all-btn:hover {
   background-color: #4f46e5;
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
 }
 
-/* Botones Secundarios (Borde Violeta) */
 .stat-link-secondary,
 .secondary-cta {
-  background: #f5f3ff !important; 
+  background: #f5f3ff !important;
   border: 1.5px solid var(--joblu-primary) !important;
   color: var(--joblu-primary) !important;
 }
 
-.stat-link-secondary:hover, 
+.stat-link-secondary:hover,
 .secondary-cta:hover {
   background: var(--joblu-primary) !important;
   color: white !important;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(99, 102, 241, 0.2) !important;
 }
 
 /* ==========================================================================
@@ -84,10 +85,6 @@
   animation: joblu-fade-in-up 0.4s ease;
 }
 
-.dashboard-header { margin-bottom: 2rem; }
-.dashboard-header h1 { font-size: 2rem; margin: 0 0 0.5rem 0; }
-
-/* Grid Simétrico 2x2 */
 .dashboard-grid-layout {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -100,7 +97,6 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
   padding: 1.8rem;
   background: var(--joblu-surface);
   border-radius: 1.25rem;
@@ -108,161 +104,262 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.brand-border { border-top: 4px solid var(--joblu-primary) !important; }
-
-/* Progress Bar */
-.progress-bar-container {
-  height: 10px;
-  background-color: #e5e7eb;
-  border-radius: 999px;
-  overflow: hidden;
-  margin: 1rem 0;
-}
-.progress-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--joblu-primary), var(--joblu-primary-accent));
-  transition: width 1s ease-in-out;
+.brand-border {
+  border-top: 4px solid var(--joblu-primary) !important;
 }
 
-/* Comunidad y Tips */
-.card-actions-row {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: auto;
-  width: 100%;
-}
-.card-actions-row .stat-link-secondary { margin-top: 0; }
-
-.btn-icon-plus {
-  width: 35px; height: 35px; border-radius: 50%; border: none;
-  background: var(--joblu-primary); color: white;
-  display: flex; align-items: center; justify-content: center;
-}
-
-/* Banner Comunidad y Carrusel Jobs */
-.dashboard-community-banner {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  padding: 3rem; border-radius: 20px; color: white; margin-bottom: 3rem;
-}
-
-/* Carrusel de Empleos */
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center; /* Centrado vertical */
-  margin-bottom: 1.5rem;
-}
-
-.carousel-controls {
-  display: flex;
-  gap: 0.8rem;
-  align-items: center;
+/* --- CARRUSEL DE EMPLEOS MEJORADO --- */
+.dashboard-recommendations {
+  position: relative;
+  padding-bottom: 5rem;
+  margin-top: 2rem;
 }
 
 .carousel-arrow {
-  width: 36px;
-  height: 36px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  border: 1px solid var(--joblu-border-soft);
   background: white;
+  border: 1px solid var(--joblu-border-soft);
+  color: var(--joblu-primary);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  color: var(--joblu-text-main);
-  padding-bottom: 2px; /* Ajuste visual */
+  transition: all 0.3s ease;
+}
+
+.carousel-arrow[aria-label="Anterior"] {
+  left: -22px;
+}
+
+.carousel-arrow[aria-label="Siguiente"] {
+  right: -22px;
 }
 
 .carousel-arrow:hover {
   background: var(--joblu-primary);
   color: white;
-  border-color: var(--joblu-primary);
 }
 
 .view-all-btn {
-  background: #f3f4f6;
-  color: var(--joblu-text-main);
-  padding: 0.5rem 1rem;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-}
-
-.view-all-btn:hover {
-  background: #e5e7eb;
-  transform: translateY(-1px);
 }
 
 .jobs-carousel-scroll {
-  display: flex; gap: 1.5rem; overflow-x: auto; padding: 1rem 0;
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding: 1rem 0;
   scrollbar-width: none;
 }
+
+.jobs-carousel-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 .home-card-trabajo-mini {
-  min-width: 260px; background: white; padding: 1.5rem;
-  border-radius: 16px; border: 1px solid #e5e7eb;
+  min-width: 280px;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid var(--joblu-border-soft);
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.home-card-trabajo-mini:hover {
+  transform: translateY(-5px);
 }
 
 /* ==========================================================================
-   4. LANDING PAGE (Invitado)
+   4. LANDING PAGE (Invitado) - NUEVO BANNER OVERLAY
    ========================================================================== */
+.home-hero-banner {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  margin-top: -1.5rem;
+  padding: 0;
+}
 
-/* Hero */
-.home-hero {
+.hero-banner-image-wrapper {
+  position: relative;
+  width: 100%;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  height: 450px;
+  /* Ajustar según necesites */
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.hero-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: none;
+  opacity: 1;
+}
+
+
+.hero-banner-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  /* 👈 clave */
+  padding-left: 4rem;
+  /* separacion del borde izquierdo */
+  padding-right: 2rem;
+
+  background: linear-gradient(90deg,
+      rgba(0, 0, 0, 0.55) 0%,
+      rgba(0, 0, 0, 0.45) 35%,
+      rgba(0, 0, 0, 0.00) 70%);
+}
+
+
+
+.hero-banner-content {
+  max-width: 380px;
+  color: #fff;
+  text-align: left;
+  /* 👈 importante */
+}
+
+.hero-banner-content h1 {
+  font-size: clamp(2rem, 3.2vw, 3rem);
+  margin-bottom: 1rem;
+  line-height: 1.08;
+  letter-spacing: -0.5px;
+}
+
+.hero-banner-content p {
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
+  margin-bottom: 1.6rem;
+  opacity: 0.95;
+}
+
+
+/* Restaurar estilos de Historia y Pasos */
+.home-como-funciona {
+  padding: 5rem 1.5rem;
+  background: white;
+}
+
+.home-como-titulo {
+  font-size: 2.2rem;
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.home-como-pasos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2.5rem;
   max-width: 1120px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  align-items: center; gap: 3rem; padding: 5rem 1.5rem;
 }
-.home-hero-texto h1 { font-size: clamp(2.2rem, 4vw, 3.2rem); line-height: 1.1; margin-bottom: 1.5rem; }
-.home-hero-imagen img { width: 100%; max-width: 450px; display: block; }
 
-/* Cómo Funciona */
-.home-como-funciona { padding: 5rem 1.5rem; background: white; }
-.home-como-titulo { font-size: 2.2rem; text-align: center; margin-bottom: 4rem; }
-.home-como-pasos {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2.5rem; max-width: 1120px; margin: 0 auto;
-}
 .home-paso {
-  background: white; padding: 3rem 2rem; border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; border: 1px solid #f3f4f6;
+  background: white;
+  padding: 2rem;
+  border-radius: 20px;
+  text-align: center;
+  border: 1px solid #f3f4f6;
 }
+
 .home-paso-numero {
-  background: var(--joblu-primary); color: white; width: 45px; height: 45px;
-  display: flex; align-items: center; justify-content: center; border-radius: 50%;
-  margin: 0 auto 1.5rem; font-weight: bold;
+  background: var(--joblu-primary);
+  color: white;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
 }
 
-/* Nuestra Historia (Sobre Nosotros) */
-.home-sobre { padding: 6rem 1.5rem; background: white; }
-.home-sobre-titulo { font-size: 2.4rem; text-align: center; margin-bottom: 3rem; font-weight: 700; }
-.home-sobre-contenido { max-width: 850px; margin: 0 auto; line-height: 1.9; font-size: 1.15rem; color: #4b5563; }
-.home-sobre-contenido p { margin-bottom: 2rem; }
+.home-sobre {
+  padding: 6rem 1.5rem;
+}
 
-/* Banner Final */
+.home-sobre-titulo {
+  font-size: 2.4rem;
+  text-align: center;
+  margin-bottom: 3rem;
+  font-weight: 700;
+}
+
+.home-sobre-contenido {
+  max-width: 850px;
+  margin: 0 auto;
+  line-height: 1.9;
+  font-size: 1.1rem;
+  color: #4b5563;
+}
+
+.home-sobre-contenido p {
+  margin-bottom: 1.5rem;
+}
+
 .home-cta-final {
-  background: #f8fafc; padding: 6rem 2rem; text-align: center;
-  border-radius: 32px; max-width: 1120px; margin: 4rem auto 6rem; border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  padding: 4rem 2rem;
+  text-align: center;
+  border-radius: 32px;
+  max-width: 1120px;
+  margin: 2rem auto 4rem;
+  border: 1px solid #e2e8f0;
 }
-.home-cta-final h2 { font-size: 2.4rem; margin-bottom: 1rem; font-weight: 800; }
-.home-cta-final p { font-size: 1.2rem; margin-bottom: 2.5rem; color: #64748b; }
-.home-cta-botones { display: flex; justify-content: center; }
 
 /* ==========================================================================
    5. RESPONSIVE
    ========================================================================== */
 @media (max-width: 900px) {
-  .dashboard-grid-layout, .home-hero, .home-como-pasos { grid-template-columns: 1fr; text-align: center; }
-  .home-hero-texto p { margin-left: auto; margin-right: auto; }
-  .home-hero-imagen img { max-width: 320px; margin: 0 auto; }
-  .hero-cta, .stat-link-secondary, .secondary-cta { align-self: center; }
-  .card-actions-row { justify-content: center; }
+  .hero-banner-overlay {
+    padding: 2rem 1.5rem;
+    justify-content: center;
+    text-align: center;
+
+    /* en mobile, overlay completo para legibilidad */
+    background: rgba(0, 0, 0, 0.55);
+  }
+
+  .hero-banner-image-wrapper {
+    height: 420px;
+  }
+
+  .hero-banner-content {
+    max-width: 680px;
+  }
+
+  .dashboard-grid-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .carousel-arrow[aria-label="Anterior"] {
+    left: 0;
+  }
+
+  .carousel-arrow[aria-label="Siguiente"] {
+    right: 0;
+  }
 }

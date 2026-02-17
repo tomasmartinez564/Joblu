@@ -25,12 +25,11 @@ export default function Home({ user }) {
   const [lastCv, setLastCv] = useState(null);
   const [dailyTip, setDailyTip] = useState(null);
 
-  // Ref para el carrusel
   const carouselRef = useRef(null);
 
   const scrollCarousel = (direction) => {
     if (carouselRef.current) {
-      const scrollAmount = 300; // Ancho aproximado de tarjeta + gap
+      const scrollAmount = 300; 
       carouselRef.current.scrollBy({ left: direction * scrollAmount, behavior: "smooth" });
     }
   };
@@ -38,25 +37,17 @@ export default function Home({ user }) {
   useEffect(() => {
     if (user) {
       setLoading(true);
-      // Seleccionar tip aleatorio
       setDailyTip(JOBLU_TIPS[Math.floor(Math.random() * JOBLU_TIPS.length)]);
 
       cvService.getAll().then(cvs => {
         if (cvs && cvs.length > 0) setLastCv(cvs[0]);
       }).catch(console.error);
 
-      // Cargar CVs
-      cvService.getAll()
-        .then(cvs => { if (cvs && cvs.length > 0) setLastCv(cvs[0]); })
-        .catch(console.error);
-
-      // Cargar Empleos
       fetch(`${API_BASE_URL}/api/jobs`)
         .then(res => res.json())
         .then(data => setRecommendedJobs(data.slice(0, 6)))
         .catch(console.error);
 
-      // Cargar último Post de la comunidad
       fetch(`${API_BASE_URL}/api/community/posts`)
         .then(res => res.json())
         .then(data => { if (data.length > 0) setLatestPost(data[0]); })
@@ -86,8 +77,7 @@ export default function Home({ user }) {
         </header>
 
         <div className="dashboard-grid-layout">
-
-          {/* 1. Progreso de Perfil */}
+          {/* 1. Progreso */}
           <section className="stat-card progress-card brand-border">
             <div className="card-content">
               <h3>Estado de tu CV</h3>
@@ -106,7 +96,7 @@ export default function Home({ user }) {
             </button>
           </section>
 
-          {/* 2. Mi Perfil Profesional (Reemplazo de Acciones Rápidas) */}
+          {/* 2. Identidad */}
           <section className="stat-card profile-preview-card brand-border">
             <div className="card-content">
               <h3>Tu Identidad</h3>
@@ -119,7 +109,7 @@ export default function Home({ user }) {
             <Link to="/cuenta" className="stat-link-secondary">Ajustes de cuenta</Link>
           </section>
 
-          {/* 3. Tip del día con Link directo */}
+          {/* 3. Tip */}
           <section className="stat-card tip-card brand-border">
             <div className="card-content">
               <div className="tip-header">
@@ -138,7 +128,7 @@ export default function Home({ user }) {
             )}
           </section>
 
-          {/* 4. Comunidad con CTA de acción */}
+          {/* 4. Comunidad */}
           <section className="stat-card latest-post-card brand-border">
             <div className="card-content">
               <h3>Comunidad</h3>
@@ -156,24 +146,24 @@ export default function Home({ user }) {
           </section>
         </div>
 
-        {/* Sección Comunidad Protagónica */}
         <section className="dashboard-community-banner">
           <div className="community-banner-content">
             <h2>Explorá nuestra Comunidad</h2>
-            <p>Aprendé de otros profesionales y compartí tus propios consejos en <span className="brand-name">JOBLU</span>.</p>
+            <p>Aprendé de otros profesionales y compartí tus propios consejos en <span className="brand-name-comunidad">JOBLU</span>.</p>
             <Link to="/comunidad" className="hero-cta btn-white">Explorar Foro</Link>
           </div>
         </section>
 
-        {/* Carrusel de Empleos con Flechas */}
+        {/* Carrusel de Empleos */}
         <section className="dashboard-recommendations">
           <div className="section-header">
             <h2>Empleos para vos</h2>
-            <div className="carousel-controls">
-              <button onClick={() => scrollCarousel(-1)} className="carousel-arrow" aria-label="Anterior">‹</button>
-              <button onClick={() => scrollCarousel(1)} className="carousel-arrow" aria-label="Siguiente">›</button>
-              <Link to="/jobs" className="view-all-btn">Ver todos</Link>
-            </div>
+          </div>
+
+          {/* Controles del Carrusel */}
+          <div className="carousel-controls">
+            <button onClick={() => scrollCarousel(-1)} className="carousel-arrow" aria-label="Anterior">‹</button>
+            <button onClick={() => scrollCarousel(1)} className="carousel-arrow" aria-label="Siguiente">›</button>
           </div>
 
           <div className="jobs-carousel-container">
@@ -188,68 +178,74 @@ export default function Home({ user }) {
               ))}
             </div>
           </div>
+          
+          <Link to="/jobs" className="view-all-btn">Ver todos</Link>
         </section>
       </main>
     );
   }
 
-  return (<main className="home-page">
-    <section className="home-hero">
-      <div className="home-hero-texto">
-        <h1>Creá tu currículum profesional con <span className="brand-name">JOBLU</span></h1>
-        <p>
-          Superá los filtros ATS y destacá tu talento con ayuda de inteligencia artificial y una estructura pensada para el mercado actual.
-        </p>
-        <Link to="/cv" className="hero-cta">Empezar ahora gratis</Link>
-      </div>
-      <div className="home-hero-imagen">
-        <img src="/hero-illustration.png" alt="JOBLU" />
-      </div>
-    </section>
+  {/* VISTA INVITADO CON BANNER Y TEXTO POR ENCIMA */}
+  return (
+    <main className="home-page">
+      <header className="home-hero-banner">
+        <div className="hero-banner-image-wrapper">
+          <img src="/banner_vacio.jpeg" alt="JOBLU Banner" className="hero-banner-img" />
+          <div className="hero-banner-overlay">
+            <div className="hero-banner-content">
+              <h1>Creá tu currículum profesional con <span className="brand-name">JOBLU</span></h1>
+              <p>
+                Superá los filtros ATS y destacá tu talento con ayuda de inteligencia artificial y una estructura pensada para el mercado actual.
+              </p>
+              <Link to="/cv" className="hero-cta">Empezar ahora gratis</Link>
+            </div>
+          </div>
+        </div>
+      </header>
 
-    <section className="home-como-funciona">
-      <h2 className="home-como-titulo">¿Cómo funciona <span className="brand-name">JOBLU</span>?</h2>
-      <div className="home-como-pasos">
-        <article className="home-paso">
-          <span className="home-paso-numero">1</span>
-          <h3>Volcá tu talento</h3>
-          <p>Nuestro formulario inteligente te guía paso a paso para que no olvides ningún detalle clave que buscan las empresas.</p>
-        </article>
-        <article className="home-paso">
-          <span className="home-paso-numero">2</span>
-          <h3>Potenciá tu perfil</h3>
-          <p>Nuestra IA integrada en <span className="brand-name">JOBLU</span> analiza tu rubro y sugiere mejoras de redacción que atraen a los reclutadores.</p>
-        </article>
-        <article className="home-paso">
-          <span className="home-paso-numero">3</span>
-          <h3>Impactá en el mercado</h3>
-          <p>Descargá un PDF con diseño profesional optimizado para sistemas ATS y destacate en cualquier búsqueda laboral.</p>
-        </article>
-      </div>
-    </section>
+      <section className="home-como-funciona">
+        <h2 className="home-como-titulo">¿Cómo funciona <span className="brand-name">JOBLU</span>?</h2>
+        <div className="home-como-pasos">
+          <article className="home-paso">
+            <span className="home-paso-numero">1</span>
+            <h3>Volcá tu talento</h3>
+            <p>Nuestro formulario inteligente te guía paso a paso para que no olvides ningún detalle clave que buscan las empresas.</p>
+          </article>
+          <article className="home-paso">
+            <span className="home-paso-numero">2</span>
+            <h3>Potenciá tu perfil</h3>
+            <p>Nuestra IA integrada en <span className="brand-name">JOBLU</span> analiza tu rubro y sugiere mejoras de redacción.</p>
+          </article>
+          <article className="home-paso">
+            <span className="home-paso-numero">3</span>
+            <h3>Impactá en el mercado</h3>
+            <p>Descargá un PDF con diseño profesional optimizado para sistemas ATS y destacate.</p>
+          </article>
+        </div>
+      </section>
 
-    <section className="home-sobre">
-      <h2 className="home-sobre-titulo">Nuestra Historia</h2>
-      <div className="home-sobre-contenido">
-        <p>
-          Todo comenzó con una hoja en blanco y la frustración de no saber por dónde empezar. Como muchos jóvenes, nos encontramos armando nuestro primer currículum sin experiencia previa y sin nadie que nos enseñara cómo hacerlo. Probamos herramientas genéricas y palabras vacías, dándonos cuenta de que así nunca pasaríamos los filtros ATS que las empresas usan hoy.
-        </p>
-        <p>
-          Investigando, descubrimos que no estábamos solos: miles de adolescentes sentían la misma incertidumbre. Así nació <span className="brand-name">JOBLU</span>. No queríamos ser solo otra herramienta de diseño; queríamos crear el lugar donde realmente <strong>APRENDES</strong> a construir tu identidad profesional.
-        </p>
-        <p>
-          En <span className="brand-name">JOBLU</span>, te damos las herramientas para que armes tu CV según tus necesidades, con consejos personalizados de IA y una comunidad dispuesta a enseñarte. Estamos acá para que dejes de scrollear infinitamente y empieces a encontrar el trabajo que de verdad querés.
-        </p>
-      </div>
-    </section>
+      <section className="home-sobre">
+        <h2 className="home-sobre-titulo">Nuestra Historia</h2>
+        <div className="home-sobre-contenido">
+          <p>
+            Todo comenzó con una hoja en blanco y la frustración de no saber por dónde empezar. Como muchos jóvenes, nos encontramos armando nuestro primer currículum sin experiencia previa y sin nadie que nos enseñara cómo hacerlo. Probamos herramientas genéricas y palabras vacías, dándonos cuenta de que así nunca pasaríamos los filtros ATS que las empresas usan hoy.
+          </p>
+          <p>
+            Investigando, descubrimos que no estábamos solos: miles de adolescentes sentían la misma incertidumbre. Así nació <span className="brand-name">JOBLU</span>. No queríamos ser solo otra herramienta de diseño; queríamos crear el lugar donde realmente <strong>APRENDES</strong> a construir tu identidad profesional.
+          </p>
+          <p>
+            En <span className="brand-name">JOBLU</span>, te damos las herramientas para que armes tu CV según tus necesidades, con consejos personalizados de IA y una comunidad dispuesta a enseñarte. Estamos acá para que dejes de scrollear infinitamente y empieces a encontrar el trabajo que de verdad querés.
+          </p>
+        </div>
+      </section>
 
-    <section className="home-cta-final">
-      <h2>Empezá hoy a crear tu futuro profesional</h2>
-      <p>Unite a <span className="brand-name">JOBLU</span> y transformá tu forma de buscar trabajo.</p>
-      <div className="home-cta-botones">
-        <Link to="/cv" className="hero-cta">Crear mi CV</Link>
-      </div>
-    </section>
-  </main>
+      <section className="home-cta-final">
+        <h2>Empezá hoy a crear tu futuro profesional</h2>
+        <p>Unite a <span className="brand-name">JOBLU</span> y transformá tu forma de buscar trabajo.</p>
+        <div className="home-cta-botones">
+          <Link to="/cv" className="hero-cta">Crear mi CV</Link>
+        </div>
+      </section>
+    </main>
   );
 }
