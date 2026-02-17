@@ -151,8 +151,9 @@ function Community({ user }) {
         },
       });
       if (!res.ok) throw new Error("Error al dar like");
-      const updatedData = await res.json();
-      setPosts((prev) => prev.map(p => p._id === postId ? { ...p, likedBy: updatedData.likedBy } : p));
+      if (!res.ok) throw new Error("Error al dar like");
+      // La actualización optimista ya se encargó de la UI.
+      // Si quisieramos ser estrictos, podríamos confirmar con updatedData.likes
     } catch (error) {
       addToast("No pudimos registrar tu like", "error");
     }

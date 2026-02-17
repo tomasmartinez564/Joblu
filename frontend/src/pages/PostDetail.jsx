@@ -40,12 +40,12 @@ function PostDetail({ user }) {
   const [commentContent, setCommentContent] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
 
-  // --- 3. Estados: UI y Persistencia Local (Likes) ---
+  // --- 3. Estados: UI (Likes) ---
   const [deleting, setDeleting] = useState(false);
-  const [likedPosts, setLikedPosts] = useState(() => getInitialLikedPosts());
 
   // --- 4. Lógica Derivada (Calculada) ---
-  const isLiked = post && likedPosts.includes(post._id);
+  const isLiked = post && user && post.likedBy?.includes(user.id);
+  const likeCount = post ? (post.likedBy?.length || 0) : 0;
   const canDelete = user && post && post.authorEmail && user.email === post.authorEmail;
 
   // ==========================================
@@ -73,13 +73,6 @@ function PostDetail({ user }) {
     fetchPost();
   }, [id]);
 
-  /**
-   * Sincroniza los posts con "like" en el localStorage.
-   */
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(likedPosts));
-  }, [likedPosts]);
-
   // ==========================================
   // 📡 MANEJADORES DE EVENTOS (Handlers)
   // ==========================================
@@ -88,10 +81,22 @@ function PostDetail({ user }) {
    * Gestiona la lógica de dar/quitar like.
    */
   const handleToggleLike = async () => {
-    if (!post) return;
+    if (!post || !user) {
+      if (!user) addToast("Debes iniciar sesión para dar like", "info");
+      return;
+    }
 
-    const alreadyLiked = likedPosts.includes(post._id);
-    const action = alreadyLiked ? "unlike" : "like";
+    // Actualización Optimista
+    const alreadyLiked = post.likedBy?.includes(user.id);
+    let newLikedBy = post.likedBy ? [...post.likedBy] : [];
+
+    if (alreadyLiked) {
+      newLikedBy = newLikedBy.filter(uid => uid !== user.id);
+    } else {
+      newLikedBy.push(user.id);
+    }
+
+    setPost(prev => ({ ...prev, likedBy: newLikedBy }));
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/community/posts/${post._id}/like`, {
@@ -100,21 +105,18 @@ function PostDetail({ user }) {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${localStorage.getItem("joblu_token")}`
         },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ action: alreadyLiked ? "unlike" : "like" }),
       });
 
       if (!res.ok) throw new Error("No se pudo actualizar el like.");
 
-      const updatedPost = await res.json();
-      
-      // Actualizamos el contador en el post y el registro local
-      setPost((prev) => (prev ? { ...prev, likes: updatedPost.likes } : prev));
-      setLikedPosts((prev) =>
-        alreadyLiked ? prev.filter((id) => id !== post._id) : [...prev, post._id]
-      );
+      // Confirmamos con datos del servidor si es necesario, 
+      // pero el optimista suele ser suficiente para UX rápida.
     } catch (err) {
       console.error(err);
       addToast("Hubo un problema al actualizar el like.", "error");
+      // Revertir en caso de error
+      setPost(prev => ({ ...prev, likedBy: post.likedBy }));
     }
   };
 
@@ -176,7 +178,7 @@ function PostDetail({ user }) {
         }
       });
       if (!res.ok) throw new Error("No se pudo borrar el post.");
-      
+
       addToast("Post eliminado correctamente", "success");
       navigate("/comunidad");
     } catch (err) {
@@ -228,7 +230,7 @@ function PostDetail({ user }) {
           {isLiked ? "💙 Quitar like" : "🤍 Me gusta"}
         </button>
         <span className="postdetail-like-count">
-          {(post.likes ?? 0)} { (post.likes === 1) ? "like" : "likes" }
+          {likeCount} {(likeCount === 1) ? "like" : "likes"}
         </span>
       </div>
 

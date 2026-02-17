@@ -171,8 +171,8 @@ function Jobs() {
           <div className="jobs-header-tabs">
             <div className="jobs-list-tabs">
               <button className={"jobs-tab" + (activeTab === "all" ? " jobs-tab-active" : "")} onClick={() => setActiveTab("all")}>Todos</button>
-              <button className={"jobs-tab" + (activeTab === "recent" ? " jobs-tab-active" : "")} onClick={() => setActiveTab("recent")}>Recientes 🔥</button>
-              <button className={"jobs-tab" + (activeTab === "featured" ? " jobs-tab-active" : "")} onClick={() => setActiveTab("featured")}>Destacados ⭐</button>
+              <button className={"jobs-tab" + (activeTab === "recent" ? " jobs-tab-active" : "")} onClick={() => setActiveTab("recent")}>Recientes</button>
+              <button className={"jobs-tab" + (activeTab === "featured" ? " jobs-tab-active" : "")} onClick={() => setActiveTab("featured")}>Destacados</button>
             </div>
           </div>
         </div>
