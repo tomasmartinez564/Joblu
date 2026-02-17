@@ -478,7 +478,11 @@ function CvBuilder({ user, settings, onChangeSettings }) {
             <button type="button" className="cv-action-btn download-btn" onClick={handleDownloadPDF}>
               {cvLanguage === "en" ? "Download PDF" : "Descargar PDF"}
             </button>
-            <button ref={refBtnIA} type="button" className="cv-action-btn ai-btn" onClick={() => setAiOpen(true)}>
+            <button ref={refBtnIA} type="button" className="cv-action-btn ai-btn" onClick={() => {
+              const currentKey = STEPS[activeStep].key;
+              const sectionToUse = currentKey === "datos" ? "perfil" : currentKey; // Si está en datos, sugerir perfil
+              handleOpenAiForSection(sectionToUse, cvData[sectionToUse]);
+            }}>
               ✨ {cvLanguage === "en" ? "Improve with IA" : "Mejorar con IA"}
             </button>
             {(saveError || saveSuccess) && (
