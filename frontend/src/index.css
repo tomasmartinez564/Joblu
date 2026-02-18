@@ -83,3 +83,21 @@ button { font-family: inherit; }
     transform: translateY(0);
   }
 }
+
+/* Estandarización de botones */
+button, .hero-cta, .btn-small, .btn-white {
+  border-radius: var(--joblu-radius-lg); /* Usar tu variable de 16px o poner 999px para redondos */
+  font-family: var(--font-subtitle);
+  font-weight: 600;
+  transition: var(--joblu-transition);
+  cursor: pointer;
+  border: none;
+  /* Opcional: para que todos se sientan "marca" */
+  letter-spacing: 0.5px; 
+}
+
+/* Ajuste específico para que no rompa los iconos o links que parecen botones */
+button:active, .hero-cta:active {
+  transform: scale(0.98);
+}
+

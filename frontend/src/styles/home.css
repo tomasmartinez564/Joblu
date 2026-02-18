@@ -197,7 +197,8 @@
 
 .hero-banner-image-wrapper {
   /* height: 450px; <-- REMOVE FIXED HEIGHT */
-  aspect-ratio: 3/1; /* Maintain aspect ratio like 1350x450 */
+  aspect-ratio: 3/1;
+  /* Maintain aspect ratio like 1350x450 */
   width: 100%;
   margin: 0;
   border-radius: 0;
@@ -235,23 +236,26 @@
 
 
 .hero-banner-content {
-  max-width: 480px; /* Ancho fijo para que no se expanda demasiado */
+  max-width: clamp(350px, 45vw, 600px);
+  /* Ancho fluido */
   color: #fff;
   text-align: left;
 }
 
 .hero-banner-content h1 {
-  font-size: 3rem; /* Tamaño fijo, no clamp */
+  font-size: clamp(2.2rem, 3.5vw, 3.5rem);
+  /* Texto responsive */
   margin-bottom: 0.8rem;
   line-height: 1.1;
   letter-spacing: -0.5px;
 }
 
 .hero-banner-content p {
-  font-size: 1.15rem; /* Tamaño fijo */
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  /* Texto responsive */
   margin-bottom: 2rem;
   opacity: 0.95;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 

@@ -80,24 +80,27 @@
 }
 
 .mycvs-card-btn {
-  padding: 0.4rem 0.9rem;
-  border-radius: 999px;
-  border: 1px solid #e5e7eb;
-  font-size: 0.85rem;
+  padding: 0.5rem 1.25rem; /* Más consistencia */
+  border-radius: 12px; /* Antes 999px */
+  border: 2px solid #e5e7eb; /* Grosor 2px para igualar al resto */
+  font-size: 0.9rem;
+  font-weight: 600; /* Texto más gordito como en Home */
   cursor: pointer;
   background: #f9fafb;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition: all 0.2s ease;
 }
 
+/* Ajuste para el botón primario (Editar) */
 .mycvs-card-btn.primary {
   background: var(--joblu-primary);
   color: #f9fafb;
-  border-color: var(--joblu-primary);
+  border-color: var(--joblu-primary); /* El borde ahora tiene color */
 }
 
 .mycvs-card-btn.primary:hover {
-  background: var(--joblu-secondary);
-  border-color: var(--joblu-secondary);
+  background-color: #4f46e5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 55, 183, 0.2);
 }
 
 .mycvs-card-btn.danger {
@@ -105,10 +108,11 @@
   color: #b91c1c;
   border-color: #fecaca;
 }
-
+/* Ajuste para el botón borrar */
 .mycvs-card-btn.danger:hover {
   background: #fee2e2;
   border-color: #fecaca;
+  transform: translateY(-2px);
 }
 
 .mycvs-confirm-hint {

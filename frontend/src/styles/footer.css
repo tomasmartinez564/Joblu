@@ -100,10 +100,34 @@
 @media (max-width: 768px) {
   .app-footer {
     padding: 2rem 1rem;
+    text-align: center; /* Centra el texto de descripción y copyright */
   }
   
   .footer-content {
-    grid-template-columns: 1fr;
+    display: grid;
+    /* Cambiamos a 2 columnas para que Navegación y Legal queden lado a lado */
+    grid-template-columns: 1fr 1fr; 
     gap: 2rem;
+  }
+
+  /* El primer div (Logo y descripción) ocupa todo el ancho */
+  .footer-section:first-child {
+    grid-column: 1 / -1;
+    align-items: center; /* Centra el logo y texto */
+  }
+
+  /* El último div (Redes sociales) ocupa todo el ancho */
+  .footer-section:last-child {
+    grid-column: 1 / -1;
+    align-items: center;
+  }
+
+  .footer-socials {
+    justify-content: center; /* Centra los iconos */
+  }
+
+  /* Asegura que los links dentro de las secciones también se centren si es necesario */
+  .footer-links {
+    align-items: center; 
   }
 }

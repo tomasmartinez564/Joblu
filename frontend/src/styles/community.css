@@ -386,18 +386,38 @@ body.dark-mode .community-post {
   box-shadow: 0 0 0 2px rgba(33, 219, 210, 0.2);
 }
 
+/* Botón de Comentar */
 .btn-comment {
-  padding: 0.4rem 1rem;
-  border-radius: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 12px; /* Antes 0.5rem */
   background: var(--joblu-primary);
   color: white;
   border: none;
   font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
-  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
-.btn-comment:disabled {
-  opacity: 0.6;
-  cursor: default;
+.btn-comment:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 55, 183, 0.25);
+  background-color: #4f46e5;
+}
+
+/* Si tienes un botón de "Publicar" en el form de arriba, asegúrate que use esto */
+.community-form button[type="submit"] {
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  background: var(--joblu-primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.community-form button[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 55, 183, 0.25);
 }

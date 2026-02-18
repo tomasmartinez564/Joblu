@@ -68,13 +68,16 @@
 }
 
 
+/* Pestañas de filtrado */
 .jobs-tab {
-  border-radius: 999px;
-  padding: 0.35rem 0.9rem;
-  border: 1px solid var(--joblu-border-soft);
+  border-radius: 12px; /* Antes 999px */
+  padding: 0.5rem 1rem; /* Un poco más de aire */
+  border: 2px solid var(--joblu-border-soft); /* Borde unificado */
   background: #f9fafb;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .jobs-tab-active {
@@ -168,23 +171,34 @@
   gap: 0.4rem;
 }
 
-.job-card-secondary-btn {
-  border-radius: 999px;
-  padding: 0.3rem 0.8rem;
-  font-size: 0.8rem;
-  border: 1px solid var(--joblu-border-soft);
-  background: #f9fafb;
-  cursor: pointer;
+/* Botón "Ver detalle" o acciones secundarias */
+.job-card-secondary-btn, 
+.job-card-detail-link,
+.job-detail-back,
+.chip {
+  border-radius: 12px !important; /* Forzamos el 12px en lugar de 999px */
+  border: 2px solid var(--joblu-border-soft); /* Grosor unificado */
+  padding: 0.4rem 1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
+/* Botón Principal de la tarjeta (Solicitar / Ver más) */
 .job-card-cta {
-  border-radius: 999px;
-  padding: 0.4rem 1.1rem;
+  border-radius: 12px; /* Antes 999px */
+  padding: 0.5rem 1.25rem;
   border: none;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
   background: var(--joblu-primary);
   color: #fff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.job-card-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 55, 183, 0.25);
 }
 
 .jobs-search-area {
@@ -200,22 +214,31 @@
   max-width: 460px;
 }
 
+/* Input de búsqueda (para que coincida con el botón cuadrado) */
 .jobs-search-input {
   flex: 1;
-  border-radius: 999px;
+  border-radius: 12px; /* Antes 999px */
   border: 1px solid var(--joblu-border-soft);
-  padding: 0.45rem 0.9rem;
-  font-size: 0.9rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
 }
 
+/* Botón de buscar */
 .jobs-search-button {
-  border-radius: 999px;
+  border-radius: 12px; /* Antes 999px */
   border: none;
-  padding: 0.45rem 1.1rem;
-  font-size: 0.9rem;
+  padding: 0.75rem 1.5rem; /* Padding estándar del Home */
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
   background: var(--joblu-primary);
   color: #ffffff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.jobs-search-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 55, 183, 0.25);
 }
 
 .jobs-empty {

@@ -150,6 +150,19 @@ body.dark-mode .nav-link {
   justify-content: center;
 }
 
+/* Botón del menú móvil (hamburguesa) */
+.mobile-menu-toggle {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: #f9fafb; /* Color blanco/claro del texto */
+  cursor: pointer;
+  
+  /* AQUÍ BAJAMOS EL BOTÓN */
+  margin-top: 10px; 
+  /* O puedes usar: transform: translateY(4px); */
+}
+
 /* Desktop: mostrar avatar, ocultar hamburguesa */
 @media (min-width: 768px) {
   .desktop-user-menu {

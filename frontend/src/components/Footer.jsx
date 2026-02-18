@@ -8,10 +8,10 @@ export default function Footer() {
             <div className="footer-content">
                 <div className="footer-section">
                     <Link to="/" className="footer-logo">
-                        Joblu
+                        JOBLU
                     </Link>
                     <p className="footer-description">
-                        La plataforma inteligente para potenciar tu carrera profesional.
+                        La plataforma inteligente para potenciar tu carrera profesional con JOBLU.
                         Crea tu CV, encuentra empleo y conecta con la comunidad.
                     </p>
                 </div>
@@ -47,7 +47,7 @@ export default function Footer() {
             </div>
 
             <div className="footer-bottom">
-                <p>&copy; {new Date().getFullYear()} Joblu. Todos los derechos reservados.</p>
+                <p>&copy; {new Date().getFullYear()} JOBLU. Todos los derechos reservados.</p>
             </div>
         </footer>
     );
