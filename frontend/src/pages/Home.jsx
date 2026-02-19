@@ -190,7 +190,10 @@ export default function Home({ user }) {
     <main className="home-page">
       <header className="home-hero-banner">
         <div className="hero-banner-image-wrapper">
-          <img src="/banner_vacio.jpeg" alt="JOBLU Banner" className="hero-banner-img" />
+          <picture>
+            <source media="(max-width: 767px)" srcSet="/banner_movil.jpeg" />
+            <img src="/banner_vacio.jpeg" alt="JOBLU Banner" className="hero-banner-img" />
+          </picture>
           <div className="hero-banner-overlay">
             <div className="hero-banner-content">
               <h1>Creá tu currículum profesional con <span className="brand-name">JOBLU</span></h1>

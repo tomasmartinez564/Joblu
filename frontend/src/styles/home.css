@@ -363,6 +363,13 @@
   .hero-banner-content {
     max-width: 680px;
   }
+}
+
+@media (max-width: 768px) {
+  .hero-banner-image-wrapper {
+    aspect-ratio: 9/16; /* Formato vertical para móvil */
+    height: auto;
+  }
 
   .dashboard-grid-layout {
     grid-template-columns: 1fr;
@@ -375,9 +382,7 @@
   .carousel-arrow[aria-label="Siguiente"] {
     right: 0;
   }
-}
 
-@media (max-width: 768px) {
   /* Fix Carrusel Mobile: Scroll de borde a borde */
   .jobs-carousel-container {
     margin-left: -1.5rem;
