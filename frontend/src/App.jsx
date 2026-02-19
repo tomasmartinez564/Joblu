@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense, lazy } from 'react'
 import { Route, Routes, useNavigate } from 'react-router-dom'
 
 // --- Estilos ---
@@ -6,18 +6,19 @@ import './App.css'
 import "./styles/header.css"
 import "./styles/footer.css"
 
-// --- Páginas ---
+// --- Páginas (Estatica para LCP) ---
 import Home from './pages/Home.jsx'
-import CvBuilder from './pages/CvBuilder.jsx'
-import Community from './pages/Community.jsx'
-import Jobs from './pages/Jobs.jsx'
-import Login from './pages/Login.jsx'
-import MyCvs from './pages/MyCvs.jsx'
 
-import AccountSettings from './pages/AccountSettings.jsx'
-import JobDetail from './pages/JobDetail.jsx'
-import PostDetail from "./pages/PostDetail"
-import NotFound from './pages/NotFound.jsx'
+// --- Páginas (Lazy Loading) ---
+const CvBuilder = lazy(() => import('./pages/CvBuilder.jsx'))
+const Community = lazy(() => import('./pages/Community.jsx'))
+const Jobs = lazy(() => import('./pages/Jobs.jsx'))
+const Login = lazy(() => import('./pages/Login.jsx'))
+const MyCvs = lazy(() => import('./pages/MyCvs.jsx'))
+const AccountSettings = lazy(() => import('./pages/AccountSettings.jsx'))
+const JobDetail = lazy(() => import('./pages/JobDetail.jsx'))
+const PostDetail = lazy(() => import("./pages/PostDetail"))
+const NotFound = lazy(() => import('./pages/NotFound.jsx'))
 
 // --- Componentes ---
 import Navbar from "./components/Navbar"
@@ -226,20 +227,22 @@ function AppLayout() {
       )}
 
       <main className="app-main">
-        <Routes>
-          <Route path="/" element={<Home user={user} />} />
-          <Route path="/cv" element={<CvBuilder user={user} settings={settings} onChangeSettings={setSettings} />} />
-          <Route path="/cv/:id" element={<CvBuilder user={user} settings={settings} onChangeSettings={setSettings} />} />
-          <Route path="/comunidad" element={<Community user={user} />} />
-          <Route path="/comunidad/:id" element={<PostDetail user={user} />} />
-          <Route path="/jobs" element={<Jobs savedJobs={savedJobs} toggleSavedJob={toggleSavedJob} />} />
-          <Route path="/jobs/:id" element={<JobDetail savedJobs={savedJobs} toggleSavedJob={toggleSavedJob} />} />
-          <Route path="/login" element={<Login onLogin={handleLogin} />} />
+        <Suspense fallback={<div style={{ padding: "2rem", textAlign: "center" }}>Cargando...</div>}>
+          <Routes>
+            <Route path="/" element={<Home user={user} />} />
+            <Route path="/cv" element={<CvBuilder user={user} settings={settings} onChangeSettings={setSettings} />} />
+            <Route path="/cv/:id" element={<CvBuilder user={user} settings={settings} onChangeSettings={setSettings} />} />
+            <Route path="/comunidad" element={<Community user={user} />} />
+            <Route path="/comunidad/:id" element={<PostDetail user={user} />} />
+            <Route path="/jobs" element={<Jobs savedJobs={savedJobs} toggleSavedJob={toggleSavedJob} />} />
+            <Route path="/jobs/:id" element={<JobDetail savedJobs={savedJobs} toggleSavedJob={toggleSavedJob} />} />
+            <Route path="/login" element={<Login onLogin={handleLogin} />} />
 
-          <Route path="/mis-cvs" element={<MyCvs user={user} />} />
-          <Route path="/cuenta" element={<AccountSettings user={user} onUpdateUser={handleUpdateUser} settings={settings} onChangeSettings={setSettings} />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+            <Route path="/mis-cvs" element={<MyCvs user={user} />} />
+            <Route path="/cuenta" element={<AccountSettings user={user} onUpdateUser={handleUpdateUser} settings={settings} onChangeSettings={setSettings} />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </main>
       <Footer />
     </div>

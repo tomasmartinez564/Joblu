@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { FaLinkedin, FaGithub, FaGlobe } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
-import html2pdf from "html2pdf.js";
+
 
 // --- Estilos ---
 import "../styles/cvbuilder.css";
@@ -305,7 +305,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
     const recalc = () => calcularPosicionPaso(pasoTutorial);
     window.addEventListener("resize", recalc);
-    
+
     return () => {
       clearTimeout(timeoutId);
       window.removeEventListener("resize", recalc);
@@ -351,12 +351,12 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
     const siguienteIndice = pasoTutorial + 1;
     const siguientePaso = pasos[siguienteIndice];
-    
+
     // Sincronizar activeStep antes de cambiar el paso del tutorial
     if (siguientePaso?.activeStepTarget !== null && siguientePaso?.activeStepTarget !== undefined) {
       setActiveStep(siguientePaso.activeStepTarget);
     }
-    
+
     // Cambiar el paso del tutorial después de un pequeño delay para asegurar que activeStep se haya actualizado
     setTimeout(() => {
       setPasoTutorial(siguienteIndice);
@@ -412,17 +412,23 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
   const toggleSection = (key) => setSectionsVisible((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (!cvRef.current) return;
-    const opt = {
-      margin: [10, 10],
-      filename: `${cvData.nombre || "mi_cv"}.pdf`,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      pagebreak: { mode: ["avoid-all", "css", "legacy"] },
-    };
-    html2pdf().set(opt).from(cvRef.current).save();
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+      const opt = {
+        margin: [10, 10],
+        filename: `${cvData.nombre || "mi_cv"}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+      };
+      html2pdf().set(opt).from(cvRef.current).save();
+    } catch (error) {
+      console.error("Error al cargar html2pdf:", error);
+      // Podrías mostrar un toast de error aquí si quisieras
+    }
   };
 
   // --- Helpers de Renderizado ---
@@ -461,10 +467,10 @@ function CvBuilder({ user, settings, onChangeSettings }) {
             className={`tutorial-modal ${posicionPaso?.modalAtTopOnMobile ? "tutorial-modal-top" : ""}`}
             style={posicionPaso && !posicionPaso.isMobile
               ? {
-                  left: posicionPaso.modalLeft,
-                  top: posicionPaso.ponerArriba ? "auto" : posicionPaso.anchorBottom,
-                  bottom: posicionPaso.ponerArriba ? window.innerHeight - posicionPaso.anchorTop : "auto",
-                }
+                left: posicionPaso.modalLeft,
+                top: posicionPaso.ponerArriba ? "auto" : posicionPaso.anchorBottom,
+                bottom: posicionPaso.ponerArriba ? window.innerHeight - posicionPaso.anchorTop : "auto",
+              }
               : undefined}
           >
             <p className="tutorial-paso">Paso {pasoTutorial + 1} de {pasos.length}</p>
