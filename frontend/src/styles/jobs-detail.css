@@ -151,3 +151,60 @@
     border-radius: 4px;
   }
 }
+
+/* Modal de Postulación */
+.job-apply-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.job-apply-modal {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  animation: joblu-fade-in-up 0.3s ease;
+}
+
+.job-apply-modal-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.job-apply-modal h3 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  color: var(--joblu-primary);
+}
+
+.job-apply-modal p {
+  color: #4b5563;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.job-apply-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+@media (max-width: 480px) {
+  .job-apply-modal-actions {
+    flex-direction: column;
+  }
+  
+  .job-apply-modal-actions button {
+    width: 100%;
+  }
+}
