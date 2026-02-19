@@ -22,6 +22,7 @@ import NotFound from './pages/NotFound.jsx'
 // --- Componentes ---
 import Navbar from "./components/Navbar"
 import Footer from "./components/Footer"
+import ScrollToTop from "./components/ScrollToTop"
 
 // --- Contexto y Configuración ---
 import { ToastProvider } from './context/ToastContext'
@@ -191,6 +192,7 @@ function AppLayout() {
   // --- Renderizado ---
   return (
     <div className="app">
+      <ScrollToTop />
       <Navbar
         user={user}
         isMobileMenuOpen={isMobileMenuOpen}
