@@ -695,33 +695,67 @@
 .tutorial-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 99990;
   background: rgba(0, 0, 0, 0.55);
   pointer-events: auto;
 }
 
-/* Modal SIEMPRE en viewport */
+/* Modal SIEMPRE en viewport - posición legible respecto al highlight */
 .tutorial-modal {
   position: fixed;
   background: white;
   border-radius: 16px;
   padding: 1.25rem;
   width: min(520px, calc(100vw - 24px));
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
   border: 1px solid #e5e7eb;
   pointer-events: auto;
-  z-index: 10001;
+  z-index: 99992;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  /* Evita que se salga del viewport en desktop */
+  transform: translateZ(0);
 }
 
-/* Highlight SIEMPRE en viewport */
+/* Highlight SIEMPRE visible y por encima del overlay */
 .tutorial-highlight {
   position: fixed;
   border-radius: 12px;
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
   pointer-events: none;
-  transition: all 0.25s ease;
-  z-index: 10000;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  z-index: 99991;
+  border: 2px solid var(--joblu-primary, #6337b7);
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+/* ===========================
+   Tutorial - Mobile: modal fijo abajo para no tapar el campo
+   =========================== */
+@media (max-width: 768px) {
+  .tutorial-modal {
+    /* Fijar en la parte inferior para no tapar el campo que edita el usuario */
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    max-height: 45vh;
+    border-radius: 16px 16px 0 0;
+    margin: 0;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Alternativa: si el campo está abajo, modal arriba (se puede activar con clase) */
+@media (max-width: 768px) {
+  .tutorial-modal.tutorial-modal-top {
+    top: 0 !important;
+    bottom: auto !important;
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  }
 }
 
 /* ===========================

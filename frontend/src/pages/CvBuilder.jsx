@@ -262,10 +262,10 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   // ==========================================
 
   const pasos = [
-    { titulo: "Elegí la configuración del CV", descripcion: "Acá podés seleccionar el rubro/estilo del CV.", ref: refBtnConfiguracion },
-    { titulo: "Completá tu perfil profesional", descripcion: "Escribí un resumen breve y claro de quién sos.", ref: refTextareaPerfil },
-    { titulo: "Mejoralo con IA", descripcion: "Usá la IA para hacerlo más profesional.", ref: refBtnIA },
-    { titulo: "Revisá la vista previa", descripcion: "Se actualiza en tiempo real mientras completás los datos.", ref: refVistaPrevia },
+    { titulo: "Elegí la configuración del CV", descripcion: "Acá podés seleccionar el rubro/estilo del CV.", ref: refBtnConfiguracion, activeStepTarget: 0 },
+    { titulo: "Completá tu perfil profesional", descripcion: "Escribí un resumen breve y claro de quién sos.", ref: refTextareaPerfil, activeStepTarget: 1 },
+    { titulo: "Mejoralo con IA", descripcion: "Usá la IA para hacerlo más profesional.", ref: refBtnIA, activeStepTarget: 1 },
+    { titulo: "Revisá la vista previa", descripcion: "Se actualiza en tiempo real mientras completás los datos.", ref: refVistaPrevia, activeStepTarget: null },
   ];
 
   const pasoActual = pasos[pasoTutorial];
@@ -275,15 +275,41 @@ function CvBuilder({ user, settings, onChangeSettings }) {
     if (!tutorialActivo) return;
 
     const paso = pasos[pasoTutorial];
-    if (!paso?.ref?.current) return;
+    if (!paso) return;
 
-    paso.ref.current.scrollIntoView({ behavior: "auto", block: "center", inline: "nearest" });
+    // Asegurar que el activeStep esté sincronizado antes de intentar acceder al ref
+    if (paso.activeStepTarget !== null && paso.activeStepTarget !== undefined) {
+      setActiveStep(paso.activeStepTarget);
+    }
 
-    requestAnimationFrame(() => {
+    // Delay para asegurar que el DOM se haya actualizado después del cambio de activeStep
+    const timeoutId = setTimeout(() => {
+      if (!paso?.ref?.current) {
+        // Si el ref aún no está disponible, intentar recalcular después de otro delay
+        setTimeout(() => {
+          if (paso?.ref?.current) {
+            paso.ref.current.scrollIntoView({ behavior: "auto", block: "center", inline: "nearest" });
+            calcularPosicionPaso(pasoTutorial);
+          }
+        }, 100);
+        return;
+      }
+
+      paso.ref.current.scrollIntoView({ behavior: "auto", block: "center", inline: "nearest" });
+
+      const recalc = () => calcularPosicionPaso(pasoTutorial);
       requestAnimationFrame(() => {
-        calcularPosicionPaso(pasoTutorial);
+        requestAnimationFrame(recalc);
       });
-    });
+    }, 150);
+
+    const recalc = () => calcularPosicionPaso(pasoTutorial);
+    window.addEventListener("resize", recalc);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("resize", recalc);
+    };
   }, [tutorialActivo, pasoTutorial]);
 
   const calcularPosicionPaso = (indicePaso) => {
@@ -297,6 +323,8 @@ function CvBuilder({ user, settings, onChangeSettings }) {
     const anchoModal = 520;
 
     const ponerArriba = rect.top > (vh * 0.6);
+    const isMobile = vw <= 768;
+    const modalAtTopOnMobile = isMobile && ponerArriba;
     let leftCalculado = rect.left + (rect.width / 2) - (anchoModal / 2);
 
     if (leftCalculado < margen) leftCalculado = margen;
@@ -306,6 +334,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
       top: rect.top, left: rect.left, width: rect.width, height: rect.height,
       modalLeft: leftCalculado, ponerArriba,
       anchorTop: rect.top - margen, anchorBottom: rect.bottom + margen,
+      modalAtTopOnMobile, isMobile,
     });
   };
 
@@ -315,8 +344,23 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   };
 
   const siguientePaso = () => {
-    if (pasoTutorial >= pasos.length - 1) cerrarTutorial();
-    else setPasoTutorial((prev) => prev + 1);
+    if (pasoTutorial >= pasos.length - 1) {
+      cerrarTutorial();
+      return;
+    }
+
+    const siguienteIndice = pasoTutorial + 1;
+    const siguientePaso = pasos[siguienteIndice];
+    
+    // Sincronizar activeStep antes de cambiar el paso del tutorial
+    if (siguientePaso?.activeStepTarget !== null && siguientePaso?.activeStepTarget !== undefined) {
+      setActiveStep(siguientePaso.activeStepTarget);
+    }
+    
+    // Cambiar el paso del tutorial después de un pequeño delay para asegurar que activeStep se haya actualizado
+    setTimeout(() => {
+      setPasoTutorial(siguienteIndice);
+    }, 50);
   };
 
   useEffect(() => {
@@ -412,7 +456,17 @@ function CvBuilder({ user, settings, onChangeSettings }) {
           {posicionPaso && (
             <div className="tutorial-highlight" style={{ top: posicionPaso.top, left: posicionPaso.left, width: posicionPaso.width, height: posicionPaso.height }} />
           )}
-          <div ref={refTutorialModal} className="tutorial-modal" style={posicionPaso ? { left: posicionPaso.modalLeft, top: posicionPaso.ponerArriba ? "auto" : posicionPaso.anchorBottom, bottom: posicionPaso.ponerArriba ? (window.innerHeight - posicionPaso.anchorTop) : "auto" } : undefined}>
+          <div
+            ref={refTutorialModal}
+            className={`tutorial-modal ${posicionPaso?.modalAtTopOnMobile ? "tutorial-modal-top" : ""}`}
+            style={posicionPaso && !posicionPaso.isMobile
+              ? {
+                  left: posicionPaso.modalLeft,
+                  top: posicionPaso.ponerArriba ? "auto" : posicionPaso.anchorBottom,
+                  bottom: posicionPaso.ponerArriba ? window.innerHeight - posicionPaso.anchorTop : "auto",
+                }
+              : undefined}
+          >
             <p className="tutorial-paso">Paso {pasoTutorial + 1} de {pasos.length}</p>
             <h3 className="tutorial-titulo">{pasoActual.titulo}</h3>
             <p className="tutorial-descripcion">{pasoActual.descripcion}</p>
