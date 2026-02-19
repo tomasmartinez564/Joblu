@@ -7,7 +7,7 @@ import html2pdf from "html2pdf.js";
 import "../styles/cvbuilder.css";
 
 // --- Componentes y Páginas ---
-import Settings from "./Settings";
+
 import CvForm from "../components/cv/CvForm";
 
 // --- Servicios y Configuración ---
@@ -66,7 +66,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   });
 
   // --- 3. Estados: Interfaz (UI) ---
-  const [showSettings, setShowSettings] = useState(false);
+
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [saveSuccess, setSaveSuccess] = useState("");
@@ -427,16 +427,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
       <section className="cv-builder">
         {/* --- Columna Formulario --- */}
         <div className="cv-column">
-          <div className="cv-settings-toggle">
-            <button ref={refBtnConfiguracion} type="button" className="cv-settings-toggle-btn" onClick={() => setShowSettings(!showSettings)}>
-              {showSettings ? "Ocultar configuración de CV" : "Mostrar configuración de CV"}
-            </button>
-            {showSettings && (
-              <div className="cv-settings-panel">
-                <Settings user={user} settings={settings} onChangeSettings={onChangeSettings} />
-              </div>
-            )}
-          </div>
+
 
           <h2>Completa tu CV</h2>
 

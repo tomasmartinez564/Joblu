@@ -68,7 +68,7 @@ body {
 }
 
 h1, h2, .app-logo { font-family: var(--font-title); }
-h3, h4, .settings-subtitle, .account-subtitle { font-family: var(--font-subtitle); }
+h3, h4, .account-subtitle { font-family: var(--font-subtitle); }
 
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; }

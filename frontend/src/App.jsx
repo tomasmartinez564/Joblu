@@ -13,7 +13,7 @@ import Community from './pages/Community.jsx'
 import Jobs from './pages/Jobs.jsx'
 import Login from './pages/Login.jsx'
 import MyCvs from './pages/MyCvs.jsx'
-import Settings from './pages/Settings.jsx'
+
 import AccountSettings from './pages/AccountSettings.jsx'
 import JobDetail from './pages/JobDetail.jsx'
 import PostDetail from "./pages/PostDetail"
@@ -233,7 +233,7 @@ function AppLayout() {
           <Route path="/jobs" element={<Jobs savedJobs={savedJobs} toggleSavedJob={toggleSavedJob} />} />
           <Route path="/jobs/:id" element={<JobDetail savedJobs={savedJobs} toggleSavedJob={toggleSavedJob} />} />
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
-          <Route path="/configuracion" element={<Settings />} />
+
           <Route path="/mis-cvs" element={<MyCvs user={user} />} />
           <Route path="/cuenta" element={<AccountSettings user={user} onUpdateUser={handleUpdateUser} settings={settings} onChangeSettings={setSettings} />} />
           <Route path="*" element={<NotFound />} />

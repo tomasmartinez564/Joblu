@@ -109,16 +109,7 @@ export default function Navbar({
 
             {/* Menú Desplegable Desktop */}
             <div className={`account-menu ${isAccountMenuOpen ? "open" : ""}`}>
-              <button
-                type="button"
-                className="account-menu-item"
-                onClick={() => {
-                  setIsAccountMenuOpen(false);
-                  navigate("/configuracion");
-                }}
-              >
-                Configuración
-              </button>
+
 
               <button
                 type="button"
@@ -182,37 +173,37 @@ export default function Navbar({
 
             {/* Enlaces del Drawer */}
             <nav className="drawer-nav" onClick={() => setIsMobileMenuOpen(false)}>
-              <NavLink 
-                to="/" 
+              <NavLink
+                to="/"
                 className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}
               >
                 Inicio
               </NavLink>
-              <NavLink 
-                to="/cv" 
+              <NavLink
+                to="/cv"
                 className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}
-                onClick={(e) => { 
-                  e.preventDefault(); 
-                  onCreateCv(); 
-                  setIsMobileMenuOpen(false); 
+                onClick={(e) => {
+                  e.preventDefault();
+                  onCreateCv();
+                  setIsMobileMenuOpen(false);
                 }}
               >
                 Crear CV
               </NavLink>
-              <NavLink 
-                to="/comunidad" 
+              <NavLink
+                to="/comunidad"
                 className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}
               >
                 Comunidad
               </NavLink>
-              <NavLink 
-                to="/jobs" 
+              <NavLink
+                to="/jobs"
                 className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}
               >
                 Bolsa de Trabajo
               </NavLink>
-              <NavLink 
-                to="/mis-cvs" 
+              <NavLink
+                to="/mis-cvs"
                 className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}
               >
                 Mis cvs
