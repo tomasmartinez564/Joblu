@@ -376,3 +376,29 @@
     right: 0;
   }
 }
+
+@media (max-width: 768px) {
+  /* Fix Carrusel Mobile: Scroll de borde a borde */
+  .jobs-carousel-container {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+  }
+  
+  .jobs-carousel-scroll {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 1.5rem; /* Para que el snap no quede pegado al borde izquierdo */
+    gap: 1rem;
+  }
+  
+  .home-card-trabajo-mini {
+    scroll-snap-align: start;
+    min-width: 260px; /* Un poco más chico en mobile para que se vea el siguiente */
+  }
+  
+  /* Ocultar flechas en mobile (se usa swipe) */
+  .carousel-controls {
+    display: none;
+  }
+}

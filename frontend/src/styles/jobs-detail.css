@@ -5,14 +5,7 @@
   padding: 1.5rem;
 }
 
-.job-detail-back {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 0.85rem;
-  margin-bottom: 0.75rem;
-  text-decoration: underline;
-}
+
 
 .job-detail-card {
   background: var(--joblu-surface);
@@ -79,4 +72,44 @@
 
 .job-detail-not-found {
   font-size: 0.9rem;
+}
+
+/* Tags de empleo */
+.job-detail-tags {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tag-badge {
+  background: #e0e7ff;
+  color: #4338ca;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* Mobile: Scroll vertical limitado para tags */
+@media (max-width: 768px) {
+  .job-detail-tags {
+    flex-wrap: wrap;
+    overflow-y: auto;
+    max-height: 130px; /* Altura máxima para ~3-4 filas */
+    padding-bottom: 0.5rem;
+    margin-right: 0;
+    padding-right: 0;
+    border-bottom: 1px solid #f3f4f6; /* Indicador visual sutil */
+  }
+  
+  .job-detail-tags::-webkit-scrollbar {
+    display: block;
+    width: 4px;
+  }
+  
+  .job-detail-tags::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+  }
 }
