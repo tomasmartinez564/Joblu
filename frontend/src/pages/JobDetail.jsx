@@ -117,7 +117,7 @@ function JobDetail() {
         <div className="job-apply-modal-overlay">
           <div className="job-apply-modal">
             <div className="job-apply-modal-icon">🚀</div>
-            <h3>¡Consejo JOBLU!</h3>
+            <h3>¡Consejo <span className="brand-name">JOBLU</span>!</h3>
             <p>
               Asegurate de descargar tu CV en PDF desde la sección <strong>'Crear CV'</strong> antes de continuar con la postulación en el sitio de la empresa.
             </p>

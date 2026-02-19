@@ -16,15 +16,10 @@
 /* ==========================================================================
    2. IDENTIDAD DE MARCA Y BOTONES UNIFICADOS
    ========================================================================== */
-.brand-name {
-  color: var(--joblu-primary, #6366f1);
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+
 
 .brand-name-comunidad {
-  color: var(--joblu-primary-accent, #7c3aed);
+  color: #7c3aed;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
