@@ -17,6 +17,7 @@ import Settings from './pages/Settings.jsx'
 import AccountSettings from './pages/AccountSettings.jsx'
 import JobDetail from './pages/JobDetail.jsx'
 import PostDetail from "./pages/PostDetail"
+import NotFound from './pages/NotFound.jsx'
 
 // --- Componentes ---
 import Navbar from "./components/Navbar"
@@ -134,7 +135,7 @@ function AppLayout() {
     try {
       if (token) localStorage.setItem('joblu_token', token)
       localStorage.setItem(LS_USER_KEY, JSON.stringify(userData))
-      
+
       const done = localStorage.getItem(LS_ONBOARDING_KEY) === 'done'
       if (!done) {
         setOnboardingStep(0)
@@ -168,7 +169,7 @@ function AppLayout() {
   }
 
   const toggleSavedJob = (jobId) => {
-    setSavedJobs((prev) => 
+    setSavedJobs((prev) =>
       prev.includes(jobId) ? prev.filter(id => id !== jobId) : [...prev, jobId]
     )
   }
@@ -235,6 +236,7 @@ function AppLayout() {
           <Route path="/configuracion" element={<Settings />} />
           <Route path="/mis-cvs" element={<MyCvs user={user} />} />
           <Route path="/cuenta" element={<AccountSettings user={user} onUpdateUser={handleUpdateUser} settings={settings} onChangeSettings={setSettings} />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       <Footer />

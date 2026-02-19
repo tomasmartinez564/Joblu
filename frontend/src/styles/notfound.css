@@ -1,0 +1,56 @@
+/* Contenedor principal centrado */
+.not-found-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh; /* Ocupa buena parte de la pantalla pero deja ver header/footer */
+  text-align: center;
+  padding: 2rem;
+  animation: joblu-fade-in-up 0.5s ease-out;
+}
+
+/* Título gigante 404 */
+.not-found-title {
+  font-size: 8rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--joblu-primary), var(--joblu-primary-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--font-title);
+  opacity: 0.9;
+}
+
+/* Subtítulo / Mensaje principal */
+.not-found-message {
+  font-size: 1.5rem;
+  color: var(--joblu-text-main);
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+/* Texto descriptivo */
+.not-found-description {
+  color: var(--joblu-text-muted);
+  max-width: 500px;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+/* Ilustración o icono (opcional, por ahora solo texto estilizado) */
+.not-found-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  color: var(--joblu-secondary);
+}
+
+/* Botón de acción principal */
+.btn-not-found {
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 14px rgba(99, 55, 183, 0.3);
+}

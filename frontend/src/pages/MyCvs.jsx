@@ -74,7 +74,7 @@ function MyCvs({ user }) {
    */
   const handleDelete = async (id) => {
     const previousCvs = [...cvs];
-    
+
     // Actualización optimista: removemos del estado antes de la respuesta del servidor
     setCvs((prev) => prev.filter((cv) => cv._id !== id));
     setCvToConfirm(null);
@@ -171,7 +171,7 @@ function MyCvs({ user }) {
             marginRight: "1rem"
           }}
         >
-          {isImporting ? "Importando..." : "📤 Importar CV (PDF)"}
+          {isImporting ? "Importando..." : "Importar CV (PDF)"}
         </button>
       </div>
 
