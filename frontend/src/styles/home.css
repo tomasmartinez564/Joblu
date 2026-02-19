@@ -367,8 +367,26 @@
 
 @media (max-width: 768px) {
   .hero-banner-image-wrapper {
-    aspect-ratio: 9/16; /* Formato vertical para móvil */
+    /* 1. Cambiamos el ratio para que sea menos alto (puedes probar con 1/1 o 4/5) */
+    aspect-ratio: 4 / 5; 
     height: auto;
+    /* 2. Limitamos la altura máxima para que no ocupe el 100% de la pantalla */
+    max-height: 75vh; 
+  }
+
+  /* 3. Ajustamos el contenido para que respire mejor en mobile */
+  .hero-banner-content {
+    max-width: 90%; /* Evita que el texto toque los bordes */
+  }
+
+  .hero-banner-content h1 {
+    font-size: 2rem; /* Achicamos un poco el título para que no sea tan gigante */
+    margin-bottom: 0.5rem;
+  }
+  
+  .hero-banner-content p {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
   }
 
   .dashboard-grid-layout {
