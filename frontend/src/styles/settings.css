@@ -138,3 +138,93 @@ input:checked + .slider:before {
   background: rgba(99, 55, 183, 0.05);
   transform: translateY(-1px);
 }
+
+/* ============================================================
+   RESPONSIVE - MOBILE (max-width: 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+  .settings {
+    max-width: 100%;
+    padding: 1rem;
+    margin: 1rem auto;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .settings-header {
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .settings-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .settings-header p {
+    font-size: 0.9rem;
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .settings-card {
+    width: 100%;
+    padding: 1.25rem 1.5rem;
+    box-sizing: border-box;
+  }
+
+  .settings-card h3 {
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .setting-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .setting-info {
+    width: 100%;
+  }
+
+  .setting-info label {
+    font-size: 0.9rem;
+  }
+
+  .setting-info p {
+    font-size: 0.75rem;
+    margin-top: 0.3rem;
+  }
+
+  .switch {
+    align-self: flex-start;
+  }
+
+  .input-group {
+    width: 100%;
+  }
+
+  .input-group label {
+    font-size: 0.8rem;
+  }
+
+  .input-group select,
+  .input-group input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-secondary {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem 1.2rem;
+  }
+}
