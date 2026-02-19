@@ -18,6 +18,7 @@ function JobDetail() {
   // --- 1. Estados ---
   const [job, setJob] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showApplyModal, setShowApplyModal] = useState(false);
 
   // --- 2. Efectos: Carga de Datos ---
   useEffect(() => {
@@ -40,11 +41,11 @@ function JobDetail() {
   // --- 3. Manejadores (Handlers) ---
   const handleApply = () => {
     if (!job) return;
+    setShowApplyModal(true);
+  };
 
-    // Feedback / Consejo Joblu
-    alert("🚀 ¡Consejo JOBLU!\n\nAsegurate de descargar tu CV en PDF desde la sección 'Crear CV' antes de continuar con la postulación en el sitio de la empresa.");
-
-    // Redirección al sitio de la empresa
+  const confirmApply = () => {
+    setShowApplyModal(false);
     if (job.url) {
       window.open(job.url, "_blank");
     } else {
@@ -110,6 +111,28 @@ function JobDetail() {
           Postularme en el sitio de la empresa ↗
         </button>
       </div>
+
+      {/* Modal de Confirmación / Consejo */}
+      {showApplyModal && (
+        <div className="job-apply-modal-overlay">
+          <div className="job-apply-modal">
+            <div className="job-apply-modal-icon">🚀</div>
+            <h3>¡Consejo JOBLU!</h3>
+            <p>
+              Asegurate de descargar tu CV en PDF desde la sección <strong>'Crear CV'</strong> antes de continuar con la postulación en el sitio de la empresa.
+            </p>
+            <div className="job-apply-modal-actions">
+              <button className="btn-secondary" onClick={() => setShowApplyModal(false)}>Cancelar</button>
+              <button className="apply-btn-primary" onClick={confirmApply} style={{
+                background: 'var(--joblu-primary, #6366f1)', color: 'white', border: 'none',
+                padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '1rem', cursor: 'pointer', fontWeight: 600
+              }}>
+                Continuar al sitio
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
