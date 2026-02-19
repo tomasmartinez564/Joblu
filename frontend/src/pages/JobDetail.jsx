@@ -66,9 +66,9 @@ function JobDetail() {
 
       {/* Cabecera del Empleo */}
       <header className="job-detail-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-          {job.logo && <img src={job.logo} alt="logo" style={{ width: 60, height: 60, objectFit: 'contain', borderRadius: 8, background: '#fff' }} />}
-          <h1 style={{ margin: 0, fontSize: '1.8rem' }}>{job.title}</h1>
+        <div className="job-header-top">
+          {job.logo && <img src={job.logo} alt="logo" className="job-logo" />}
+          <h1 className="job-title">{job.title}</h1>
         </div>
 
         <div className="job-detail-sub">

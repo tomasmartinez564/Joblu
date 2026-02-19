@@ -153,7 +153,7 @@ function Jobs() {
       <header className="jobs-header">
         <div className="jobs-header-top">
           <div className="jobs-search-area">
-            <h1 className="jobs-title">Bolsa de trabajo Tech 🚀</h1>
+            <h1 className="jobs-title">Bolsa de trabajo 🚀</h1>
             <p className="jobs-subtitle">Oportunidades remotas y presenciales curadas para vos.</p>
 
             <form className="jobs-search-bar" onSubmit={handleSearchSubmit}>
