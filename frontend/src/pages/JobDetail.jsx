@@ -42,7 +42,7 @@ function JobDetail() {
     if (!job) return;
 
     // Feedback / Consejo Joblu
-    alert("🚀 ¡Consejo Joblu!\n\nAsegurate de descargar tu CV en PDF desde la sección 'Crear CV' antes de continuar con la postulación en el sitio de la empresa.");
+    alert("🚀 ¡Consejo JOBLU!\n\nAsegurate de descargar tu CV en PDF desde la sección 'Crear CV' antes de continuar con la postulación en el sitio de la empresa.");
 
     // Redirección al sitio de la empresa
     if (job.url) {

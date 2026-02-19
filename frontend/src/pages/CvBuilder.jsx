@@ -453,7 +453,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
             </p>
           </div>
 
-          {showTips && <div className="cv-settings-tip"><strong>Preferencias Joblu: </strong><span>{settingsSummary}</span></div>}
+          {showTips && <div className="cv-settings-tip"><strong>Preferencias JOBLU: </strong><span>{settingsSummary}</span></div>}
 
           <CvForm
             cvData={cvData}
@@ -548,7 +548,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
             <div className="cv-ai-panel">
               <div className="cv-ai-content">
                 <div className="cv-ai-header">
-                  <h3>Joblu IA</h3>
+                  <h3>JOBLU IA</h3>
                   <button type="button" className="cv-ai-close" onClick={closeAiPanel}>✕</button>
                 </div>
                 <div className="cv-ai-body">

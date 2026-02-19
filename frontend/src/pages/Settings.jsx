@@ -44,7 +44,7 @@ function Settings({ user, settings, onChangeSettings }) {
       {/* Cabecera de la página */}
       <div className="settings-header">
         <h2>Configuración</h2>
-        <p>Personalizá cómo Joblu te ayuda a conseguir trabajo.</p>
+        <p>Personalizá cómo JOBLU te ayuda a conseguir trabajo.</p>
       </div>
 
       <div className="settings-grid">

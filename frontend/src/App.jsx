@@ -46,7 +46,7 @@ const defaultSettings = {
 
 const onboardingSteps = [
   {
-    title: "Bienvenido a Joblu",
+    title: "Bienvenido a JOBLU",
     text: "Acá vas a poder crear tu currículum de forma rápida, con vista previa y ayuda de inteligencia artificial.",
   },
   {
@@ -210,7 +210,7 @@ function AppLayout() {
             <div className="onboarding-actions">
               <button type="button" className="onboarding-secondary" onClick={finishOnboarding}>Cerrar</button>
               <button type="button" className="onboarding-primary" onClick={handleNextOnboarding}>
-                {onboardingStep + 1 < onboardingSteps.length ? 'Siguiente' : 'Empezar a usar Joblu'}
+                {onboardingStep + 1 < onboardingSteps.length ? 'Siguiente' : 'Empezar a usar JOBLU'}
               </button>
             </div>
             <div className="onboarding-dots">

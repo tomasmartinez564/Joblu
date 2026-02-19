@@ -83,7 +83,7 @@ const handleSubmit = async (e) => {
       <div className="login-card">
         {/* Cabecera dinámica */}
         <h2 className="login-title">
-          {isRegistering ? 'Crear cuenta en Joblu' : 'Iniciar Sesión'}
+          {isRegistering ? 'Crear cuenta en JOBLU' : 'Iniciar Sesión'}
         </h2>
         <p className="login-subtitle">
           {isRegistering 

@@ -82,25 +82,35 @@
 .mycvs-card-btn {
   padding: 0.5rem 1.25rem; /* Más consistencia */
   border-radius: 12px; /* Antes 999px */
-  border: 2px solid #e5e7eb; /* Grosor 2px para igualar al resto */
+  border: 2px solid var(--joblu-primary); /* Borde con color primario */
   font-size: 0.9rem;
   font-weight: 600; /* Texto más gordito como en Home */
+  font-family: var(--font-subtitle);
   cursor: pointer;
-  background: #f9fafb;
-  transition: all 0.2s ease;
+  background: #f5f3ff; /* Fondo igual al btn-secondary */
+  color: var(--joblu-primary);
+  transition: all 0.3s ease;
 }
 
-/* Ajuste para el botón primario (Editar) */
+/* Ajuste para el botón primario (Editar) - mantiene fondo sólido */
 .mycvs-card-btn.primary {
   background: var(--joblu-primary);
-  color: #f9fafb;
-  border-color: var(--joblu-primary); /* El borde ahora tiene color */
+  color: #ffffff;
+  border-color: var(--joblu-primary);
 }
 
 .mycvs-card-btn.primary:hover {
   background-color: #4f46e5;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(99, 55, 183, 0.2);
+}
+
+/* Botón secundario (sin clase primary) usa estilo hover que rellena */
+.mycvs-card-btn:not(.primary):not(.danger):hover {
+  background: var(--joblu-primary);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 55, 183, 0.25);
 }
 
 .mycvs-card-btn.danger {

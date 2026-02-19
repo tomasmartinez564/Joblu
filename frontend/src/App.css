@@ -92,7 +92,7 @@
   background: var(--joblu-primary);
   color: #ffffff;
   border: none;
-  border-radius: 999px;
+  border-radius: 12px;
   padding: 0.45rem;
   font-size: 0.9rem;
   font-family: var(--font-subtitle);

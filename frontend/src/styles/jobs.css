@@ -417,3 +417,24 @@
 .fade-in {
   animation: fadeIn 0.4s ease forwards;
 }
+
+/* Botón para limpiar filtros - estilo secundario */
+.clear-filters-btn {
+  padding: 0.5rem 1.25rem;
+  border-radius: 12px;
+  border: 2px solid var(--joblu-primary);
+  background: #f5f3ff;
+  color: var(--joblu-primary);
+  font-family: var(--font-subtitle);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clear-filters-btn:hover {
+  background: var(--joblu-primary);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 55, 183, 0.25);
+}

@@ -115,6 +115,14 @@ body.dark-mode .community-post {
   color: var(--joblu-text-muted);
 }
 
+/* Fecha del post - estilo Twitter/redes sociales */
+.community-post-date {
+  font-size: 0.8rem;
+  color: var(--joblu-text-muted);
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
 .community-post-excerpt {
   margin: 0;
   font-size: 0.9rem;

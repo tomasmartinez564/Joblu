@@ -5,6 +5,30 @@ import { Link } from "react-router-dom";
 import "../styles/community.css";
 import { formatDate } from "../utils/dateUtils";
 
+/**
+ * Formatea una fecha a formato relativo simple (estilo Twitter).
+ * Ejemplos: "Hace 2h", "Hace 3d", "Hace 1 sem"
+ */
+const formatRelativeDate = (isoString) => {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  const diffWeeks = Math.floor(diffDays / 7);
+  const diffMonths = Math.floor(diffDays / 30);
+
+  if (diffMins < 1) return "Ahora";
+  if (diffMins < 60) return `Hace ${diffMins}m`;
+  if (diffHours < 24) return `Hace ${diffHours}h`;
+  if (diffDays < 7) return `Hace ${diffDays}d`;
+  if (diffWeeks < 4) return `Hace ${diffWeeks} sem`;
+  if (diffMonths < 12) return `Hace ${diffMonths} mes`;
+  return date.toLocaleDateString("es-AR", { day: "numeric", month: "short" });
+};
+
 // --- Contexto y Configuración ---
 import { useToast } from "../context/ToastContext";
 import API_BASE_URL from "../config/api";
@@ -218,7 +242,7 @@ function Community({ user }) {
   return (
     <section className="community">
       <div className="community-header">
-        <h2>Comunidad Joblu</h2>
+        <h2>Comunidad JOBLU</h2>
         <p className="community-subtitle">Compartí tus experiencias, dudas y tips con otros profesionales.</p>
       </div>
 
@@ -282,13 +306,17 @@ function Community({ user }) {
                 <span className="community-category-badge">{post.category || "General"}</span>
                 <div className="community-post-meta">
                   <span>👤 {post.authorName || "Anónimo"}</span>
-                  <span>📅 {formatDate(post.createdAt)}</span>
                 </div>
               </div>
 
               <div className="post-main">
                 <Link to={`/comunidad/${post._id}`} className="community-post-title">{post.title}</Link>
                 <p className="community-post-excerpt">{post.content}</p>
+              </div>
+
+              {/* Fecha del post - estilo Twitter */}
+              <div className="community-post-date">
+                {formatRelativeDate(post.createdAt)}
               </div>
 
               {/* Acciones del Post */}
