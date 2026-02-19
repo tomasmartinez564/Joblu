@@ -17,7 +17,7 @@ export default function Footer() {
                 </div>
 
                 <div className="footer-section">
-                    <h4 className="footer-title">Navegación</h4>
+                    <h3 className="footer-title">Navegación</h3>
                     <div className="footer-links">
                         <Link to="/" className="footer-link">Inicio</Link>
                         <Link to="/cv" className="footer-link">Crear CV</Link>
@@ -27,7 +27,7 @@ export default function Footer() {
                 </div>
 
                 <div className="footer-section">
-                    <h4 className="footer-title">Legal</h4>
+                    <h3 className="footer-title">Legal</h3>
                     <div className="footer-links">
                         <Link to="#" className="footer-link">Términos y Condiciones</Link>
                         <Link to="#" className="footer-link">Política de Privacidad</Link>
@@ -36,7 +36,7 @@ export default function Footer() {
                 </div>
 
                 <div className="footer-section">
-                    <h4 className="footer-title">Síguenos</h4>
+                    <h3 className="footer-title">Síguenos</h3>
                     <div className="footer-socials">
                         <a href="#" className="social-icon" aria-label="Facebook"><FaFacebook /></a>
                         <a href="#" className="social-icon" aria-label="Twitter"><FaTwitter /></a>
