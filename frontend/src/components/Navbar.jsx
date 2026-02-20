@@ -206,7 +206,7 @@ export default function Navbar({
                 to="/mis-cvs"
                 className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}
               >
-                Mis cvs
+                Mis Cvs
               </NavLink>
             </nav>
 
