@@ -41,7 +41,12 @@
   border: none;
 }
 
-.hero-cta,
+.hero-cta {
+  background: var(--joblu-primary, #6366f1);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(99, 55, 183, 0.35);
+}
+
 .view-all-btn {
   background: var(--joblu-primary, #6366f1);
   color: #ffffff;
@@ -84,15 +89,51 @@
   box-shadow: var(--joblu-shadow-md);
 }
 
+/* Todos los botones/links directos dentro de stat-card
+   bajan al fondo independientemente del contenido superior */
+.stat-card>.hero-cta,
+.stat-card>.btn-secondary,
+.stat-card>button {
+  margin-top: auto;
+  align-self: stretch;
+}
+
 .brand-border {
   border-top: 4px solid var(--joblu-primary) !important;
+}
+
+/* --- SECCIÓN UNIFICADA: OPORTUNIDADES Y COMUNIDAD --- */
+.unified-dashboard-section {
+  background: var(--joblu-surface);
+  border-radius: var(--joblu-radius-lg);
+  border: 1px solid var(--joblu-border-soft);
+  border-top: 4px solid var(--joblu-primary-accent);
+  box-shadow: var(--joblu-shadow-md);
+  padding: 2rem 2rem 6rem;
+  /* padding-bottom: espacio para el view-all-btn absoluto */
+  margin-top: 2rem;
+}
+
+.unified-section-header {
+  margin-bottom: 1.25rem;
+}
+
+.unified-section-header h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.4rem;
+}
+
+.unified-section-header p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--joblu-text-muted);
 }
 
 /* --- CARRUSEL DE EMPLEOS MEJORADO --- */
 .dashboard-recommendations {
   position: relative;
-  padding-bottom: 5rem;
-  margin-top: 2rem;
+  padding-bottom: 4rem;
+  margin-top: 0;
 }
 
 .carousel-arrow {
@@ -102,29 +143,35 @@
   z-index: 10;
   width: 44px;
   height: 44px;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
-  background: white;
+  background: #ffffff;
   border: 1px solid var(--joblu-border-soft);
   color: var(--joblu-primary);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--joblu-shadow-md);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1.5rem;
+  line-height: 1;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.2s ease, color 0.2s ease,
+    box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .carousel-arrow[aria-label="Anterior"] {
-  left: -22px;
+  left: -20px;
 }
 
 .carousel-arrow[aria-label="Siguiente"] {
-  right: -22px;
+  right: -20px;
 }
 
 .carousel-arrow:hover {
   background: var(--joblu-primary);
-  color: white;
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(99, 55, 183, 0.3);
+  transform: translateY(-50%) scale(1.05);
 }
 
 .view-all-btn {
@@ -133,6 +180,12 @@
   left: 50%;
   transform: translateX(-50%);
   border-radius: 12px;
+}
+
+.view-all-btn:hover {
+  background-color: #4f46e5;
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
 }
 
 .jobs-carousel-scroll {

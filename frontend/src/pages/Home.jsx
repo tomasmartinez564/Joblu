@@ -91,7 +91,7 @@ export default function Home({ user }) {
                 {progress < 100 ? "Seguí completando datos para mejorar tu visibilidad." : "¡Tu perfil está impecable!"}
               </p>
             </div>
-            <button onClick={() => navigate(lastCv ? `/cv/${lastCv._id}` : '/cv')} className="hero-cta btn-small">
+            <button onClick={() => navigate(lastCv ? `/cv/${lastCv._id}` : '/cv')} className="hero-cta">
               {lastCv ? "Editar CV" : "Empezar CV"}
             </button>
           </section>
@@ -121,7 +121,7 @@ export default function Home({ user }) {
             {lastCv && (
               <button
                 onClick={() => navigate(`/cv/${lastCv._id}#${dailyTip?.target}`)}
-                className="hero-cta btn-small secondary-cta"
+                className="btn-secondary"
               >
                 Mejorar esta sección
               </button>
@@ -139,47 +139,40 @@ export default function Home({ user }) {
                 </div>
               ) : <p className="empty-msg">Explorá dudas de otros usuarios.</p>}
             </div>
-            <div className="card-actions-row">
-              <Link to="/comunidad" className="btn-secondary">Ver foro</Link>
-              <button onClick={() => navigate('/comunidad')} className="btn-icon-plus" title="Crear Post">+</button>
-            </div>
+            <Link to="/comunidad" className="btn-secondary">Ver foro</Link>
           </section>
         </div>
 
-        <section className="dashboard-community-banner">
-          <div className="community-banner-content">
-            <h2>Explorá nuestra Comunidad</h2>
-            <p>Aprendé de otros profesionales y compartí tus propios consejos en <span className="brand-name-comunidad">JOBLU</span>.</p>
-            <Link to="/comunidad" className="hero-cta btn-white">Explorar Foro</Link>
-          </div>
-        </section>
-
-        {/* Carrusel de Empleos */}
-        <section className="dashboard-recommendations">
-          <div className="section-header">
-            <h2>Empleos para vos</h2>
+        <section className="unified-dashboard-section">
+          {/* Encabezado unificado: introduce tanto la comunidad como los empleos */}
+          <div className="unified-section-header">
+            <h2>Oportunidades y Comunidad</h2>
+            <p>Empléos recomendados para vos, más los últimos aportes de la comunidad <span className="brand-name-comunidad">JOBLU</span>.</p>
           </div>
 
-          {/* Controles del Carrusel */}
-          <div className="carousel-controls">
-            <button onClick={() => scrollCarousel(-1)} className="carousel-arrow" aria-label="Anterior">‹</button>
-            <button onClick={() => scrollCarousel(1)} className="carousel-arrow" aria-label="Siguiente">›</button>
-          </div>
-
-          <div className="jobs-carousel-container">
-            <div className="jobs-carousel-scroll" ref={carouselRef}>
-              {loading ? <p>Cargando...</p> : recommendedJobs.map(job => (
-                <article key={job._id} className="home-card-trabajo-mini">
-                  <span className="job-tag">Oportunidad</span>
-                  <h3>{job.title}</h3>
-                  <p>{job.company}</p>
-                  <Link to={`/jobs/${job._id}`} className="card-link-overlay">Ver detalle</Link>
-                </article>
-              ))}
+          {/* Carrusel de Empleos */}
+          <div className="dashboard-recommendations">
+            {/* Controles del Carrusel */}
+            <div className="carousel-controls">
+              <button onClick={() => scrollCarousel(-1)} className="carousel-arrow" aria-label="Anterior">‹</button>
+              <button onClick={() => scrollCarousel(1)} className="carousel-arrow" aria-label="Siguiente">›</button>
             </div>
-          </div>
 
-          <Link to="/jobs" className="view-all-btn">Ver todos</Link>
+            <div className="jobs-carousel-container">
+              <div className="jobs-carousel-scroll" ref={carouselRef}>
+                {loading ? <p>Cargando...</p> : recommendedJobs.map(job => (
+                  <article key={job._id} className="home-card-trabajo-mini">
+                    <span className="job-tag">Oportunidad</span>
+                    <h3>{job.title}</h3>
+                    <p>{job.company}</p>
+                    <Link to={`/jobs/${job._id}`} className="card-link-overlay">Ver detalle</Link>
+                  </article>
+                ))}
+              </div>
+            </div>
+
+            <Link to="/jobs" className="view-all-btn">Ver todos los empleos</Link>
+          </div>
         </section>
       </main>
     );
