@@ -98,12 +98,12 @@ function Community({ user }) {
     e.preventDefault();
 
     if (!title.trim() || !content.trim()) {
-      addToast("El título y contenido son obligatorios", "info");
+      addToast("El título y el contenido son obligatorios", "info");
       return;
     }
 
     if (!isLogged) {
-      addToast("Debes iniciar sesión para publicar", "info");
+      addToast("Debés iniciar sesión para publicar", "info");
       return;
     }
 
@@ -144,7 +144,7 @@ function Community({ user }) {
    */
   const handleLike = async (postId) => {
     if (!isLogged) {
-      addToast("Debes iniciar sesión para dar like", "info");
+      addToast("Debés iniciar sesión para dar like", "info");
       return;
     }
 
@@ -204,7 +204,7 @@ function Community({ user }) {
   const handleCommentSubmit = async (e, postId) => {
     e.preventDefault();
     if (!isLogged) {
-      addToast("Debes iniciar sesión para comentar", "info");
+      addToast("Debés iniciar sesión para comentar", "info");
       return;
     }
 
@@ -254,7 +254,9 @@ function Community({ user }) {
         )}
 
         <form onSubmit={handleCreatePost} className="community-form">
+          <label htmlFor="post-title" className="visually-hidden">Título del post</label>
           <input
+            id="post-title"
             type="text"
             placeholder="Título (ej: ¿Cómo responder sobre debilidades?)"
             value={title}
@@ -263,7 +265,9 @@ function Community({ user }) {
             disabled={isSubmitting || !isLogged}
           />
 
+          <label htmlFor="post-category" className="visually-hidden">Categoría</label>
           <select
+            id="post-category"
             className="community-input"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
@@ -272,7 +276,9 @@ function Community({ user }) {
             {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
           </select>
 
+          <label htmlFor="post-content" className="visually-hidden">Contenido del post</label>
           <textarea
+            id="post-content"
             placeholder="Escribí acá tu consulta o aporte..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -305,7 +311,8 @@ function Community({ user }) {
               <div className="community-post-header">
                 <span className="community-category-badge">{post.category || "General"}</span>
                 <div className="community-post-meta">
-                  <span>👤 {post.authorName || "Anónimo"}</span>
+                  <span aria-hidden="true">👤</span>
+                  <span>{post.authorName || "Anónimo"}</span>
                 </div>
               </div>
 
@@ -345,9 +352,11 @@ function Community({ user }) {
 
                   {isLogged && (
                     <form onSubmit={(e) => handleCommentSubmit(e, post._id)} className="comment-form">
+                      <label htmlFor={`comment-input-${post._id}`} className="visually-hidden">Escribí un comentario</label>
                       <input
+                        id={`comment-input-${post._id}`}
                         type="text"
-                        placeholder="Escribe un comentario..."
+                        placeholder="Escribí un comentario..."
                         className="community-input comment-input"
                         value={commentText[post._id] || ""}
                         onChange={(e) => setCommentText(prev => ({ ...prev, [post._id]: e.target.value }))}

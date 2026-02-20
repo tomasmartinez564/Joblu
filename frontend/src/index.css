@@ -11,13 +11,19 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --joblu-primary: #6337b7;        /* violeta principal */
-  --joblu-primary-accent: #21dbd2; /* acento turquesa */
-  --joblu-secondary: #3c74c2;       /* azul secundario */
+  --joblu-primary: #6337b7;
+  /* violeta principal */
+  --joblu-primary-accent: #21dbd2;
+  /* acento turquesa */
+  --joblu-secondary: #3c74c2;
+  /* azul secundario */
 
-  --joblu-bg-main: #ededed;        /* fondo app */
-  --joblu-bg-muted: #9d9191;        /* fondo alternativo / footers */
-  --joblu-surface: #ffffff;        /* tarjetas / paneles */
+  --joblu-bg-main: #ededed;
+  /* fondo app */
+  --joblu-bg-muted: #9d9191;
+  /* fondo alternativo / footers */
+  --joblu-surface: #ffffff;
+  /* tarjetas / paneles */
 
   --joblu-text-main: #111827;
   --joblu-text-muted: #6b7280;
@@ -54,7 +60,9 @@ body.dark-mode {
   --joblu-secondary: #60a5fa;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -67,11 +75,26 @@ body {
   color: var(--joblu-text-main);
 }
 
-h1, h2, .app-logo { font-family: var(--font-title); }
-h3, h4, .account-subtitle { font-family: var(--font-subtitle); }
+h1,
+h2,
+.app-logo {
+  font-family: var(--font-title);
+}
 
-a { color: inherit; text-decoration: none; }
-button { font-family: inherit; }
+h3,
+h4,
+.account-subtitle {
+  font-family: var(--font-subtitle);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+}
 
 /* Identidad de Marca Global */
 .brand-name {
@@ -86,6 +109,7 @@ button { font-family: inherit; }
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -93,19 +117,24 @@ button { font-family: inherit; }
 }
 
 /* Estandarización de botones */
-button, .hero-cta, .btn-small, .btn-white {
-  border-radius: var(--joblu-radius-lg); /* Usar tu variable de 16px o poner 999px para redondos */
+button,
+.hero-cta,
+.btn-small,
+.btn-white {
+  border-radius: var(--joblu-radius-lg);
+  /* Usar tu variable de 16px o poner 999px para redondos */
   font-family: var(--font-subtitle);
   font-weight: 600;
   transition: var(--joblu-transition);
   cursor: pointer;
   border: none;
   /* Opcional: para que todos se sientan "marca" */
-  letter-spacing: 0.5px; 
+  letter-spacing: 0.5px;
 }
 
 /* Ajuste específico para que no rompa los iconos o links que parecen botones */
-button:active, .hero-cta:active {
+button:active,
+.hero-cta:active {
   transform: scale(0.98);
 }
 
@@ -148,3 +177,20 @@ button:active, .hero-cta:active {
   transform: none;
 }
 
+/* ============================================================
+   UTILIDADES DE ACCESIBILIDAD
+   ============================================================ */
+
+/* Oculta el elemento visualmente pero lo mantiene accesible
+   para lectores de pantalla y tecnolog\u00edas asistivas (WCAG 2.1) */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

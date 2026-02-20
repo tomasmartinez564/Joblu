@@ -1,53 +1,78 @@
-/* Mis CVs */
+/* ============================================================
+   MIS CVs — usa variables globales de index.css
+   ============================================================ */
+
 .mycvs {
-  background: var(--joblu-surface);
-  border-radius: 0.75rem;
-  padding: 1.75rem;
-  border: 1px solid var(--joblu-border-soft);
-  background: transparent; /* deja ver el fondo general */
-  border: none;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+  animation: joblu-fade-in-up 0.4s ease-out;
+}
+
+.mycvs header {
+  margin-bottom: 2rem;
+}
+
+.mycvs header h2 {
+  font-size: 2rem;
+  margin: 0 0 0.5rem;
+  color: var(--joblu-text-main);
 }
 
 .mycvs-subtitle {
-  margin-top: 0.35rem;
-  margin-bottom: 1.25rem;
-  color: #6b7280;
-  font-size: 0.9rem;
+  margin: 0;
+  color: var(--joblu-text-muted);
+  font-size: 0.95rem;
 }
 
+/* ── Estado vacío ────────────────────────────── */
 .mycvs-empty {
-  padding: 1rem;
-  border-radius: 0.75rem;
-  background: #f9fafb;
-  border: 1px dashed #d1d5db;
-  text-align: left;
+  padding: 2rem 1.5rem;
+  border-radius: var(--joblu-radius-lg);
+  background: var(--joblu-surface);
+  border: 2px dashed var(--joblu-border-soft);
+  text-align: center;
+  box-shadow: var(--joblu-shadow-sm);
 }
 
 .mycvs-link {
   display: inline-block;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   font-size: 0.9rem;
+  font-weight: 600;
   color: var(--joblu-primary);
+  font-family: var(--font-subtitle);
+  transition: opacity 0.2s ease;
 }
 
 .mycvs-link:hover {
+  opacity: 0.8;
   text-decoration: underline;
 }
 
+/* ── Lista de CVs ────────────────────────────── */
 .mycvs-list {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: 1rem;
 }
 
+/* ── Tarjeta de CV ───────────────────────────── */
 .mycvs-card {
-  padding: 1rem 1.1rem;
-  border-radius: 0.75rem;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
+  padding: 1.5rem;
+  border-radius: var(--joblu-radius-lg);
+  border: 1px solid var(--joblu-border-soft);
+  background: var(--joblu-surface);
+  box-shadow: var(--joblu-shadow-md);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
+  transition: box-shadow 0.25s ease, transform 0.2s ease;
+}
+
+.mycvs-card:hover {
+  box-shadow: var(--joblu-shadow-lg);
+  transform: translateY(-2px);
 }
 
 .mycvs-card-header {
@@ -58,41 +83,48 @@
 
 .mycvs-card-title {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--joblu-text-main);
 }
 
 .mycvs-card-role {
-  margin: 0.15rem 0;
+  margin: 0.2rem 0 0;
   font-size: 0.9rem;
-  color: #4b5563;
+  color: var(--joblu-text-muted);
 }
 
 .mycvs-card-date {
-  margin: 0.15rem 0 0 0;
+  margin: 0.2rem 0 0;
   font-size: 0.8rem;
-  color: #9ca3af;
+  color: var(--joblu-text-muted);
+  opacity: 0.75;
 }
 
+/* ── Acciones de tarjeta (botones alineados) ─── */
 .mycvs-card-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  align-items: center;
+  /* garantiza alineación vertical entre botones */
 }
 
 .mycvs-card-btn {
-  padding: 0.5rem 1.25rem; /* Más consistencia */
-  border-radius: 12px; /* Antes 999px */
-  border: 2px solid var(--joblu-primary); /* Borde con color primario */
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  border: 2px solid var(--joblu-primary);
   font-size: 0.9rem;
-  font-weight: 600; /* Texto más gordito como en Home */
+  font-weight: 600;
   font-family: var(--font-subtitle);
   cursor: pointer;
-  background: #f5f3ff; /* Fondo igual al btn-secondary */
+  background: #f5f3ff;
   color: var(--joblu-primary);
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
-/* Ajuste para el botón primario (Editar) - mantiene fondo sólido */
+/* Variante primaria (Editar) */
 .mycvs-card-btn.primary {
   background: var(--joblu-primary);
   color: #ffffff;
@@ -100,34 +132,105 @@
 }
 
 .mycvs-card-btn.primary:hover {
-  background-color: #4f46e5;
+  filter: brightness(1.1);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 55, 183, 0.2);
+  box-shadow: var(--joblu-shadow-md);
 }
 
-/* Botón secundario (sin clase primary) usa estilo hover que rellena */
+/* Variante secundaria por defecto (hover rellena) */
 .mycvs-card-btn:not(.primary):not(.danger):hover {
   background: var(--joblu-primary);
   color: #ffffff;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(99, 55, 183, 0.25);
+  box-shadow: var(--joblu-shadow-md);
 }
 
+/* Variante destructiva (Eliminar) */
 .mycvs-card-btn.danger {
   background: #fef2f2;
   color: #b91c1c;
   border-color: #fecaca;
 }
-/* Ajuste para el botón borrar */
+
 .mycvs-card-btn.danger:hover {
   background: #fee2e2;
-  border-color: #fecaca;
+  border-color: #fca5a5;
   transform: translateY(-2px);
 }
 
+/* Hint al confirmar eliminación */
 .mycvs-confirm-hint {
   margin-top: 0.25rem;
   font-size: 0.8rem;
   color: #b91c1c;
 }
 
+/* ── Barra de acciones superior ──────────────── */
+.mycvs-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.mycvs-import-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-family: var(--font-subtitle);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--joblu-surface);
+  color: var(--joblu-text-main);
+  border: 1px solid var(--joblu-border-soft);
+  box-shadow: var(--joblu-shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.mycvs-import-btn:hover:not(:disabled) {
+  border-color: var(--joblu-primary);
+  color: var(--joblu-primary);
+  box-shadow: var(--joblu-shadow-md);
+}
+
+.mycvs-import-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Mensaje de error ────────────────────────── */
+.error-msg {
+  color: #b91c1c;
+  font-size: 0.9rem;
+  margin: 0.5rem 0 1rem;
+  padding: 0.75rem 1rem;
+  background: #fef2f2;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+}
+
+/* ── Responsive ──────────────────────────────── */
+@media (max-width: 768px) {
+  .mycvs {
+    max-width: 100%;
+    padding: 1rem;
+    margin: 1rem auto;
+  }
+
+  .mycvs header h2 {
+    font-size: 1.5rem;
+  }
+
+  .mycvs-card {
+    padding: 1.25rem;
+  }
+
+  .mycvs-card-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .mycvs-actions-bar {
+    flex-wrap: wrap;
+  }
+}

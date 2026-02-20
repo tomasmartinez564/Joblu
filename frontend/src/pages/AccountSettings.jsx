@@ -8,7 +8,7 @@ import "../styles/account.css";
 // 👤 PÁGINA: AJUSTES DE CUENTA (AccountSettings)
 // ==========================================
 function AccountSettings({ user, onUpdateUser }) {
-  
+
   // --- 1. Estados: Información de Perfil ---
   const [displayName, setDisplayName] = useState(user?.name || "");
   const [avatarPreview, setAvatarPreview] = useState(user?.avatar || "");
@@ -68,7 +68,7 @@ function AccountSettings({ user, onUpdateUser }) {
         } else if (errorText.includes("Solo se permiten imágenes")) {
           alert("Solo se permiten archivos de imagen (JPG, PNG, etc.).");
         } else {
-          alert(`Error del servidor (${response.status}). Intenta de nuevo.`);
+          alert(`Error del servidor (${response.status}). Intentá de nuevo.`);
         }
         return;
       }
@@ -127,9 +127,11 @@ function AccountSettings({ user, onUpdateUser }) {
             </div>
             <input
               type="file"
+              id="avatar-file-input"
               ref={fileInputRef}
               hidden
               accept="image/*"
+              aria-label="Cambiar foto de perfil"
               onChange={handleFileChange}
             />
             <p className="hint">JPG o PNG, máx 5MB</p>
@@ -137,17 +139,19 @@ function AccountSettings({ user, onUpdateUser }) {
 
           <form className="account-form" onSubmit={handleProfileSubmit}>
             <div className="input-group">
-              <label>Nombre Visible</label>
+              <label htmlFor="account-display-name">Nombre Visible</label>
               <input
+                id="account-display-name"
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Ej: Tomas Martinez"
+                placeholder="Ej: Tomás Martínez"
               />
             </div>
             <div className="input-group">
-              <label>Email de la cuenta</label>
+              <label htmlFor="account-email">Email de la cuenta</label>
               <input
+                id="account-email"
                 type="email"
                 value={user?.email || ""}
                 disabled
@@ -168,30 +172,36 @@ function AccountSettings({ user, onUpdateUser }) {
             <form className="password-form" onSubmit={handlePasswordSubmit}>
               <div className="password-grid">
                 <div className="input-group">
-                  <label>Contraseña Actual</label>
-                  <input 
-                    type="password" 
+                  <label htmlFor="current-password">Contraseña Actual</label>
+                  <input
+                    id="current-password"
+                    type="password"
                     value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)} 
-                    placeholder="••••••••" 
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="••••••••"
+                    autoComplete="current-password"
                   />
                 </div>
                 <div className="input-group">
-                  <label>Nueva Contraseña</label>
-                  <input 
-                    type="password" 
+                  <label htmlFor="new-password">Nueva Contraseña</label>
+                  <input
+                    id="new-password"
+                    type="password"
                     value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)} 
-                    placeholder="Mínimo 8 caracteres" 
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Mínimo 8 caracteres"
+                    autoComplete="new-password"
                   />
                 </div>
                 <div className="input-group">
-                  <label>Repetir Nueva Contraseña</label>
-                  <input 
-                    type="password" 
+                  <label htmlFor="repeat-password">Repetir Nueva Contraseña</label>
+                  <input
+                    id="repeat-password"
+                    type="password"
                     value={repeatPassword}
-                    onChange={(e) => setRepeatPassword(e.target.value)} 
-                    placeholder="Confirmá tu contraseña" 
+                    onChange={(e) => setRepeatPassword(e.target.value)}
+                    placeholder="Confirmá tu contraseña"
+                    autoComplete="new-password"
                   />
                 </div>
               </div>

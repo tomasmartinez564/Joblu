@@ -26,8 +26,6 @@
 }
 
 .hero-cta,
-.stat-link-secondary,
-.secondary-cta,
 .view-all-btn {
   display: inline-flex;
   align-items: center;
@@ -57,24 +55,11 @@
   box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
 }
 
-.stat-link-secondary,
-.secondary-cta {
-  background: #f5f3ff !important;
-  border: 2px solid var(--joblu-primary) !important;
-  color: var(--joblu-primary) !important;
-}
-
-.stat-link-secondary:hover,
-.secondary-cta:hover {
-  background: var(--joblu-primary) !important;
-  color: white !important;
-}
-
 /* ==========================================================================
    3. DASHBOARD (Usuario Logueado)
    ========================================================================== */
 .home-dashboard {
-  max-width: 1024px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
   animation: joblu-fade-in-up 0.4s ease;
@@ -94,9 +79,9 @@
   justify-content: space-between;
   padding: 1.8rem;
   background: var(--joblu-surface);
-  border-radius: 1.25rem;
+  border-radius: var(--joblu-radius-lg);
   border: 1px solid var(--joblu-border-soft);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--joblu-shadow-md);
 }
 
 .brand-border {
@@ -235,7 +220,8 @@
   max-width: clamp(350px, 45vw, 600px);
   /* Ancho fluido */
 
-  max-width: clamp(350px, 45vw, 600px); /* Ancho fluido */
+  max-width: clamp(350px, 45vw, 600px);
+  /* Ancho fluido */
   color: #fff;
   text-align: left;
 }
@@ -245,7 +231,8 @@
   font-size: clamp(2.2rem, 3.5vw, 3.5rem);
   /* Texto responsive */
 
-  font-size: clamp(2.2rem, 3.5vw, 3.5rem); /* Texto responsive */
+  font-size: clamp(2.2rem, 3.5vw, 3.5rem);
+  /* Texto responsive */
 
   margin-bottom: 0.8rem;
   line-height: 1.1;
@@ -257,7 +244,8 @@
   font-size: clamp(1rem, 1.5vw, 1.25rem);
   /* Texto responsive */
 
-  font-size: clamp(1rem, 1.5vw, 1.25rem); /* Texto responsive */
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  /* Texto responsive */
 
   margin-bottom: 2rem;
   opacity: 0.95;
@@ -363,22 +351,24 @@
 @media (max-width: 768px) {
   .hero-banner-image-wrapper {
     /* 1. Cambiamos el ratio para que sea menos alto (puedes probar con 1/1 o 4/5) */
-    aspect-ratio: 4 / 5; 
+    aspect-ratio: 4 / 5;
     height: auto;
     /* 2. Limitamos la altura máxima para que no ocupe el 100% de la pantalla */
-    max-height: 75vh; 
+    max-height: 75vh;
   }
 
   /* 3. Ajustamos el contenido para que respire mejor en mobile */
   .hero-banner-content {
-    max-width: 90%; /* Evita que el texto toque los bordes */
+    max-width: 90%;
+    /* Evita que el texto toque los bordes */
   }
 
   .hero-banner-content h1 {
-    font-size: 2rem; /* Achicamos un poco el título para que no sea tan gigante */
+    font-size: 2rem;
+    /* Achicamos un poco el título para que no sea tan gigante */
     margin-bottom: 0.5rem;
   }
-  
+
   .hero-banner-content p {
     font-size: 1rem;
     margin-bottom: 1.5rem;
@@ -401,20 +391,22 @@
     margin-left: -1.5rem;
     margin-right: -1.5rem;
   }
-  
+
   .jobs-carousel-scroll {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
     scroll-snap-type: x mandatory;
-    scroll-padding-left: 1.5rem; /* Para que el snap no quede pegado al borde izquierdo */
+    scroll-padding-left: 1.5rem;
+    /* Para que el snap no quede pegado al borde izquierdo */
     gap: 1rem;
   }
-  
+
   .home-card-trabajo-mini {
     scroll-snap-align: start;
-    min-width: 260px; /* Un poco más chico en mobile para que se vea el siguiente */
+    min-width: 260px;
+    /* Un poco más chico en mobile para que se vea el siguiente */
   }
-  
+
   /* Ocultar flechas en mobile (se usa swipe) */
   .carousel-controls {
     display: none;

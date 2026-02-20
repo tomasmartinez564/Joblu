@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { FaBuilding, FaMapMarkerAlt, FaBriefcase, FaLightbulb } from "react-icons/fa";
 
 // --- Estilos ---
 import "../styles/jobs-detail.css";
@@ -73,9 +74,9 @@ function JobDetail() {
         </div>
 
         <div className="job-detail-sub">
-          <span className="company-name">🏢 {job.company}</span>
-          <span className="location">📍 {job.location || "Remoto"}</span>
-          <span className="type">💼 {job.type ? job.type.replace("_", " ") : "Full time"}</span>
+          <span className="company-name"><FaBuilding className="meta-icon" /> {job.company}</span>
+          <span className="location"><FaMapMarkerAlt className="meta-icon" /> {job.location || "Remoto"}</span>
+          <span className="type"><FaBriefcase className="meta-icon" /> {job.type ? job.type.replace("_", " ") : "Full time"}</span>
         </div>
 
         {/* Tags / Habilidades */}
@@ -116,7 +117,7 @@ function JobDetail() {
       {showApplyModal && (
         <div className="job-apply-modal-overlay">
           <div className="job-apply-modal">
-            <div className="job-apply-modal-icon">🚀</div>
+            <div className="job-apply-modal-icon"><FaLightbulb /></div>
             <h3>¡Consejo <span className="brand-name">JOBLU</span>!</h3>
             <p>
               Asegurate de descargar tu CV en PDF desde la sección <strong>'Crear CV'</strong> antes de continuar con la postulación en el sitio de la empresa.

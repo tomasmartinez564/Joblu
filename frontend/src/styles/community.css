@@ -1,10 +1,9 @@
 /* Página Comunidad */
 .community {
   padding: 1.5rem;
-  max-width: 1120px;
+  max-width: 1200px;
   margin: 2rem auto;
   background: transparent;
-  /* deja ver el fondo general */
   border: none;
   animation: joblu-fade-in-up 0.35s ease;
 }
@@ -18,21 +17,17 @@
 
 /* Tarjeta de cada post en la lista */
 .community-post {
-  padding: 0.9rem 1.1rem;
-  border-radius: 0.8rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--joblu-radius-lg);
   background: var(--joblu-surface);
-  /* Usa variable para dark mode */
   border: 1px solid var(--joblu-border-soft);
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--joblu-shadow-md);
   transition:
     transform 0.16s ease,
     box-shadow 0.16s ease,
     border-color 0.16s ease,
     background-color 0.16s ease;
   animation: joblu-fade-in-up 0.35s ease;
-
-  /* Glass touch subtle */
-  backdrop-filter: blur(5px);
 }
 
 body.dark-mode .community-post {
@@ -49,11 +44,11 @@ body.dark-mode .community-post {
 .community-create-card {
   margin-top: 1rem;
   margin-bottom: 1.5rem;
-  padding: 1.1rem 1.25rem;
-  border-radius: 0.9rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--joblu-radius-lg);
   border: 1px solid var(--joblu-border-soft);
   background: var(--joblu-surface);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+  box-shadow: var(--joblu-shadow-md);
 }
 
 .community-create-title {
@@ -382,8 +377,10 @@ body.dark-mode .community-post {
   flex: 1;
   padding: 0.6rem 0.8rem;
   font-size: 0.9rem;
-  background-color: #f1f5f9; /* Color de fondo más distinto (slate-100) */
-  border: 1px solid #cbd5e1; /* Borde más visible (slate-300) */
+  background-color: #f1f5f9;
+  /* Color de fondo más distinto (slate-100) */
+  border: 1px solid #cbd5e1;
+  /* Borde más visible (slate-300) */
   border-radius: 0.5rem;
   transition: all 0.2s ease;
 }
@@ -396,36 +393,42 @@ body.dark-mode .community-post {
 
 /* Botón de Comentar */
 .btn-comment {
-  padding: 0.6rem 1.25rem;
-  border-radius: 12px; /* Antes 0.5rem */
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
   background: var(--joblu-primary);
   color: white;
   border: none;
+  font-family: var(--font-subtitle);
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .btn-comment:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(99, 55, 183, 0.25);
-  background-color: #4f46e5;
+  filter: brightness(1.1);
 }
 
-/* Si tienes un botón de "Publicar" en el form de arriba, asegúrate que use esto */
+/* Botón "Publicar" del form principal */
 .community-form button[type="submit"] {
   border-radius: 12px;
   padding: 0.75rem 1.5rem;
+  font-family: var(--font-subtitle);
+  font-size: 0.9rem;
   font-weight: 600;
   background: var(--joblu-primary);
   color: white;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .community-form button[type="submit"]:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(99, 55, 183, 0.25);
+  filter: brightness(1.1);
 }

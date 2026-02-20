@@ -200,13 +200,13 @@ export default function Navbar({
                 to="/jobs"
                 className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}
               >
-                Bolsa de Trabajo
+                Bolsa de trabajo
               </NavLink>
               <NavLink
                 to="/mis-cvs"
                 className={({ isActive }) => "drawer-link" + (isActive ? " drawer-link-active" : "")}
               >
-                Mis Cvs
+                Mis CVs
               </NavLink>
             </nav>
 

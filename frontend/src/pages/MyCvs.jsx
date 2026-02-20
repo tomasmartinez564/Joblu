@@ -150,7 +150,7 @@ function MyCvs({ user }) {
       </header>
 
       {/* Barra de Acciones */}
-      <div className="mycvs-actions-bar" style={{ marginBottom: "1rem" }}>
+      <div className="mycvs-actions-bar">
         <input
           type="file"
           id="import-cv-input"
@@ -162,14 +162,6 @@ function MyCvs({ user }) {
           className="mycvs-import-btn"
           onClick={handleImportClick}
           disabled={isImporting}
-          style={{
-            padding: "0.5rem 1rem",
-            cursor: "pointer",
-            backgroundColor: "#f3f4f6",
-            border: "1px solid #d1d5db",
-            borderRadius: "0.375rem",
-            marginRight: "1rem"
-          }}
         >
           {isImporting ? "Importando..." : "Importar CV (PDF)"}
         </button>

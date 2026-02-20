@@ -1,7 +1,7 @@
 /* frontend/src/styles/jobs.css */
 
 .jobs-page {
-  max-width: 1120px;
+  max-width: 1200px;
   margin: 2rem auto;
   padding: 1.5rem;
   animation: joblu-fade-in-up 0.35s ease;
@@ -48,10 +48,11 @@
 
 .jobs-filters {
   background: var(--joblu-surface);
-  border-radius: 0.9rem;
+  border-radius: var(--joblu-radius-lg);
   border: 1px solid var(--joblu-border-soft);
-  padding: 0.8rem;
-  height: fit-content; /* Evita que se estire hasta abajo */
+  box-shadow: var(--joblu-shadow-md);
+  padding: 1rem;
+  height: fit-content;
 }
 
 .jobs-list-area {
@@ -70,9 +71,12 @@
 
 /* Pestañas de filtrado */
 .jobs-tab {
-  border-radius: 12px; /* Antes 999px */
-  padding: 0.5rem 1rem; /* Un poco más de aire */
-  border: 2px solid var(--joblu-border-soft); /* Borde unificado */
+  border-radius: 12px;
+  /* Antes 999px */
+  padding: 0.5rem 1rem;
+  /* Un poco más de aire */
+  border: 2px solid var(--joblu-border-soft);
+  /* Borde unificado */
   background: #f9fafb;
   font-size: 0.9rem;
   font-weight: 600;
@@ -94,9 +98,17 @@
 
 .job-card {
   background: var(--joblu-surface);
-  border-radius: 0.9rem;
+  border-radius: var(--joblu-radius-lg);
   border: 1px solid var(--joblu-border-soft);
-  padding: 1rem 1.1rem;
+  box-shadow: var(--joblu-shadow-md);
+  padding: 1.1rem 1.25rem;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.job-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--joblu-shadow-lg);
+  border-color: var(--joblu-primary-accent);
 }
 
 .job-card-header {
@@ -120,19 +132,23 @@
 .job-card-time {
   font-size: 0.85rem;
   color: var(--joblu-text-muted);
-  white-space: nowrap; /* Evita que la fecha se rompa en dos líneas si es muy larga */
+  white-space: nowrap;
+  /* Evita que la fecha se rompa en dos líneas si es muy larga */
 }
 
 /* LOGO DE LA EMPRESA */
 .job-card-logo {
   width: 48px;
   height: 48px;
-  object-fit: contain; /* Mantiene la proporción */
+  object-fit: contain;
+  /* Mantiene la proporción */
   border-radius: 6px;
-  background: white; /* Fondo blanco por si el logo tiene transparencia */
+  background: white;
+  /* Fondo blanco por si el logo tiene transparencia */
   padding: 2px;
   border: 1px solid var(--joblu-border-soft);
-  flex-shrink: 0; /* Evita que el logo se aplaste */
+  flex-shrink: 0;
+  /* Evita que el logo se aplaste */
 }
 
 .job-card-logo-placeholder {
@@ -143,7 +159,8 @@
   justify-content: center;
   background: #eee;
   border-radius: 6px;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
+  color: var(--joblu-text-muted);
   flex-shrink: 0;
 }
 
@@ -151,6 +168,17 @@
   margin: 0.45rem 0 0.35rem;
   font-size: 0.85rem;
   color: var(--joblu-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+/* Icono inline SVG (react-icons) en la meta de la tarjeta */
+.meta-icon {
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  vertical-align: middle;
 }
 
 .job-card-description {
@@ -172,12 +200,14 @@
 }
 
 /* Botón "Ver detalle" o acciones secundarias */
-.job-card-secondary-btn, 
+.job-card-secondary-btn,
 .job-card-detail-link,
 .job-detail-back,
 .chip {
-  border-radius: 12px !important; /* Forzamos el 12px en lugar de 999px */
-  border: 2px solid var(--joblu-border-soft); /* Grosor unificado */
+  border-radius: 12px !important;
+  /* Forzamos el 12px en lugar de 999px */
+  border: 2px solid var(--joblu-border-soft);
+  /* Grosor unificado */
   padding: 0.4rem 1rem;
   font-weight: 600;
   transition: all 0.2s ease;
@@ -185,7 +215,8 @@
 
 /* Botón Principal de la tarjeta (Solicitar / Ver más) */
 .job-card-cta {
-  border-radius: 12px; /* Antes 999px */
+  border-radius: 12px;
+  /* Antes 999px */
   padding: 0.5rem 1.25rem;
   border: none;
   font-size: 0.9rem;
@@ -217,7 +248,8 @@
 /* Input de búsqueda (para que coincida con el botón cuadrado) */
 .jobs-search-input {
   flex: 1;
-  border-radius: 12px; /* Antes 999px */
+  border-radius: 12px;
+  /* Antes 999px */
   border: 1px solid var(--joblu-border-soft);
   padding: 0.75rem 1rem;
   font-size: 0.95rem;
@@ -225,9 +257,11 @@
 
 /* Botón de buscar */
 .jobs-search-button {
-  border-radius: 12px; /* Antes 999px */
+  border-radius: 12px;
+  /* Antes 999px */
   border: none;
-  padding: 0.75rem 1.5rem; /* Padding estándar del Home */
+  padding: 0.75rem 1.5rem;
+  /* Padding estándar del Home */
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
@@ -246,10 +280,20 @@
   color: var(--joblu-text-muted);
 }
 
+/* Icono del estado vacío (react-icons SVG) */
+.jobs-empty-icon {
+  font-size: 3rem;
+  color: var(--joblu-text-muted);
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: center;
+}
+
 /* PANEL DE FILTROS COMPACTO */
 .jobs-filter-section {
   border-bottom: 1px solid var(--joblu-border-soft);
-  padding: 0.25rem 0; /* Reducido de 0.4rem */
+  padding: 0.25rem 0;
+  /* Reducido de 0.4rem */
 }
 
 .jobs-filter-title {
@@ -263,7 +307,8 @@
   margin-top: 0.2rem;
   display: flex;
   flex-direction: column;
-  gap: 0.15rem; /* Muy pegaditos */
+  gap: 0.15rem;
+  /* Muy pegaditos */
   padding-left: 0.1rem;
 }
 
@@ -410,8 +455,15 @@
 
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .fade-in {

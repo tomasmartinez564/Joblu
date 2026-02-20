@@ -553,7 +553,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
               <div className="cv-preview-header">
                 <div>
                   <h1>{cvData.nombre || (cvLanguage === "en" ? "Name Surname" : "Nombre Apellido")}</h1>
-                  <h3 className="cv-preview-job-title">{cvData.puesto || (cvLanguage === "en" ? "Desired role / Job title" : "Puesto deseado / Rol profesional")}</h3>
+                  <p className="cv-preview-job-title">{cvData.puesto || (cvLanguage === "en" ? "Desired role / Job title" : "Puesto deseado / Rol profesional")}</p>
                 </div>
                 {includePhoto && (cvData.foto ? <img src={cvData.foto} alt="Foto" className="cv-photo-preview" /> : <div className="cv-photo-placeholder">{cvLanguage === "en" ? "Photo" : "Foto"}</div>)}
               </div>
@@ -600,7 +600,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
               <div className="cv-ai-content">
                 <div className="cv-ai-header">
                   <h3>JOBLU IA</h3>
-                  <button type="button" className="cv-ai-close" onClick={closeAiPanel}>✕</button>
+                  <button type="button" className="cv-ai-close" onClick={closeAiPanel} aria-label="Cerrar panel de IA">✕</button>
                 </div>
                 <div className="cv-ai-body">
                   <label>{cvLanguage === "en" ? "Text to improve:" : "Texto a mejorar:"}

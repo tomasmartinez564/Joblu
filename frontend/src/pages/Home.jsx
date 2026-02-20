@@ -29,7 +29,7 @@ export default function Home({ user }) {
 
   const scrollCarousel = (direction) => {
     if (carouselRef.current) {
-      const scrollAmount = 300; 
+      const scrollAmount = 300;
       carouselRef.current.scrollBy({ left: direction * scrollAmount, behavior: "smooth" });
     }
   };
@@ -106,7 +106,7 @@ export default function Home({ user }) {
                 <p className="profile-location">📍 {cvData.ubicacion || "Ubicación no definida"}</p>
               </div>
             </div>
-            <Link to="/cuenta" className="stat-link-secondary">Ajustes de cuenta</Link>
+            <Link to="/cuenta" className="btn-secondary">Ajustes de cuenta</Link>
           </section>
 
           {/* 3. Tip */}
@@ -140,7 +140,7 @@ export default function Home({ user }) {
               ) : <p className="empty-msg">Explorá dudas de otros usuarios.</p>}
             </div>
             <div className="card-actions-row">
-              <Link to="/comunidad" className="stat-link-secondary">Ver foro</Link>
+              <Link to="/comunidad" className="btn-secondary">Ver foro</Link>
               <button onClick={() => navigate('/comunidad')} className="btn-icon-plus" title="Crear Post">+</button>
             </div>
           </section>
@@ -178,14 +178,14 @@ export default function Home({ user }) {
               ))}
             </div>
           </div>
-          
+
           <Link to="/jobs" className="view-all-btn">Ver todos</Link>
         </section>
       </main>
     );
   }
 
-  {/* VISTA INVITADO CON BANNER Y TEXTO POR ENCIMA */}
+  {/* VISTA INVITADO CON BANNER Y TEXTO POR ENCIMA */ }
   return (
     <main className="home-page">
       <header className="home-hero-banner">

@@ -1,5 +1,5 @@
 .account {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 2rem auto;
   padding: 0 1.5rem;
   animation: joblu-fade-in-up 0.4s ease-out;
@@ -32,7 +32,7 @@
   border: 1px solid var(--joblu-border-soft);
   border-radius: var(--joblu-radius-lg);
   padding: 2.5rem;
-  box-shadow: var(--joblu-shadow-sm);
+  box-shadow: var(--joblu-shadow-md);
   display: flex;
   gap: 3rem;
   align-items: flex-start;
@@ -138,7 +138,7 @@
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid var(--joblu-border-soft);
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 0.95rem;
   background: var(--joblu-surface);
   color: var(--joblu-text-main);
@@ -158,39 +158,31 @@
 }
 
 .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background-color: var(--joblu-primary);
   color: #fff;
   border: none;
-  padding: 0.8rem 1.8rem;
-  border-radius: 8px;
-  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-family: var(--font-subtitle);
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
   transition: var(--joblu-transition);
+  white-space: nowrap;
 }
 
 .btn-primary:hover {
   filter: brightness(1.1);
   transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background: transparent;
-  border: 2px solid var(--joblu-primary);
-  color: var(--joblu-primary);
-  padding: 0.6rem 1.4rem;
-  border-radius: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: var(--joblu-transition);
-  font-family: var(--font-subtitle);
-}
-
-.btn-secondary:hover {
-  background: var(--joblu-primary);
-  color: #ffffff;
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(99, 55, 183, 0.25);
 }
+
+/* .btn-secondary se define globalmente en index.css.
+   Aquí solo se sobreescribe lo que sea necesario por contexto local. */
+
 
 /* ============================================================
    RESPONSIVE - MOBILE (max-width: 768px)

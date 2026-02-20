@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { FaBuilding, FaMapMarkerAlt, FaBriefcase, FaLink, FaCheck, FaSearch } from "react-icons/fa";
 
 // --- Estilos ---
 import "../styles/jobs.css";
@@ -153,14 +154,14 @@ function Jobs() {
       <header className="jobs-header">
         <div className="jobs-header-top">
           <div className="jobs-search-area">
-            <h1 className="jobs-title">Bolsa de trabajo 🚀</h1>
+            <h1 className="jobs-title">Bolsa de trabajo</h1>
             <p className="jobs-subtitle">Oportunidades remotas y presenciales curadas para vos.</p>
 
             <form className="jobs-search-bar" onSubmit={handleSearchSubmit}>
               <input
                 type="text"
                 className="jobs-search-input"
-                placeholder="Busca por rol, tecnología o empresa..."
+                placeholder="Buscá por rol, tecnología o empresa..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -214,9 +215,9 @@ function Jobs() {
               <><JobSkeleton /><JobSkeleton /><JobSkeleton /></>
             ) : filteredJobs.length === 0 ? (
               <div className="jobs-empty-state">
-                <div style={{ fontSize: "3rem" }}>🔍</div>
+                <div className="jobs-empty-icon"><FaSearch /></div>
                 <h3>No encontramos resultados</h3>
-                <p>Intenta ajustar los filtros o buscar algo más general.</p>
+                <p>Intentá ajustar los filtros o buscá algo más general.</p>
                 <button onClick={() => { setSelectedTags([]); setSearchTerm(""); setActiveTab("all"); setSelectedTypes([]) }} className="clear-filters-btn">
                   Limpiar filtros
                 </button>
@@ -230,7 +231,7 @@ function Jobs() {
                       <div className="job-card-header-main">
                         {job.logo ? (
                           <img src={job.logo} alt={job.company} className="job-card-logo" onError={(e) => e.target.style.display = 'none'} />
-                        ) : <div className="job-card-logo-placeholder">🏢</div>}
+                        ) : <div className="job-card-logo-placeholder"><FaBuilding /></div>}
                         <div>
                           <div className="job-card-title-container">
                             <h2 className="job-card-title">{job.title}</h2>
@@ -246,7 +247,7 @@ function Jobs() {
                       {job.tags?.slice(0, 3).map(t => <span key={t} className="job-tag-badge">{t}</span>)}
                     </div>
 
-                    <div className="job-card-meta">📍 {job.location || "Remoto"} &nbsp;•&nbsp; 💼 {formatJobType(job.type)}</div>
+                    <div className="job-card-meta"><FaMapMarkerAlt className="meta-icon" /> {job.location || "Remoto"} &nbsp;&bull;&nbsp; <FaBriefcase className="meta-icon" /> {formatJobType(job.type)}</div>
 
                     <div
                       className="job-card-description"
@@ -256,7 +257,7 @@ function Jobs() {
                     <div className="job-card-footer">
                       <div className="job-card-footer-left">
                         <button className="job-card-icon-btn" onClick={() => handleShare(job._id)}>
-                          {copiedId === job._id ? "✅" : "🔗"}
+                          {copiedId === job._id ? <FaCheck /> : <FaLink />}
                         </button>
                       </div>
                       <Link to={`/jobs/${job._id}`} className="job-card-cta">Ver oferta</Link>

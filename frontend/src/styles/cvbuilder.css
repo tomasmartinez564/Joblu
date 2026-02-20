@@ -126,7 +126,7 @@
   flex-direction: column;
   font-weight: 500;
   font-size: 0.9rem;
-  color: #374151;
+  color: var(--joblu-text-main);
 }
 
 .cv-form input,
@@ -156,13 +156,15 @@
   box-shadow: 0 0 0 2px rgba(99, 55, 183, 0.2);
 }
 
-/* Título de bloque */
+/* Título de bloque (Datos personales, Experiencia, etc.) */
 .cv-form-sectionTitle {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #9ca3af;
+  color: var(--joblu-primary);
+  font-weight: 700;
+  font-family: var(--font-subtitle);
 }
 
 /* Header de sección (título + botón) */
@@ -248,39 +250,70 @@
   transition: background-color 0.2s ease, transform 0.15s ease;
 }
 
-/* Base común overrides */
+/* ── Botones Ghost/Outline: Guardar y Descargar ── */
 .cv-actions .save-btn,
-.cv-actions .download-btn,
-.cv-actions .ai-btn {
-  background-color: var(--joblu-primary, #4f46e5);
-  /* Violeta principal */
-  color: #ffffff;
-  border-color: transparent;
+.cv-actions .download-btn {
+  background: transparent;
+  color: var(--joblu-primary);
+  border: 2px solid var(--joblu-primary);
   flex: 1;
-  /* Opcional: hacer que ocupen el mismo ancho si hay espacio */
   text-align: center;
-  margin-top: 0; /* Reset global styles */
-}
-
-.cv-nav-prev,
-.cv-nav-next {
-  background-color: var(--joblu-primary, #4f46e5);
-  color: #ffffff;
-  border-color: transparent;
-  flex: 0 0 auto; /* No crecer, ancho automático según contenido/padding */
-  min-width: 140px; /* Ancho mínimo para consistencia */
-  text-align: center;
+  margin-top: 0;
 }
 
 .cv-actions .save-btn:hover,
-.cv-actions .download-btn:hover,
-.cv-actions .ai-btn:hover,
+.cv-actions .download-btn:hover {
+  background: var(--joblu-primary);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 55, 183, 0.25);
+}
+
+/* ── Botón Protagonista: Mejorar con IA ── */
+.cv-actions .ai-btn {
+  background: var(--joblu-primary-accent, #21dbd2);
+  color: #0f172a;
+  border: none;
+  flex: 1;
+  text-align: center;
+  margin-top: 0;
+  padding: 0 2rem;
+  height: 48px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--font-subtitle);
+  box-shadow: 0 4px 14px rgba(33, 219, 210, 0.35);
+  letter-spacing: 0.3px;
+}
+
+.cv-actions .ai-btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 8px 22px rgba(33, 219, 210, 0.45);
+}
+
+.cv-actions .ai-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px rgba(33, 219, 210, 0.25);
+}
+
+/* ── Botones Ghost/Outline: Navegación Anterior/Siguiente ── */
+.cv-nav-prev,
+.cv-nav-next {
+  background: transparent;
+  color: var(--joblu-primary);
+  border: 2px solid var(--joblu-primary);
+  flex: 0 0 auto;
+  min-width: 120px;
+  text-align: center;
+}
+
 .cv-nav-prev:hover,
 .cv-nav-next:hover {
-  background-color: #4338ca;
-  /* Violeta más oscuro */
+  background: var(--joblu-primary);
+  color: #ffffff;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 12px rgba(99, 55, 183, 0.25);
 }
 
 .cv-actions .save-btn:disabled,
@@ -288,10 +321,11 @@
 .cv-actions .ai-btn:disabled,
 .cv-nav-prev:disabled,
 .cv-nav-next:disabled {
-  background-color: #a5b4fc;
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  filter: none;
 }
 
 
@@ -718,43 +752,53 @@
 }
 
 /* ===========================
-   ✨ Botón Mejorar con IA (Premium)
+   ✨ Botón Mejorar con IA (Acento de marca)
    =========================== */
 .cv-improve-btn {
-  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--joblu-primary-accent, #21dbd2) 0%, #17b9b1 100%);
+  color: #0f172a;
   border: none;
-  border-radius: 999px; /* Fully rounded */
-  padding: 0.4rem 0.6rem; /* More compact */
-  font-size: 0.9rem; /* Slightly larger icon */
-  margin-left: 0.75rem; /* Spacing from title */
+  border-radius: 999px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: var(--font-subtitle);
+  margin-left: 0.75rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
+  gap: 0.3rem;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+  box-shadow: 0 4px 12px rgba(33, 219, 210, 0.3);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  text-transform: none;
+  white-space: nowrap;
   line-height: 1;
 }
 
 .cv-improve-btn:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 16px rgba(124, 58, 237, 0.35);
-  filter: brightness(1.1);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 8px 20px rgba(33, 219, 210, 0.4);
+  filter: brightness(1.05);
 }
 
 .cv-improve-btn:active {
-  transform: translateY(0) scale(0.98);
-  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.2);
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 2px 6px rgba(33, 219, 210, 0.2);
 }
 
 /* Animación sutil de brillo */
 @keyframes shine {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .cv-improve-btn.animated {

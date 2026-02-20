@@ -1,8 +1,9 @@
 .app-footer {
-  background: linear-gradient(180deg, var(--joblu-primary), var(--joblu-secondary));
+  background: var(--joblu-primary);
   color: var(--joblu-surface);
   padding: 3rem 1rem 1.5rem;
-  margin-top: auto; /* Push to bottom if content is short */
+  margin-top: auto;
+  /* Push to bottom if content is short */
   font-family: var(--font-body);
 }
 
@@ -100,20 +101,22 @@
 @media (max-width: 768px) {
   .app-footer {
     padding: 2rem 1rem;
-    text-align: center; /* Centra el texto de descripción y copyright */
+    text-align: center;
+    /* Centra el texto de descripción y copyright */
   }
-  
+
   .footer-content {
     display: grid;
     /* Cambiamos a 2 columnas para que Navegación y Legal queden lado a lado */
-    grid-template-columns: 1fr 1fr; 
+    grid-template-columns: 1fr 1fr;
     gap: 2rem;
   }
 
   /* El primer div (Logo y descripción) ocupa todo el ancho */
   .footer-section:first-child {
     grid-column: 1 / -1;
-    align-items: center; /* Centra el logo y texto */
+    align-items: center;
+    /* Centra el logo y texto */
   }
 
   /* El último div (Redes sociales) ocupa todo el ancho */
@@ -123,11 +126,12 @@
   }
 
   .footer-socials {
-    justify-content: center; /* Centra los iconos */
+    justify-content: center;
+    /* Centra los iconos */
   }
 
   /* Asegura que los links dentro de las secciones también se centren si es necesario */
   .footer-links {
-    align-items: center; 
+    align-items: center;
   }
 }

@@ -82,7 +82,7 @@ function PostDetail({ user }) {
    */
   const handleToggleLike = async () => {
     if (!post || !user) {
-      if (!user) addToast("Debes iniciar sesión para dar like", "info");
+      if (!user) addToast("Debés iniciar sesión para dar like", "info");
       return;
     }
 
