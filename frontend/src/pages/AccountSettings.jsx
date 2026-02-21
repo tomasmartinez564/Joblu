@@ -3,11 +3,13 @@ import { useState, useRef, useEffect } from "react";
 // --- Estilos y Configuración ---
 import API_BASE_URL from "../config/api";
 import "../styles/account.css";
+import { useToast } from "../context/ToastContext";
 
 // ==========================================
 // 👤 PÁGINA: AJUSTES DE CUENTA (AccountSettings)
 // ==========================================
 function AccountSettings({ user, onUpdateUser }) {
+  const { addToast } = useToast();
 
   // --- 1. Estados: Información de Perfil ---
   const [displayName, setDisplayName] = useState(user?.name || "");
@@ -64,11 +66,11 @@ function AccountSettings({ user, onUpdateUser }) {
         console.error("Error del servidor:", response.status, errorText);
 
         if (errorText.includes("File too large")) {
-          alert("El archivo es demasiado grande. Máximo 5MB.");
+          addToast("El archivo es demasiado grande. Máximo 5MB.", "error");
         } else if (errorText.includes("Solo se permiten imágenes")) {
-          alert("Solo se permiten archivos de imagen (JPG, PNG, etc.).");
+          addToast("Solo se permiten archivos de imagen (JPG, PNG, etc.).", "error");
         } else {
-          alert(`Error del servidor (${response.status}). Intentá de nuevo.`);
+          addToast(`Error del servidor (${response.status}). Intentá de nuevo.`, "error");
         }
         return;
       }
@@ -79,11 +81,11 @@ function AccountSettings({ user, onUpdateUser }) {
         onUpdateUser({ avatar: data.avatarUrl });
         console.log("✅ Avatar actualizado correctamente");
       } else if (data.error) {
-        alert(`Error: ${data.error}`);
+        addToast(`Error: ${data.error}`, "error");
       }
     } catch (error) {
       console.error("Error subiendo avatar:", error);
-      alert("Error al subir el avatar.");
+      addToast("Error al subir el avatar.", "error");
     } finally {
       setIsUploading(false);
     }
@@ -98,7 +100,7 @@ function AccountSettings({ user, onUpdateUser }) {
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
-    alert("Cambio de contraseña simulado.");
+    addToast("Cambio de contraseña no implementado aún.", "info");
   };
 
   // --- 6. Renderizado ---

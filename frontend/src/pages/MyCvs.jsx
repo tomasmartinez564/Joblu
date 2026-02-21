@@ -6,6 +6,7 @@ import "../styles/mycvs.css";
 
 // --- Servicios ---
 import cvService from "../services/cvService";
+import { useToast } from "../context/ToastContext";
 
 // ==========================================
 // 🛠️ UTILIDADES (Helpers)
@@ -34,6 +35,7 @@ function formatDate(dateString) {
 // ==========================================
 function MyCvs({ user }) {
   const navigate = useNavigate();
+  const { addToast } = useToast();
 
   // --- 1. Estados ---
   const [cvs, setCvs] = useState([]);
@@ -85,7 +87,7 @@ function MyCvs({ user }) {
       console.error("Error al eliminar CV:", err);
       // Revertimos cambios si falla la petición
       setCvs(previousCvs);
-      alert("Hubo un error al eliminar el CV.");
+      addToast("Hubo un error al eliminar el CV.", "error");
     }
   };
 

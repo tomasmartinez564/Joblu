@@ -133,7 +133,7 @@ function Community({ user }) {
       setCategory("General");
       addToast("¡Post publicado con éxito! 🎉", "success");
     } catch (err) {
-      addToast("Hubo un problema al publicar. Intentalo de nuevo.", "error");
+      addToast("Hubo un problema al publicar. Volvé a intentar.", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -174,7 +174,6 @@ function Community({ user }) {
           "Authorization": `Bearer ${token}`
         },
       });
-      if (!res.ok) throw new Error("Error al dar like");
       if (!res.ok) throw new Error("Error al dar like");
       // La actualización optimista ya se encargó de la UI.
       // Si quisieramos ser estrictos, podríamos confirmar con updatedData.likes

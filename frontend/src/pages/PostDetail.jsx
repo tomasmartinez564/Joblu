@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { FaExclamationTriangle } from "react-icons/fa";
 import { useParams, useNavigate, Link } from "react-router-dom";
 
 // --- Estilos y Utilidades ---
 import "../styles/postdetail.css";
+import "../styles/jobs-detail.css";
 import { formatDate } from "../utils/dateUtils";
 
 // --- Contexto y Configuración ---
@@ -42,6 +44,7 @@ function PostDetail({ user }) {
 
   // --- 3. Estados: UI (Likes) ---
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // --- 4. Lógica Derivada (Calculada) ---
   const isLiked = post && user && post.likedBy?.includes(user.id);
@@ -167,7 +170,11 @@ function PostDetail({ user }) {
    * Elimina la publicación (Solo autores).
    */
   const handleDelete = async () => {
-    if (!window.confirm("¿Seguro que querés eliminar este post?")) return;
+    if (!showDeleteModal) {
+      setShowDeleteModal(true);
+      return;
+    }
+    setShowDeleteModal(false);
 
     setDeleting(true);
     try {
@@ -244,6 +251,23 @@ function PostDetail({ user }) {
         <button onClick={handleDelete} disabled={deleting} className="postdetail-delete-btn">
           {deleting ? "Eliminando..." : "Eliminar post"}
         </button>
+      )}
+
+      {/* Modal Confirmación Eliminar Post */}
+      {showDeleteModal && (
+        <div className="job-apply-modal-overlay">
+          <div className="job-apply-modal">
+            <div className="job-apply-modal-icon" style={{ color: '#dc2626' }}><FaExclamationTriangle /></div>
+            <h3 style={{ color: '#dc2626' }}>Eliminar post</h3>
+            <p>¿Seguro que querés eliminar este post? Esta acción no se puede deshacer.</p>
+            <div className="job-apply-modal-actions">
+              <button className="btn-secondary" onClick={() => setShowDeleteModal(false)}>Cancelar</button>
+              <button className="cv-clear-confirm-btn" onClick={handleDelete}>
+                Sí, eliminar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* --- Sección de Comentarios --- */}

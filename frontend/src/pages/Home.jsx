@@ -147,7 +147,7 @@ export default function Home({ user }) {
           {/* Encabezado unificado: introduce tanto la comunidad como los empleos */}
           <div className="unified-section-header">
             <h2>Oportunidades y Comunidad</h2>
-            <p>Empléos recomendados para vos, más los últimos aportes de la comunidad <span className="brand-name-comunidad">JOBLU</span>.</p>
+            <p>Empleos recomendados para vos, más los últimos aportes de la comunidad <span className="brand-name-comunidad">JOBLU</span>.</p>
           </div>
 
           {/* Carrusel de Empleos */}
@@ -227,7 +227,7 @@ export default function Home({ user }) {
             Todo comenzó con una hoja en blanco y la frustración de no saber por dónde empezar. Como muchos jóvenes, nos encontramos armando nuestro primer currículum sin experiencia previa y sin nadie que nos enseñara cómo hacerlo. Probamos herramientas genéricas y palabras vacías, dándonos cuenta de que así nunca pasaríamos los filtros ATS que las empresas usan hoy.
           </p>
           <p>
-            Investigando, descubrimos que no estábamos solos: miles de adolescentes sentían la misma incertidumbre. Así nació <span className="brand-name">JOBLU</span>. No queríamos ser solo otra herramienta de diseño; queríamos crear el lugar donde realmente <strong>APRENDES</strong> a construir tu identidad profesional.
+            Investigando, descubrimos que no estábamos solos: miles de adolescentes sentían la misma incertidumbre. Así nació <span className="brand-name">JOBLU</span>. No queríamos ser solo otra herramienta de diseño; queríamos crear el lugar donde realmente <strong>APRENDÉS</strong> a construir tu identidad profesional.
           </p>
           <p>
             En <span className="brand-name">JOBLU</span>, te damos las herramientas para que armes tu CV según tus necesidades, con consejos personalizados de IA y una comunidad dispuesta a enseñarte. Estamos acá para que dejes de scrollear infinitamente y empieces a encontrar el trabajo que de verdad querés.

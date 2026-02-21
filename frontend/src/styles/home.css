@@ -102,6 +102,42 @@
   border-top: 4px solid var(--joblu-primary) !important;
 }
 
+/* --- BARRA DE PROGRESO DEL CV --- */
+.progress-container-main {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.5rem 0;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--joblu-primary, #6366f1);
+  min-width: 60px;
+}
+
+.progress-bar-container {
+  flex: 1;
+  height: 12px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #7c3aed);
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+.stat-hint {
+  font-size: 0.85rem;
+  color: var(--joblu-text-muted, #6b7280);
+  margin-top: 0.25rem;
+}
+
 /* --- SECCIÓN UNIFICADA: OPORTUNIDADES Y COMUNIDAD --- */
 .unified-dashboard-section {
   background: var(--joblu-surface);

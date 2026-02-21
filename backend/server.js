@@ -23,7 +23,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || "secreto_super_seguro_cambiar_en_env";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error("❌ JWT_SECRET no está configurado en .env. El servidor no puede arrancar de forma segura.");
+  process.exit(1);
+}
 const MONGODB_URI = process.env.MONGODB_URI;
 
 // Inicialización de aplicaciones y clientes
@@ -81,8 +85,7 @@ const postSchema = new mongoose.Schema({
   content: { type: String, required: true },
   category: { type: String, default: "General" },
   comments: [commentSchema],
-  likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-  lkCount: { type: Number, default: 0 }
+  likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
@@ -115,7 +118,10 @@ const Job = mongoose.models.Job || mongoose.model("Job", jobSchema);
 // ==========================================
 // 🛠️ MIDDLEWARES Y UTILIDADES
 // ==========================================
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  credentials: true,
+}));
 app.use(express.json({ limit: "50mb" }));
 
 // Configuración de archivos estáticos (uploads)
@@ -181,6 +187,11 @@ app.post("/api/auth/register", async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: "El email ya está registrado." });
+    }
+
+    // Validar longitud de contraseña
+    if (!password || password.length < 8) {
+      return res.status(400).json({ error: "La contraseña debe tener al menos 8 caracteres." });
     }
 
     // Hashear la contraseña antes de guardarla
@@ -507,7 +518,7 @@ app.post("/api/cvs/import", authenticateToken, uploadCv.single("file"), async (r
 
 // --- Sección: Inteligencia Artificial (Optimización) ---
 
-app.post("/api/optimizar-cv", aiLimiter, async (req, res) => {
+app.post("/api/optimizar-cv", authenticateToken, aiLimiter, async (req, res) => {
   const { section, content, language, tone, goal, jobDescription } = req.body;
 
   if (!process.env.OPENAI_API_KEY) {

@@ -119,7 +119,7 @@ function CvForm({
                 {isStep("perfil") && renderSection(
                     "perfil",
                     cvLanguage === "en" ? "Professional profile" : "Perfil profesional",
-                    cvLanguage === "en" ? "Write a short summary..." : "Escribe una breve descripción sobre vos...",
+                    cvLanguage === "en" ? "Write a short summary..." : "Escribí una breve descripción sobre vos...",
                     6
                 )}
 

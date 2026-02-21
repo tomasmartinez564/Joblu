@@ -12,7 +12,7 @@ export default function Footer() {
                     </Link>
                     <p className="footer-description">
                         La plataforma inteligente para potenciar tu carrera profesional con JOBLU.
-                        Crea tu CV, encuentra empleo y conecta con la comunidad.
+                        Creá tu CV, encontrá empleo y conectá con la comunidad.
                     </p>
                 </div>
 
@@ -36,7 +36,7 @@ export default function Footer() {
                 </div>
 
                 <div className="footer-section">
-                    <h3 className="footer-title">Síguenos</h3>
+                    <h3 className="footer-title">Seguinos</h3>
                     <div className="footer-socials">
                         <a href="#" className="social-icon" aria-label="Facebook"><FaFacebook /></a>
                         <a href="#" className="social-icon" aria-label="Twitter"><FaTwitter /></a>

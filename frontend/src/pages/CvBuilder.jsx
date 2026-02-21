@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from "react";
-import { FaLinkedin, FaGithub, FaGlobe } from "react-icons/fa";
+import { FaLinkedin, FaGithub, FaGlobe, FaCog, FaTrashAlt, FaExclamationTriangle } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
 
 
 // --- Estilos ---
 import "../styles/cvbuilder.css";
+import "../styles/jobs-detail.css";
 
 // --- Componentes y Páginas ---
 
@@ -67,6 +68,8 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
   // --- 3. Estados: Interfaz (UI) ---
 
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [showClearModal, setShowClearModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [saveSuccess, setSaveSuccess] = useState("");
@@ -489,7 +492,68 @@ function CvBuilder({ user, settings, onChangeSettings }) {
         <div className="cv-column">
 
 
-          <h2>Completa tu CV</h2>
+          <div className="cv-header-row">
+            <h2>Completa tu CV</h2>
+            <div className="cv-header-actions">
+              <button
+                ref={refBtnConfiguracion}
+                type="button"
+                className="cv-settings-gear"
+                onClick={() => setSettingsOpen((v) => !v)}
+                title="Configuración del CV"
+                aria-label="Abrir configuración del CV"
+              >
+                <FaCog />
+              </button>
+              <button
+                type="button"
+                className="cv-settings-gear cv-clear-btn"
+                onClick={() => setShowClearModal(true)}
+                title={cvLanguage === "en" ? "Clear all fields" : "Borrar todos los campos"}
+                aria-label="Borrar todos los campos del CV"
+              >
+                <FaTrashAlt />
+              </button>
+            </div>
+          </div>
+
+          {/* --- Modal de Configuración --- */}
+          {settingsOpen && (
+            <>
+              <div className="cv-settings-backdrop" onClick={() => setSettingsOpen(false)} />
+              <div className="cv-settings-modal">
+                <div className="cv-settings-modal-header">
+                  <h3>⚙️ Configuración del CV</h3>
+                  <button type="button" className="cv-settings-modal-close" onClick={() => setSettingsOpen(false)}>✕</button>
+                </div>
+                <div className="cv-settings-modal-body">
+                  <label>
+                    Idioma del CV
+                    <select value={cvLanguage} onChange={(e) => onChangeSettings((prev) => ({ ...prev, cvLanguage: e.target.value }))}>
+                      <option value="es">Español</option>
+                      <option value="en">Inglés</option>
+                    </select>
+                  </label>
+                  <label>
+                    Estilo del CV
+                    <select value={cvStyle} onChange={(e) => onChangeSettings((prev) => ({ ...prev, cvStyle: e.target.value }))}>
+                      <option value="ats">Compatibilidad ATS</option>
+                      <option value="balanceado">Balanceado</option>
+                      <option value="visual">Visual</option>
+                    </select>
+                  </label>
+                  <label className="cv-settings-checkbox">
+                    <input type="checkbox" checked={includePhoto} onChange={(e) => onChangeSettings((prev) => ({ ...prev, includePhoto: e.target.checked }))} />
+                    Incluir foto de perfil
+                  </label>
+                  <label>
+                    Rubro objetivo
+                    <input type="text" value={targetIndustry} onChange={(e) => onChangeSettings((prev) => ({ ...prev, targetIndustry: e.target.value }))} placeholder="Ej: Tecnología, Diseño, Marketing..." />
+                  </label>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Indicador de Pasos */}
           <div className="cv-steps-indicator">
@@ -641,6 +705,23 @@ function CvBuilder({ user, settings, onChangeSettings }) {
           </>
         )}
       </section>
+
+      {/* --- Modal Confirmación Borrar (root level para overlay full-screen) --- */}
+      {showClearModal && (
+        <div className="job-apply-modal-overlay">
+          <div className="job-apply-modal">
+            <div className="job-apply-modal-icon" style={{ color: '#dc2626' }}><FaExclamationTriangle /></div>
+            <h3 style={{ color: '#dc2626' }}>{cvLanguage === "en" ? "Clear CV" : "Borrar CV"}</h3>
+            <p>{cvLanguage === "en" ? "This will delete all the text from your CV. This action cannot be undone." : "Esto va a borrar todo el texto de tu CV. Esta acción no se puede deshacer."}</p>
+            <div className="job-apply-modal-actions">
+              <button className="btn-secondary" onClick={() => setShowClearModal(false)}>{cvLanguage === "en" ? "Cancel" : "Cancelar"}</button>
+              <button className="cv-clear-confirm-btn" onClick={() => { setCvData(emptyCv); setShowClearModal(false); }}>
+                {cvLanguage === "en" ? "Yes, clear all" : "Sí, borrar todo"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div >
   );
 }

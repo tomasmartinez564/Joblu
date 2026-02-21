@@ -6,7 +6,7 @@ import './App.css'
 import "./styles/header.css"
 import "./styles/footer.css"
 
-// --- Páginas (Estatica para LCP) ---
+// --- Páginas (Estática para LCP) ---
 import Home from './pages/Home.jsx'
 
 // --- Páginas (Lazy Loading) ---
@@ -20,10 +20,10 @@ const JobDetail = lazy(() => import('./pages/JobDetail.jsx'))
 const PostDetail = lazy(() => import("./pages/PostDetail"))
 const NotFound = lazy(() => import('./pages/NotFound.jsx'))
 
-// --- Componentes ---
 import Navbar from "./components/Navbar"
 import Footer from "./components/Footer"
 import ScrollToTop from "./components/ScrollToTop"
+import ProtectedRoute from "./components/ProtectedRoute"
 
 // --- Contexto y Configuración ---
 import { ToastProvider } from './context/ToastContext'
@@ -230,16 +230,16 @@ function AppLayout() {
         <Suspense fallback={<div style={{ padding: "2rem", textAlign: "center" }}>Cargando...</div>}>
           <Routes>
             <Route path="/" element={<Home user={user} />} />
-            <Route path="/cv" element={<CvBuilder user={user} settings={settings} onChangeSettings={setSettings} />} />
-            <Route path="/cv/:id" element={<CvBuilder user={user} settings={settings} onChangeSettings={setSettings} />} />
+            <Route path="/cv" element={<ProtectedRoute user={user}><CvBuilder user={user} settings={settings} onChangeSettings={setSettings} /></ProtectedRoute>} />
+            <Route path="/cv/:id" element={<ProtectedRoute user={user}><CvBuilder user={user} settings={settings} onChangeSettings={setSettings} /></ProtectedRoute>} />
             <Route path="/comunidad" element={<Community user={user} />} />
             <Route path="/comunidad/:id" element={<PostDetail user={user} />} />
             <Route path="/jobs" element={<Jobs savedJobs={savedJobs} toggleSavedJob={toggleSavedJob} />} />
             <Route path="/jobs/:id" element={<JobDetail savedJobs={savedJobs} toggleSavedJob={toggleSavedJob} />} />
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
 
-            <Route path="/mis-cvs" element={<MyCvs user={user} />} />
-            <Route path="/cuenta" element={<AccountSettings user={user} onUpdateUser={handleUpdateUser} settings={settings} onChangeSettings={setSettings} />} />
+            <Route path="/mis-cvs" element={<ProtectedRoute user={user}><MyCvs user={user} /></ProtectedRoute>} />
+            <Route path="/cuenta" element={<ProtectedRoute user={user}><AccountSettings user={user} onUpdateUser={handleUpdateUser} settings={settings} onChangeSettings={setSettings} /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
