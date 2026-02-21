@@ -26,12 +26,16 @@ body.dark-mode .app-header {
 .app-logo {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
+  /* don't let nav links compress the logo */
 }
 
 .app-logo-img {
   display: block;
-  height: 100px;
+  height: 38px;
+  /* matches avatar button height — balanced with nav links */
   width: auto;
+  object-fit: contain;
 }
 
 
@@ -156,12 +160,13 @@ body.dark-mode .nav-link {
   border: none;
   font-size: 1.8rem;
   color: #f9fafb;
-  /* Color blanco/claro del texto */
   cursor: pointer;
-
-  /* AQUÍ BAJAMOS EL BOTÓN */
-  margin-top: 10px;
-  /* O puedes usar: transform: translateY(4px); */
+  align-self: center;
+  /* vertically centered in the flex header row */
+  line-height: 1;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
 }
 
 /* Desktop: mostrar avatar, ocultar hamburguesa */

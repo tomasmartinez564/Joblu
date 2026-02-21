@@ -18,7 +18,7 @@ export default function Navbar({
     <header className="app-header">
       {/* --- 1. Logotipo --- */}
       <Link to="/" className="app-logo">
-        <img src="/logo2.png" alt="JOBLU" className="app-logo-img" fetchPriority="high" />
+        <img src="/LOGOTIPO_celeste.png" alt="JOBLU" className="app-logo-img" fetchPriority="high" />
       </Link>
 
       {/* --- 2. Navegación Desktop --- */}

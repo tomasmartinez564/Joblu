@@ -8,7 +8,7 @@ export default function Footer() {
             <div className="footer-content">
                 <div className="footer-section">
                     <Link to="/" className="footer-logo">
-                        JOBLU
+                        <img src="/LOGOTIPO_celeste.png" alt="JOBLU" className="footer-logo-img" />
                     </Link>
                     <p className="footer-description">
                         La plataforma inteligente para potenciar tu carrera profesional con JOBLU.
