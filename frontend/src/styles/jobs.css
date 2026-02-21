@@ -258,15 +258,17 @@
 /* Botón de buscar */
 .jobs-search-button {
   border-radius: 12px;
-  /* Antes 999px */
   border: none;
-  padding: 0.75rem 1.5rem;
-  /* Padding estándar del Home */
-  font-size: 0.95rem;
-  font-weight: 600;
+  padding: 0.75rem;
+  width: 44px;
+  height: 44px;
+  font-size: 1.1rem;
   cursor: pointer;
   background: var(--joblu-primary);
   color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 

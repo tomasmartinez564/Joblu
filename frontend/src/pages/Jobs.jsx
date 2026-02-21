@@ -165,7 +165,7 @@ function Jobs() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <button type="submit" className="jobs-search-button">Buscar</button>
+              <button type="submit" className="jobs-search-button" aria-label="Buscar"><FaSearch /></button>
             </form>
           </div>
 
