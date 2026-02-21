@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import TEMPLATES from "../data/templates";
 
 // --- Estilos ---
 import "../styles/home.css";
@@ -96,17 +97,38 @@ export default function Home({ user }) {
             </button>
           </section>
 
-          {/* 2. Identidad */}
-          <section className="stat-card profile-preview-card brand-border">
+          {/* 2. Plantillas — grilla estática 3 columnas */}
+          <section className="stat-card templates-mini-card brand-border">
             <div className="card-content">
-              <h3>Tu Identidad</h3>
-              <div className="profile-mini-info">
-                <p className="profile-name">{cvData.nombre || user.name}</p>
-                <p className="profile-job">{cvData.puesto || "Puesto no definido"}</p>
-                <p className="profile-location">📍 {cvData.ubicacion || "Ubicación no definida"}</p>
+              <div className="templates-card-header">
+                <h3>Plantillas</h3>
+                <Link to="/mis-cvs" className="templates-card-ver-todas">Mis plantillas →</Link>
+              </div>
+              <div className="templates-static-grid">
+                {TEMPLATES.map((tpl) => {
+                  const isActive = lastCv?.templateId === tpl.id;
+                  return (
+                    <button
+                      key={tpl.id}
+                      className={`templates-static-item${isActive ? " templates-static-item--active" : ""}`}
+                      onClick={() => navigate('/cv', { state: { templateId: tpl.id } })}
+                      title={tpl.description}
+                    >
+                      {isActive && <span className="templates-mini-badge">Actual</span>}
+                      <span
+                        className="templates-static-thumb"
+                        style={{ background: `${tpl.color}18` }}
+                      >
+                        <span className="templates-static-icon">{tpl.thumbnail}</span>
+                        <span className="templates-mini-dot" style={{ background: tpl.color }} />
+                      </span>
+                      <span className="templates-static-name">{tpl.name}</span>
+                      <span className="templates-mini-use">Usar →</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
-            <Link to="/cuenta" className="btn-secondary">Ajustes de cuenta</Link>
           </section>
 
           {/* 3. Tip */}
@@ -172,6 +194,70 @@ export default function Home({ user }) {
             </div>
 
             <Link to="/jobs" className="view-all-btn">Ver todos los empleos</Link>
+          </div>
+        </section>
+
+        {/* --- Tienda de Plantillas --- */}
+        <section className="home-templates-section">
+          <div className="home-templates-header">
+            <h2>Explorá nuevos diseños</h2>
+            <p>3 plantillas gratuitas disponibles. Desbloqué las exclusivas para destacarte.</p>
+          </div>
+          <div className="home-templates-grid">
+            {TEMPLATES.map((tpl) => {
+              const isActual = lastCv?.templateId === tpl.id;
+              const canUse = tpl.type === 'free' || tpl.isAcquired;
+
+              const handleTemplateAction = () => {
+                if (canUse) {
+                  navigate('/cv', { state: { templateId: tpl.id } });
+                } else {
+                  // Stub: preparado para pasarela de pago
+                  alert(`¡Próximamente! Desbloqueá "${tpl.name}" para usarla en tu CV.`);
+                }
+              };
+
+              return (
+                <article
+                  key={tpl.id}
+                  className={`home-template-card${tpl.type === 'exclusive' ? ' home-template-card--exclusive' : ''}`}
+                >
+                  <div className="home-template-card-thumb" style={{ background: `${tpl.color}18` }}>
+                    <span className="home-template-card-icon">{tpl.thumbnail}</span>
+                    <span className="home-template-dot" style={{ background: tpl.color }} />
+                    {tpl.type === 'exclusive' && !tpl.isAcquired && (
+                      <span className="badge-exclusive">🔒 Exclusiva</span>
+                    )}
+                    {tpl.isAcquired && tpl.type === 'exclusive' && (
+                      <span className="badge-acquired">✔ Adquirida</span>
+                    )}
+                    {isActual && (
+                      <span className="badge-actual">Actual</span>
+                    )}
+                  </div>
+                  <div className="home-template-card-body">
+                    <h4>{tpl.name}</h4>
+                    <p className="home-template-category">{tpl.category}</p>
+                    <p className="home-template-description">{tpl.description}</p>
+                    <div className="home-template-features">
+                      {tpl.features.map((f) => (
+                        <span key={f} className="home-template-tag">{f}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <button
+                    className={`home-template-cta${isActual ? ' home-template-cta--inuse'
+                        : !canUse ? ' home-template-cta--unlock'
+                          : ''
+                      }`}
+                    onClick={handleTemplateAction}
+                    disabled={isActual}
+                  >
+                    {isActual ? 'En uso' : canUse ? 'Usar plantilla' : '🔒 Desbloquear'}
+                  </button>
+                </article>
+              );
+            })}
           </div>
         </section>
       </main>

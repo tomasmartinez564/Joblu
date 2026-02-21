@@ -670,4 +670,444 @@
   .carousel-controls {
     display: none;
   }
+
+  /* Templates en mobile — una columna */
+  .home-templates-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==============================================
+   🎨 SECCIÓN: PLANTILLAS PARA TU CV (Dashboard)
+   ============================================== */
+
+.home-templates-section {
+  padding: 3rem 1.5rem 4rem;
+}
+
+.home-templates-header {
+  margin-bottom: 2rem;
+}
+
+.home-templates-header h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+}
+
+.home-templates-header p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--joblu-text-muted);
+}
+
+.home-templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.home-template-card {
+  background: var(--joblu-surface);
+  border: 1.5px solid var(--joblu-border-soft);
+  border-radius: var(--joblu-radius-lg);
+  box-shadow: var(--joblu-shadow-sm);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-template-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--joblu-shadow-md);
+}
+
+/* Área de la miniatura / color */
+.home-template-card-thumb {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 90px;
+}
+
+.home-template-card-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.home-template-dot {
+  position: absolute;
+  bottom: 0.7rem;
+  right: 0.75rem;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* Cuerpo de la card */
+.home-template-card-body {
+  padding: 1rem 1.25rem 0.75rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.home-template-card-body h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* ── Modificador: card exclusiva ── */
+.home-template-card--exclusive {
+  border-color: rgba(99, 55, 183, 0.25);
+  background: linear-gradient(135deg, var(--joblu-surface) 80%, rgba(99, 55, 183, 0.04) 100%);
+}
+
+/* ── Badges de estado sobre la miniatura ── */
+.badge-exclusive,
+.badge-acquired,
+.badge-actual {
+  position: absolute;
+  top: 0.55rem;
+  left: 0.6rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-family: var(--font-subtitle);
+  letter-spacing: 0.03em;
+}
+
+.badge-exclusive {
+  background: linear-gradient(90deg, #6337b7, #9c43f5);
+  color: #ffffff;
+}
+
+.badge-acquired {
+  background: rgba(33, 219, 210, 0.18);
+  color: #0a8a85;
+  border: 1px solid rgba(33, 219, 210, 0.4);
+}
+
+.badge-actual {
+  background: var(--joblu-primary-accent);
+  color: #0f172a;
+}
+
+/* ── Botón CTA base (reemplaza hero-cta en la tienda) ── */
+.home-template-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.75rem 1.25rem 1.25rem;
+  width: calc(100% - 2.5rem);
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: var(--font-subtitle);
+  border-radius: var(--joblu-radius-lg);
+  border: none;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  background: var(--joblu-primary-accent);
+  color: #0f172a;
+}
+
+.home-template-cta:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(33, 219, 210, 0.35);
+}
+
+/* Variante: Desbloquear (violeta) */
+.home-template-cta--unlock {
+  background: var(--joblu-primary);
+  color: #ffffff;
+}
+
+.home-template-cta--unlock:hover {
+  box-shadow: 0 4px 14px rgba(99, 55, 183, 0.35) !important;
+}
+
+/* Variante: En uso (deshabilitado) */
+.home-template-cta--inuse {
+  background: var(--joblu-border-soft);
+  color: var(--joblu-text-muted);
+  cursor: default;
+  opacity: 0.75;
+}
+
+
+.home-template-category {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--joblu-text-muted);
+}
+
+.home-template-description {
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+  color: var(--joblu-text-muted);
+  line-height: 1.4;
+}
+
+.home-template-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+}
+
+.home-template-tag {
+  font-size: 0.68rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(99, 55, 183, 0.08);
+  color: var(--joblu-primary);
+  font-weight: 600;
+}
+
+/* Botón CTA de la card de plantilla */
+.home-template-cta {
+  margin: 0.75rem 1.25rem 1.25rem;
+  width: calc(100% - 2.5rem);
+  align-self: center;
+  /* Override hero-cta padding for compact fit */
+  padding: 0.6rem 1rem !important;
+  font-size: 0.9rem !important;
+}
+
+/* ==============================================
+   📌 TEMPLATES MINI-CARD (Dashboard)
+   ============================================== */
+
+.templates-mini-card {
+  overflow: hidden;
+}
+
+/* Fila scrollable de miniaturas */
+.templates-mini-scroll {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  /* Firefox */
+  padding-bottom: 0.25rem;
+  margin-top: 0.75rem;
+}
+
+.templates-mini-scroll::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari */
+}
+
+/* Item = botón clickeable de cada plantilla */
+.templates-mini-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  flex: 0 0 80px;
+  /* ancho fijo para el snap */
+  scroll-snap-align: start;
+  background: none;
+  border: 1.5px solid var(--joblu-border-soft);
+  border-radius: var(--joblu-radius-lg);
+  padding: 0.5rem 0.4rem 0.6rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  text-align: center;
+}
+
+.templates-mini-item:hover {
+  border-color: var(--joblu-primary);
+  box-shadow: 0 3px 10px rgba(99, 55, 183, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Estado activo — la plantilla actualmente en uso */
+.templates-mini-item--active {
+  border-color: var(--joblu-primary-accent);
+  box-shadow: 0 0 0 2px rgba(33, 219, 210, 0.2);
+}
+
+/* Badge "Actual" */
+.templates-mini-badge {
+  position: absolute;
+  top: -0.45rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--joblu-primary-accent);
+  color: #0f172a;
+  font-size: 0.55rem;
+  font-weight: 700;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-family: var(--font-subtitle);
+  letter-spacing: 0.03em;
+}
+
+/* Miniatura de color */
+.templates-mini-thumb {
+  position: relative;
+  width: 52px;
+  height: 44px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.templates-mini-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.templates-mini-dot {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+/* Nombre de la plantilla */
+.templates-mini-name {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--joblu-text-main);
+  line-height: 1.2;
+}
+
+/* Link de acción */
+.templates-mini-use {
+  font-size: 0.6rem;
+  color: var(--joblu-primary-accent);
+  font-weight: 700;
+  font-family: var(--font-subtitle);
+  letter-spacing: 0.02em;
+}
+
+/* ==============================================
+   📐 TEMPLATES STATIC GRID (3 columnas fijas)
+   ============================================== */
+
+/* Header de la card: título + "Ver todas →" */
+.templates-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.templates-card-header h3 {
+  margin: 0;
+}
+
+.templates-card-ver-todas {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--joblu-primary-accent);
+  text-decoration: none;
+  font-family: var(--font-subtitle);
+  letter-spacing: 0.02em;
+  transition: opacity 0.15s ease;
+}
+
+.templates-card-ver-todas:hover {
+  opacity: 0.75;
+  text-decoration: underline;
+}
+
+/* Grilla 3 columnas iguales */
+.templates-static-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+
+/* Botón de cada plantilla */
+.templates-static-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: 1.5px solid var(--joblu-border-soft);
+  border-radius: var(--joblu-radius-lg);
+  padding: 0.6rem 0.4rem 0.65rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  text-align: center;
+  width: 100%;
+}
+
+.templates-static-item:hover {
+  border-color: var(--joblu-primary);
+  box-shadow: 0 4px 12px rgba(99, 55, 183, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Estado activo */
+.templates-static-item--active {
+  border-color: var(--joblu-primary-accent);
+  box-shadow: 0 0 0 2px rgba(33, 219, 210, 0.2);
+}
+
+/* Miniatura — llena el ancho de la columna */
+.templates-static-thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.templates-static-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+/* Nombre */
+.templates-static-name {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--joblu-text-main);
+  line-height: 1.2;
+}
+
+/* Responsive: en mobile, cambia a scroll horizontal */
+@media (max-width: 520px) {
+  .templates-static-grid {
+    grid-template-columns: unset;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 0.6rem;
+    scrollbar-width: none;
+  }
+
+  .templates-static-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .templates-static-item {
+    flex: 0 0 72px;
+    scroll-snap-align: start;
+  }
 }

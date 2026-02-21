@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { FaLinkedin, FaGithub, FaGlobe, FaCog, FaTrashAlt, FaExclamationTriangle } from "react-icons/fa";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import TEMPLATES from "../data/templates";
 
 
 // --- Estilos ---
@@ -43,6 +44,7 @@ const emptyCv = {
 function CvBuilder({ user, settings, onChangeSettings }) {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const isLogged = !!user;
 
   // --- 1. Desestructuración de Preferencias ---
@@ -70,6 +72,8 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showClearModal, setShowClearModal] = useState(false);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [templateId, setTemplateId] = useState("ats-classic");
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [saveSuccess, setSaveSuccess] = useState("");
@@ -120,7 +124,13 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
   useEffect(() => {
     if (id) loadCvForEdit(id);
-    else setCvData(emptyCv);
+    else {
+      setCvData(emptyCv);
+      // Si viene del dashboard con una plantilla preseleccionada
+      if (location.state?.templateId) {
+        setTemplateId(location.state.templateId);
+      }
+    }
   }, [id]);
 
   const loadCvForEdit = async (cvId) => {
@@ -132,6 +142,9 @@ function CvBuilder({ user, settings, onChangeSettings }) {
       if (!mergedData.foto) mergedData.foto = "";
       if (!mergedData.nombre && response.title) mergedData.nombre = response.title;
       if (!mergedData.puesto && response.puesto) mergedData.puesto = response.puesto;
+
+      // Restaurar templateId guardado
+      if (response.templateId) setTemplateId(response.templateId);
 
       // Sanitización simplificada (se mantiene la lógica existente)
       // ... (código de sanitización omitido por brevedad, se asume que sigue igual) ...
@@ -191,6 +204,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
         title: cvData.nombre || "CV sin nombre",
         puesto: cvData.puesto || "",
         data: cvData,
+        templateId,
       };
 
       if (id) {
@@ -445,7 +459,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
     otros: cvLanguage === "en" ? "Additional information" : "Información adicional",
   };
 
-  const previewPaperClass = `cv-preview-paper ${cvStyle === 'visual' ? 'cv-preview-paper-visual' : cvStyle === 'balanceado' ? 'cv-preview-paper-balanced' : 'cv-preview-paper-ats'}`;
+  const previewPaperClass = `cv-preview-paper template-${templateId} ${cvStyle === 'visual' ? 'cv-preview-paper-visual' : cvStyle === 'balanceado' ? 'cv-preview-paper-balanced' : 'cv-preview-paper-ats'}`;
 
   const settingsSummary = `Idioma: ${cvLanguage === "en" ? "Inglés" : "Español"} · Estilo: ${cvStyle === "visual" ? "Visual" : cvStyle === "balanceado" ? "Balanceado" : "Compatibilidad ATS"}${targetIndustry ? ` · Rubro: ${targetIndustry}` : ""}`;
 
@@ -586,21 +600,27 @@ function CvBuilder({ user, settings, onChangeSettings }) {
             onGoToStep={handleGoToStep}
           />
 
-          {/* Botones de Acción Globales (Guardar/Descargar/IA) movidos al final o integrados en el paso final */}
+          {/* Botones de Acción Globales */}
           <div className="cv-actions">
-            <button type="button" className="cv-action-btn save-btn" onClick={handleSave} disabled={isSaving} style={{ opacity: isSaving ? 0.7 : 1, cursor: isSaving ? "wait" : "pointer" }}>
-              {isSaving ? "Guardando..." : (cvLanguage === "en" ? "Save CV" : "Guardar CV")}
-            </button>
-            <button type="button" className="cv-action-btn download-btn" onClick={handleDownloadPDF}>
-              {cvLanguage === "en" ? "Download PDF" : "Descargar PDF"}
-            </button>
+            {/* 1. IA — herramienta de asistencia, posición protagonista */}
             <button ref={refBtnIA} type="button" className="cv-action-btn ai-btn" onClick={() => {
               const currentKey = STEPS[activeStep].key;
-              const sectionToUse = currentKey === "datos" ? "perfil" : currentKey; // Si está en datos, sugerir perfil
+              const sectionToUse = currentKey === "datos" ? "perfil" : currentKey;
               handleOpenAiForSection(sectionToUse, cvData[sectionToUse]);
             }}>
               ✨ {cvLanguage === "en" ? "Improve with IA" : "Mejorar con IA"}
             </button>
+
+            {/* 2. Guardar y Descargar — acciones de cierre */}
+            <div className="cv-actions-secondary">
+              <button type="button" className="cv-action-btn save-btn" onClick={handleSave} disabled={isSaving} style={{ opacity: isSaving ? 0.7 : 1, cursor: isSaving ? "wait" : "pointer" }}>
+                {isSaving ? "Guardando..." : (cvLanguage === "en" ? "Save CV" : "Guardar CV")}
+              </button>
+              <button type="button" className="cv-action-btn download-btn" onClick={handleDownloadPDF}>
+                {cvLanguage === "en" ? "Download PDF" : "Descargar PDF"}
+              </button>
+            </div>
+
             {(saveError || saveSuccess) && (
               <p className={"cv-save-message " + (saveError ? "cv-save-message--error" : "cv-save-message--success")}>
                 {saveError || saveSuccess}
@@ -611,7 +631,17 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
         {/* --- Columna Vista Previa --- */}
         <div className="cv-column">
-          <h2>{cvLanguage === "en" ? "Preview" : "Vista previa"}</h2>
+          <div className="cv-preview-column-header">
+            <h2>{cvLanguage === "en" ? "Preview" : "Vista previa"}</h2>
+            <button
+              type="button"
+              className="cv-template-trigger-btn"
+              onClick={() => setShowTemplateModal(true)}
+              title="Cambiar plantilla visual"
+            >
+              🎨 Plantilla
+            </button>
+          </div>
           <div className="cv-preview-wrapper" ref={refVistaPrevia}>
             <div className={previewPaperClass} ref={cvRef}>
               <div className="cv-preview-header">
@@ -705,6 +735,48 @@ function CvBuilder({ user, settings, onChangeSettings }) {
           </>
         )}
       </section>
+
+      {/* --- Modal Selector de Plantillas --- */}
+      {showTemplateModal && (
+        <div className="template-modal-overlay" onClick={() => setShowTemplateModal(false)}>
+          <div className="template-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="template-modal-header">
+              <div>
+                <h3>🎨 Elegí tu plantilla</h3>
+                <p>Cambia el diseño visual sin perder tus datos.</p>
+              </div>
+              <button type="button" className="template-modal-close" onClick={() => setShowTemplateModal(false)}>✕</button>
+            </div>
+            <div className="template-modal-grid">
+              {TEMPLATES.map((tpl) => (
+                <button
+                  key={tpl.id}
+                  type="button"
+                  className={`template-card${templateId === tpl.id ? " active" : ""}`}
+                  onClick={() => { setTemplateId(tpl.id); setShowTemplateModal(false); }}
+                >
+                  {templateId === tpl.id && (
+                    <span className="template-badge-active">Actual ✓</span>
+                  )}
+                  <span
+                    className="template-card-dot"
+                    style={{ background: tpl.color }}
+                  />
+                  <span className="template-card-thumbnail">{tpl.thumbnail}</span>
+                  <span className="template-card-name">{tpl.name}</span>
+                  <span className="template-card-category">{tpl.category}</span>
+                  <span className="template-card-description">{tpl.description}</span>
+                  <div className="template-card-features">
+                    {tpl.features.map((f) => (
+                      <span key={f} className="template-feature-tag">{f}</span>
+                    ))}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* --- Modal Confirmación Borrar (root level para overlay full-screen) --- */}
       {showClearModal && (

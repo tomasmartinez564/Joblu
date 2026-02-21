@@ -234,3 +234,103 @@
     flex-wrap: wrap;
   }
 }
+
+/* ============================================================
+   🎨 MIS PLANTILLAS (sección dentro de Mis CVs)
+   ============================================================ */
+
+.mycvs-templates-section {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--joblu-border-soft);
+}
+
+.mycvs-templates-header {
+  margin-bottom: 1.5rem;
+}
+
+.mycvs-templates-header h2 {
+  font-size: 1.4rem;
+  margin: 0 0 0.25rem;
+}
+
+.mycvs-templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.mycvs-template-card {
+  border: 1.5px solid var(--joblu-border-soft);
+  border-radius: var(--joblu-radius-lg);
+  background: var(--joblu-surface);
+  box-shadow: var(--joblu-shadow-sm);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mycvs-template-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--joblu-shadow-md);
+}
+
+.mycvs-template-thumb {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+}
+
+.mycvs-template-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.mycvs-template-dot {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.6rem;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.mycvs-template-body {
+  padding: 0.75rem 1rem 0.5rem;
+  flex: 1;
+}
+
+.mycvs-template-body h4 {
+  margin: 0 0 0.2rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.mycvs-template-category {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--joblu-text-muted);
+}
+
+.mycvs-template-btn {
+  margin: 0 1rem 1rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--joblu-primary-accent);
+  background: rgba(33, 219, 210, 0.07);
+  color: var(--joblu-primary-accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: var(--font-subtitle);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.mycvs-template-btn:hover {
+  background: rgba(33, 219, 210, 0.16);
+  transform: translateY(-1px);
+}

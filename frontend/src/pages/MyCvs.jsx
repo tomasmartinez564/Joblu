@@ -4,9 +4,10 @@ import { Link, useNavigate } from "react-router-dom";
 // --- Estilos ---
 import "../styles/mycvs.css";
 
-// --- Servicios ---
+// --- Servicios y Datos ---
 import cvService from "../services/cvService";
 import { useToast } from "../context/ToastContext";
+import { getAvailableTemplates } from "../data/templates";
 
 // ==========================================
 // 🛠️ UTILIDADES (Helpers)
@@ -221,6 +222,40 @@ function MyCvs({ user }) {
           ))}
         </div>
       )}
+
+      {/* ── Mis Plantillas ── */}
+      <section className="mycvs-templates-section">
+        <header className="mycvs-templates-header">
+          <h2>Mis Plantillas</h2>
+          <p className="mycvs-subtitle">Los diseños disponibles en tu cuenta.</p>
+        </header>
+        <div className="mycvs-templates-grid">
+          {getAvailableTemplates().map((tpl) => (
+            <article key={tpl.id} className="mycvs-template-card">
+              <div
+                className="mycvs-template-thumb"
+                style={{ background: `${tpl.color}18` }}
+              >
+                <span className="mycvs-template-icon">{tpl.thumbnail}</span>
+                <span
+                  className="mycvs-template-dot"
+                  style={{ background: tpl.color }}
+                />
+              </div>
+              <div className="mycvs-template-body">
+                <h4>{tpl.name}</h4>
+                <p className="mycvs-template-category">{tpl.category}</p>
+              </div>
+              <button
+                className="mycvs-template-btn"
+                onClick={() => navigate('/cv', { state: { templateId: tpl.id } })}
+              >
+                Usar en nuevo CV
+              </button>
+            </article>
+          ))}
+        </div>
+      </section>
     </section>
   );
 }

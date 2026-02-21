@@ -56,6 +56,310 @@
   background: radial-gradient(circle at top left, #dbeafe 0, #ffffff 40%);
 }
 
+/* ==============================================
+   🎨 CLASES DE PLANTILLA (template-*)
+   Modifican solo el look del papel de vista previa.
+   Los datos del formulario no se ven afectados.
+   ============================================== */
+
+/* Plantilla 1 – Profesional (ATS Classic): look base, sin overrides adicionales */
+.template-ats-classic {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Plantilla 2 – Moderna (Modern Visual) */
+.template-modern-visual .cv-preview-header {
+  background: var(--joblu-primary);
+  color: #ffffff;
+  margin: -1.5rem -1.5rem 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.template-modern-visual .cv-preview-header h1 {
+  color: #ffffff;
+}
+
+.template-modern-visual .cv-preview-header .cv-preview-job-title {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.template-modern-visual .cv-preview-header .cv-photo-placeholder,
+.template-modern-visual .cv-preview-header .cv-photo-preview {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.template-modern-visual .cv-preview-section h4 {
+  color: var(--joblu-primary-accent);
+  border-bottom: 1px solid rgba(33, 219, 210, 0.25);
+  padding-bottom: 0.2rem;
+}
+
+.template-modern-visual .cv-preview-divider {
+  border-color: var(--joblu-primary-accent);
+  opacity: 0.35;
+}
+
+/* Plantilla 3 – Minimalista (Minimal Pro) */
+.template-minimal-pro {
+  font-size: 0.88rem;
+  letter-spacing: 0.01em;
+}
+
+.template-minimal-pro .cv-preview-header h1 {
+  font-size: 1.6rem;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+}
+
+.template-minimal-pro .cv-preview-header .cv-preview-job-title {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--joblu-text-muted);
+}
+
+.template-minimal-pro .cv-preview-divider {
+  border-top: 2px solid var(--joblu-text-main);
+  opacity: 0.08;
+}
+
+.template-minimal-pro .cv-preview-section h4 {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--joblu-text-muted);
+  margin-bottom: 0.25rem;
+}
+
+/* ====================================================
+   🎨 MODAL SELECTOR DE PLANTILLAS
+   ==================================================== */
+
+/* Header con botón de plantilla en columna preview */
+.cv-preview-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.cv-preview-column-header h2 {
+  margin: 0;
+}
+
+.cv-template-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: var(--joblu-radius-lg);
+  border: 1.5px solid var(--joblu-primary-accent);
+  background: rgba(33, 219, 210, 0.07);
+  color: var(--joblu-primary-accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-subtitle);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.cv-template-trigger-btn:hover {
+  background: rgba(33, 219, 210, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(33, 219, 210, 0.25);
+}
+
+/* Overlay del modal */
+.template-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: tmFadeIn 0.18s ease;
+}
+
+@keyframes tmFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Caja del modal */
+.template-modal {
+  background: var(--joblu-surface, #ffffff);
+  border-radius: var(--joblu-radius-lg);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+  width: min(680px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: tmSlideUp 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes tmSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.template-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--joblu-border-soft);
+}
+
+.template-modal-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.template-modal-header p {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  color: var(--joblu-text-muted);
+}
+
+.template-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--joblu-text-muted);
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: 8px;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.template-modal-close:hover {
+  color: var(--joblu-text-main);
+  background: var(--joblu-border-soft);
+}
+
+/* Grid de cards de plantilla */
+.template-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+/* Card individual de plantilla */
+.template-card {
+  position: relative;
+  padding: 1.25rem 1rem;
+  border-radius: var(--joblu-radius-lg);
+  border: 2px solid var(--joblu-border-soft);
+  background: var(--joblu-surface);
+  box-shadow: var(--joblu-shadow-sm);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.template-card:hover {
+  border-color: var(--joblu-primary);
+  box-shadow: var(--joblu-shadow-md);
+  transform: translateY(-3px);
+}
+
+/* Estado activo — borde turquesa */
+.template-card.active {
+  border-color: var(--joblu-primary-accent);
+  box-shadow: 0 0 0 3px rgba(33, 219, 210, 0.2), var(--joblu-shadow-md);
+}
+
+.template-card-thumbnail {
+  font-size: 2.2rem;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.template-card-name {
+  font-weight: 700;
+  font-family: var(--font-subtitle);
+  font-size: 0.95rem;
+  color: var(--joblu-text-main);
+}
+
+.template-card-category {
+  font-size: 0.75rem;
+  color: var(--joblu-text-muted);
+}
+
+.template-card-description {
+  font-size: 0.78rem;
+  color: var(--joblu-text-muted);
+  line-height: 1.4;
+}
+
+.template-card-features {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3rem;
+  margin-top: 0.25rem;
+}
+
+.template-feature-tag {
+  font-size: 0.68rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(99, 55, 183, 0.08);
+  color: var(--joblu-primary);
+  font-weight: 600;
+}
+
+/* Badge "Actual ✓" */
+.template-badge-active {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  background: var(--joblu-primary-accent);
+  color: #0f172a;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  font-family: var(--font-subtitle);
+}
+
+/* Dot de color de acento de cada plantilla */
+.template-card-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-bottom: 0.15rem;
+}
+
+
 /* Header de la vista previa con posible foto */
 .cv-preview-header {
   display: flex;
@@ -206,11 +510,9 @@
 
 .cv-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1.25rem;
-  /* separación real */
+  flex-direction: column;
+  gap: 0.75rem;
   margin-top: 1.5rem;
-  align-items: center;
 }
 
 .cv-form-navigation {
@@ -250,31 +552,38 @@
   transition: background-color 0.2s ease, transform 0.15s ease;
 }
 
-/* ── Botones Ghost/Outline: Guardar y Descargar ── */
-.cv-actions .save-btn,
-.cv-actions .download-btn {
+/* ── Contenedor secundario: Guardar + Descargar lado a lado ── */
+.cv-actions-secondary {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.cv-actions-secondary .save-btn,
+.cv-actions-secondary .download-btn {
   background: transparent;
   color: var(--joblu-primary);
   border: 2px solid var(--joblu-primary);
   flex: 1;
   text-align: center;
   margin-top: 0;
+  min-width: 120px;
 }
 
-.cv-actions .save-btn:hover,
-.cv-actions .download-btn:hover {
+.cv-actions-secondary .save-btn:hover,
+.cv-actions-secondary .download-btn:hover {
   background: var(--joblu-primary);
   color: #ffffff;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(99, 55, 183, 0.25);
 }
 
-/* ── Botón Protagonista: Mejorar con IA ── */
+/* ── Botón Protagonista: Mejorar con IA — ocupa todo el ancho ── */
 .cv-actions .ai-btn {
   background: var(--joblu-primary-accent, #21dbd2);
   color: #0f172a;
   border: none;
-  flex: 1;
+  width: 100%;
   text-align: center;
   margin-top: 0;
   padding: 0 2rem;
@@ -687,6 +996,7 @@
     opacity: 0;
     transform: translateY(-8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
