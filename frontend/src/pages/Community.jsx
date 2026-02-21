@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { FaUser, FaHeart, FaRegHeart, FaComment, FaShareAlt, FaTrash } from "react-icons/fa";
 
 // --- Estilos y Utilidades ---
 import "../styles/community.css";
@@ -247,6 +248,28 @@ function Community({ user }) {
     }
   };
 
+  const handleDeleteComment = async (postId, commentId) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/community/posts/${postId}/comments/${commentId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("joblu_token")}`
+        },
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Error al eliminar comentario");
+      }
+
+      const updatedPost = await res.json();
+      setPosts(prev => prev.map(p => p._id === postId ? updatedPost : p));
+      addToast("Comentario eliminado", "success");
+    } catch (err) {
+      addToast(err.message, "error");
+    }
+  };
+
   // ==========================================
   // 📦 RENDERIZADO (JSX)
   // ==========================================
@@ -342,7 +365,7 @@ function Community({ user }) {
               <div className="community-post-header">
                 <span className="community-category-badge">{post.category || "General"}</span>
                 <span className="community-post-meta">
-                  <span aria-hidden="true">👤</span>
+                  <FaUser className="action-icon" />
                   {post.authorName || "Anónimo"}
                   <span className="community-post-meta-sep">·</span>
                   {formatRelativeDate(post.createdAt)}
@@ -357,14 +380,14 @@ function Community({ user }) {
               {/* Acciones del Post */}
               <div className="post-actions">
                 <button className={`action-btn ${user && post.likedBy?.includes(user.id) ? "liked" : ""}`} onClick={() => handleLike(post._id)}>
-                  <span className="action-icon">{user && post.likedBy?.includes(user.id) ? "❤️" : "🤍"}</span>
+                  <span className="action-icon">{user && post.likedBy?.includes(user.id) ? <FaHeart /> : <FaRegHeart />}</span>
                   <span className="action-count">{post.likedBy?.length || 0}</span>
                 </button>
                 <button className="action-btn" onClick={() => toggleComments(post._id)}>
-                  <span className="action-icon">💬</span>
+                  <span className="action-icon"><FaComment /></span>
                   <span className="action-count">{post.comments?.length || 0}</span>
                 </button>
-                <button className="action-btn" onClick={() => handleShare(post._id)} title="Compartir"><span className="action-icon">🔗</span></button>
+                <button className="action-btn" onClick={() => handleShare(post._id)} title="Compartir"><span className="action-icon"><FaShareAlt /></span></button>
               </div>
 
               {/* Sección de Comentarios Desplegable */}
@@ -373,7 +396,21 @@ function Community({ user }) {
                   <div className="comments-list">
                     {post.comments?.length > 0 ? (
                       post.comments.map((comment, idx) => (
-                        <div key={idx} className="comment-item"><strong>{comment.authorName}</strong>: {comment.content}</div>
+                        <div key={comment._id || idx} className="comment-item">
+                          <div className="comment-item-content">
+                            <strong>{comment.authorName}</strong>: {comment.content}
+                          </div>
+                          {user && user.email === comment.authorEmail && (
+                            <button
+                              className="comment-delete-btn"
+                              onClick={() => handleDeleteComment(post._id, comment._id)}
+                              title="Eliminar comentario"
+                              aria-label="Eliminar comentario"
+                            >
+                              <FaTrash />
+                            </button>
+                          )}
+                        </div>
                       ))
                     ) : <p className="no-comments">Sé el primero en comentar.</p>}
                   </div>

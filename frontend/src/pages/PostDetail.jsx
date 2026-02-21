@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaExclamationTriangle } from "react-icons/fa";
+import { FaExclamationTriangle, FaTrash, FaHeart, FaRegHeart } from "react-icons/fa";
 import { useParams, useNavigate, Link } from "react-router-dom";
 
 // --- Estilos y Utilidades ---
@@ -196,6 +196,28 @@ function PostDetail({ user }) {
     }
   };
 
+  const handleDeleteComment = async (commentId) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/community/posts/${id}/comments/${commentId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("joblu_token")}`
+        },
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Error al eliminar comentario");
+      }
+
+      const updatedPost = await res.json();
+      setPost(updatedPost);
+      addToast("Comentario eliminado", "success");
+    } catch (err) {
+      addToast(err.message, "error");
+    }
+  };
+
   // ==========================================
   // 📦 RENDERIZADO (JSX)
   // ==========================================
@@ -238,7 +260,7 @@ function PostDetail({ user }) {
           onClick={handleToggleLike}
           className={`postdetail-like-button${isLiked ? " is-liked" : ""}`}
         >
-          {isLiked ? "💙 Quitar like" : "🤍 Me gusta"}
+          {isLiked ? <><FaHeart /> Quitar like</> : <><FaRegHeart /> Me gusta</>}
         </button>
         <span className="postdetail-like-count">
           {likeCount} {(likeCount === 1) ? "like" : "likes"}
@@ -286,12 +308,26 @@ function PostDetail({ user }) {
         ) : (
           <ul className="postdetail-comments-list">
             {post.comments.map((c, index) => (
-              <li key={index} className="postdetail-comment">
-                <p className="postdetail-comment-header">
-                  <span className="postdetail-comment-author">{c.authorName || "Usuario anónimo"}</span>
-                  <span className="postdetail-comment-meta">{formatDate(c.createdAt)}</span>
-                </p>
-                <p className="postdetail-comment-body">{c.content}</p>
+              <li key={c._id || index} className="postdetail-comment">
+                <div className="postdetail-comment-row">
+                  <div>
+                    <p className="postdetail-comment-header">
+                      <span className="postdetail-comment-author">{c.authorName || "Usuario anónimo"}</span>
+                      <span className="postdetail-comment-meta">{formatDate(c.createdAt)}</span>
+                    </p>
+                    <p className="postdetail-comment-body">{c.content}</p>
+                  </div>
+                  {user && user.email === c.authorEmail && (
+                    <button
+                      className="comment-delete-btn"
+                      onClick={() => handleDeleteComment(c._id)}
+                      title="Eliminar comentario"
+                      aria-label="Eliminar comentario"
+                    >
+                      <FaTrash />
+                    </button>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
@@ -303,6 +339,12 @@ function PostDetail({ user }) {
             placeholder="Escribí tu comentario..."
             value={commentContent}
             onChange={(e) => setCommentContent(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleAddComment(e);
+              }
+            }}
             rows={3}
             className="community-textarea community-input"
           />

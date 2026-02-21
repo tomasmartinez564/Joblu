@@ -23,7 +23,7 @@
 .community-hero h2 {
   font-size: clamp(1.6rem, 3vw, 2.1rem);
   font-weight: 800;
-  font-family: var(--font-subtitle);
+  font-family: var(--font-title);
   margin: 0 0 0.35rem;
   color: var(--joblu-text-main);
 }
@@ -378,6 +378,32 @@ body.dark-mode .community-post {
   border-radius: 8px;
   border-left: 3px solid var(--joblu-primary);
   color: var(--joblu-text-main);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.comment-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-delete-btn {
+  background: none;
+  border: none;
+  color: #d1d5db;
+  cursor: pointer;
+  padding: 0.25rem;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.comment-delete-btn:hover {
+  color: #e11d48;
 }
 
 .no-comments {

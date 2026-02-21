@@ -197,6 +197,36 @@
   line-height: 1.5;
 }
 
+.postdetail-comment-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.postdetail-comment-row > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-delete-btn {
+  background: none;
+  border: none;
+  color: #d1d5db;
+  cursor: pointer;
+  padding: 0.25rem;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+  margin-top: 0.2rem;
+}
+
+.comment-delete-btn:hover {
+  color: #e11d48;
+}
+
 /* ─── Textarea de comentarios (override sobre .community-input) ─── */
 
 .community-form--compact .community-textarea.community-input {

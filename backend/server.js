@@ -379,6 +379,28 @@ app.post("/api/community/posts/:id/comments", authenticateToken, async (req, res
   }
 });
 
+// Eliminar un comentario propio
+app.delete("/api/community/posts/:id/comments/:commentId", authenticateToken, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: "Post no encontrado" });
+
+    const comment = post.comments.id(req.params.commentId);
+    if (!comment) return res.status(404).json({ error: "Comentario no encontrado" });
+
+    if (comment.authorEmail !== req.user.email) {
+      return res.status(403).json({ error: "No tenés permiso para borrar este comentario" });
+    }
+
+    post.comments.pull({ _id: req.params.commentId });
+    await post.save();
+    res.json(post);
+  } catch (err) {
+    console.error("Error eliminando comentario:", err);
+    res.status(500).json({ error: "Error al eliminar el comentario" });
+  }
+});
+
 app.post("/api/community/posts/:id/like", authenticateToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
