@@ -62,10 +62,43 @@
    Los datos del formulario no se ven afectados.
    ============================================== */
 
-/* Plantilla 1 – Profesional (ATS Classic): look base, sin overrides adicionales */
+/* Plantilla 1 – Profesional (ATS Classic): estructura corporativa con acento lateral */
 .template-ats-classic {
   font-size: 0.9rem;
-  line-height: 1.4;
+  line-height: 1.5;
+  border-left: 5px solid #1e293b;
+  padding-left: 1.25rem !important;
+}
+
+.template-ats-classic .cv-preview-header h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  border-bottom: 2px solid #1e293b;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.template-ats-classic .cv-preview-header .cv-preview-job-title {
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.template-ats-classic .cv-preview-section h4 {
+  color: #1e40af;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1.5px solid #1e40af;
+  padding-bottom: 0.2rem;
+  margin-bottom: 0.45rem;
+}
+
+.template-ats-classic .cv-preview-divider {
+  border-top: 1px solid #cbd5e1;
+  margin: 0.85rem 0;
 }
 
 /* Plantilla 2 – Moderna (Modern Visual) */
@@ -101,36 +134,70 @@
   opacity: 0.35;
 }
 
-/* Plantilla 3 – Minimalista (Minimal Pro) */
+/* Plantilla 3 – Minimalista (Minimal Pro): editorial, centrado, mucho blanco */
 .template-minimal-pro {
   font-size: 0.88rem;
   letter-spacing: 0.01em;
+  padding: 2rem 2rem !important;
+}
+
+.template-minimal-pro .cv-preview-header {
+  text-align: center;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .template-minimal-pro .cv-preview-header h1 {
-  font-size: 1.6rem;
+  font-size: 1.85rem;
   letter-spacing: -0.03em;
-  font-weight: 800;
+  font-weight: 300;
+  font-family: var(--font-title);
+  color: #334155;
 }
 
 .template-minimal-pro .cv-preview-header .cv-preview-job-title {
   font-size: 0.78rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--joblu-text-muted);
+  letter-spacing: 0.18em;
+  color: #94a3b8;
+  font-weight: 400;
+  margin-top: 0.15rem;
+}
+
+.template-minimal-pro .cv-preview-contact {
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 0.8rem;
 }
 
 .template-minimal-pro .cv-preview-divider {
-  border-top: 2px solid var(--joblu-text-main);
-  opacity: 0.08;
+  border-top: none;
+  margin: 1.1rem auto;
+  width: 40px;
+  height: 1px;
+  background: #cbd5e1;
 }
 
 .template-minimal-pro .cv-preview-section h4 {
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--joblu-text-muted);
-  margin-bottom: 0.25rem;
+  letter-spacing: 0.2em;
+  color: #94a3b8;
+  margin-bottom: 0.35rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.template-minimal-pro .cv-preview-paragraph,
+.template-minimal-pro .cv-preview-paragraph-preline {
+  text-align: center;
+}
+
+.template-minimal-pro .cv-photo-placeholder,
+.template-minimal-pro .cv-photo-preview {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ====================================================
