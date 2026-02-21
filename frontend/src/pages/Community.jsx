@@ -37,13 +37,17 @@ import API_BASE_URL from "../config/api";
 // 📋 CONSTANTES
 // ==========================================
 const CATEGORIES = [
-  "General",
-  "Consejos CV",
-  "Entrevistas",
-  "Networking",
-  "Ofertas Laborales",
-  "Dudas Técnicas"
+  { id: "all", label: "Todos" },
+  { id: "General", label: "General" },
+  { id: "Consejos CV", label: "Consejos CV" },
+  { id: "Entrevistas", label: "Entrevistas" },
+  { id: "Networking", label: "Networking" },
+  { id: "Ofertas Laborales", label: "Ofertas Laborales" },
+  { id: "Dudas Técnicas", label: "Dudas Técnicas" },
 ];
+
+/** Categorías para el selector del formulario (sin "Todos") */
+const FORM_CATEGORIES = CATEGORIES.filter(c => c.id !== "all");
 
 // ==========================================
 // 👥 PÁGINA: COMUNIDAD (Community)
@@ -62,6 +66,14 @@ function Community({ user }) {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("General");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // --- 4. Estados: Filtro de Categoría ---
+  const [selectedCategory, setSelectedCategory] = useState("all");
+
+  // --- Derived: posts filtrados ---
+  const filteredPosts = selectedCategory === "all"
+    ? posts
+    : posts.filter(p => p.category?.trim() === selectedCategory);
 
   // --- 4. Estados: Gestión de Comentarios ---
   const [openComments, setOpenComments] = useState({}); // { postId: boolean }
@@ -240,14 +252,15 @@ function Community({ user }) {
   // ==========================================
   return (
     <section className="community">
-      <div className="community-header">
+      {/* --- Hero Header --- */}
+      <div className="community-hero">
         <h2>Comunidad JOBLU</h2>
-        <p className="community-subtitle">Compartí tus experiencias, dudas y tips con otros profesionales.</p>
+        <p className="community-subtitle">El espacio para aprender, compartir y crecer junto a otros profesionales.</p>
       </div>
 
       {/* --- Sección: Crear Publicación --- */}
       <div className="community-create-card">
-        <h3 className="community-create-title">Crear nueva publicación</h3>
+        <h3 className="community-create-title">Iniciá una conversación</h3>
         {!isLogged && (
           <div className="community-alert-info">💡 Para publicar necesitas <Link to="/login">iniciar sesión</Link>.</div>
         )}
@@ -257,7 +270,7 @@ function Community({ user }) {
           <input
             id="post-title"
             type="text"
-            placeholder="Título (ej: ¿Cómo responder sobre debilidades?)"
+            placeholder="¿Qué tenés en mente?"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="community-input"
@@ -272,13 +285,13 @@ function Community({ user }) {
             onChange={(e) => setCategory(e.target.value)}
             disabled={isSubmitting || !isLogged}
           >
-            {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+            {FORM_CATEGORIES.map(cat => <option key={cat.id} value={cat.id}>{cat.label}</option>)}
           </select>
 
           <label htmlFor="post-content" className="visually-hidden">Contenido del post</label>
           <textarea
             id="post-content"
-            placeholder="Escribí acá tu consulta o aporte..."
+            placeholder="¿Sobre qué categoría querés hablar? Contanos más..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={3}
@@ -291,9 +304,22 @@ function Community({ user }) {
             className={`btn-joblu ${isSubmitting || !isLogged ? "btn-disabled" : ""}`}
             disabled={isSubmitting || !isLogged}
           >
-            {isSubmitting ? "Publicando..." : "Publicar Post"}
+            {isSubmitting ? "Publicando..." : "Publicar post"}
           </button>
         </form>
+      </div>
+
+      {/* --- Chips de Categoría --- */}
+      <div className="community-chips">
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat.id}
+            className={`community-chip${selectedCategory === cat.id ? " community-chip--active" : ""}`}
+            onClick={() => setSelectedCategory(cat.id)}
+          >
+            {cat.label}
+          </button>
+        ))}
       </div>
 
       {/* --- Sección: Feed de la Comunidad --- */}
@@ -301,28 +327,31 @@ function Community({ user }) {
 
       {loading ? (
         <div className="community-loading"><div className="spinner"></div> Cargando comunidad...</div>
-      ) : posts.length === 0 ? (
-        <div className="community-empty"><p>Todavía no hay nada por acá. ¡Sé el primero en romper el hielo! 🧊🔨</p></div>
+      ) : filteredPosts.length === 0 ? (
+        <div className="community-empty">
+          <p>
+            {posts.length === 0
+              ? "Todavía no hay nada por acá. ¡Sé el primero en romper el hielo! 🧊🔨"
+              : "Todavía no hay conversaciones en esta categoría. ¡Sé el primero en preguntar!"}
+          </p>
+        </div>
       ) : (
         <div className="community-list">
-          {posts.map((post) => (
+          {filteredPosts.map((post) => (
             <article key={post._id} className="community-post">
               <div className="community-post-header">
                 <span className="community-category-badge">{post.category || "General"}</span>
-                <div className="community-post-meta">
+                <span className="community-post-meta">
                   <span aria-hidden="true">👤</span>
-                  <span>{post.authorName || "Anónimo"}</span>
-                </div>
+                  {post.authorName || "Anónimo"}
+                  <span className="community-post-meta-sep">·</span>
+                  {formatRelativeDate(post.createdAt)}
+                </span>
               </div>
 
               <div className="post-main">
                 <Link to={`/comunidad/${post._id}`} className="community-post-title">{post.title}</Link>
                 <p className="community-post-excerpt">{post.content}</p>
-              </div>
-
-              {/* Fecha del post - estilo Twitter */}
-              <div className="community-post-date">
-                {formatRelativeDate(post.createdAt)}
               </div>
 
               {/* Acciones del Post */}
