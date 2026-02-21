@@ -345,7 +345,7 @@
 /* Restaurar estilos de Historia y Pasos */
 .home-como-funciona {
   padding: 5rem 1.5rem;
-  background: white;
+  background: #f8fafc;
 }
 
 .home-como-titulo {
@@ -363,57 +363,227 @@
 }
 
 .home-paso {
-  background: white;
+  background: var(--joblu-surface, #ffffff);
   padding: 2rem;
-  border-radius: 20px;
+  border-radius: var(--joblu-radius-lg);
   text-align: center;
-  border: 1px solid #f3f4f6;
+  border: 1px solid var(--joblu-border-soft);
+  /* Acento turquesa superior — marca JOBLU */
+  border-top: 3px solid var(--joblu-primary-accent);
+  box-shadow: var(--joblu-shadow-sm);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+/* Elevación en hover — suave y no intrusiva */
+.home-paso:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--joblu-shadow-lg);
+  border-color: rgba(33, 219, 210, 0.35);
+  border-top-color: var(--joblu-primary-accent);
+}
+
+/* Foco accesible para navegación con teclado */
+.home-paso:focus-within {
+  outline: 3px solid var(--joblu-primary-accent);
+  outline-offset: 3px;
 }
 
 .home-paso-numero {
-  background: var(--joblu-primary);
-  color: white;
-  width: 40px;
-  height: 40px;
+  background: var(--joblu-primary-accent);
+  color: #ffffff;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   margin: 0 auto 1rem;
+  font-weight: 700;
+  font-size: 1rem;
+  /* Sombra turquesa sutil para reforzar el acento */
+  box-shadow: 0 4px 10px rgba(33, 219, 210, 0.35);
+}
+
+/* — Microcopy de beneficio por paso — */
+.paso-beneficio {
+  display: block;
+  margin-top: 0.6rem;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--joblu-primary-accent);
+  letter-spacing: 0.01em;
+}
+
+/* Separador decorativo entre secciones */
+.section-divider-accent {
+  width: 60px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--joblu-primary-accent);
+  margin: 0 auto;
 }
 
 .home-sobre {
   padding: 6rem 1.5rem;
+  background: transparent;
+}
+
+/* Encabezado de la sección */
+.home-sobre-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+/* Eyebrow text "NUESTRA MISIÓN" */
+.home-sobre-eyebrow {
+  display: block;
+  font-family: var(--font-subtitle);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--joblu-primary-accent);
+  margin-bottom: 0.5rem;
 }
 
 .home-sobre-titulo {
   font-size: 2.4rem;
   text-align: center;
-  margin-bottom: 3rem;
+  margin: 0;
   font-weight: 700;
 }
 
+/* Contenedor narrativo — más estrecho para mejor lectura */
 .home-sobre-contenido {
-  max-width: 850px;
+  max-width: 750px;
   margin: 0 auto;
-  line-height: 1.9;
-  font-size: 1.1rem;
-  color: #4b5563;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
-.home-sobre-contenido p {
-  margin-bottom: 1.5rem;
+/* Bloque individual de la historia */
+.historia-bloque {
+  padding-left: 1.25rem;
+  /* espacio para la línea decorativa */
+  border-left: 3px solid var(--joblu-primary-accent);
+}
+
+.historia-subtitulo {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-subtitle);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--joblu-text-muted);
+}
+
+.historia-bloque p {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--joblu-text-main);
+}
+
+/* Frases clave resaltadas */
+.highlight {
+  font-weight: 700;
+  color: var(--joblu-primary);
+}
+
+/* Bloque de cierre callout */
+.historia-callout {
+  margin: 1rem 0 0;
+  padding: 1.25rem 1.75rem;
+  border-radius: var(--joblu-radius-lg);
+  background: rgba(99, 55, 183, 0.05);
+  border: 1px solid rgba(99, 55, 183, 0.12);
+  border-left: 4px solid var(--joblu-primary);
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1.7;
+  color: var(--joblu-text-main);
+  text-align: center;
+}
+
+.historia-callout .brand-name {
+  font-style: normal;
 }
 
 .home-cta-final {
-  background: #f8fafc;
-  padding: 4rem 2rem;
+  background: var(--joblu-surface, #ffffff);
+  padding: 5rem 2rem;
   text-align: center;
   border-radius: 32px;
   max-width: 1120px;
   margin: 2rem auto 4rem;
-  border: 1px solid #e2e8f0;
+  /* Borde superior de marca + glow sutil en esquinas */
+  border: 1px solid rgba(99, 55, 183, 0.12);
+  border-top: 4px solid var(--joblu-primary);
+  box-shadow:
+    var(--joblu-shadow-md),
+    0 0 40px rgba(33, 219, 210, 0.06);
 }
+
+.home-cta-final h2 {
+  margin: 0 0 0.75rem;
+  font-size: 2.2rem;
+  line-height: 1.2;
+}
+
+.home-cta-final>p {
+  margin: 0 auto 2rem;
+  max-width: 560px;
+  font-size: 1rem;
+  color: var(--joblu-text-muted);
+  line-height: 1.6;
+}
+
+/* Fila de micro-beneficios */
+.cta-benefits-row {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 2rem;
+}
+
+.cta-benefits-row li {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--joblu-text-muted);
+  letter-spacing: 0.01em;
+}
+
+/* Botones del CTA final */
+.home-cta-botones {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* Enlace secundario ghost */
+.btn-link-secondary {
+  font-family: var(--font-subtitle);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--joblu-primary);
+  text-decoration: none;
+  transition: opacity 0.2s ease, text-decoration-color 0.2s ease;
+  text-underline-offset: 3px;
+}
+
+.btn-link-secondary:hover {
+  text-decoration: underline;
+  opacity: 0.8;
+}
+
 
 /* ==========================================================================
    5. RESPONSIVE

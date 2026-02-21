@@ -213,7 +213,7 @@ function PostDetail({ user }) {
     return (
       <section className="community postdetail">
         <p className="postdetail-status">{error || "Post no encontrado."}</p>
-        <Link to="/comunidad" className="postdetail-back-link">← Volver a la comunidad</Link>
+        <Link to="/comunidad" className="btn-secondary postdetail-back-link">← Volver a la comunidad</Link>
       </section>
     );
   }
@@ -222,7 +222,7 @@ function PostDetail({ user }) {
     <section className="community postdetail">
       {/* Navegación de regreso */}
       <div className="postdetail-back">
-        <Link to="/comunidad" className="postdetail-back-link">← Volver a la comunidad</Link>
+        <Link to="/comunidad" className="btn-secondary postdetail-back-link">← Volver a la comunidad</Link>
       </div>
 
       {/* Cabecera del Post */}
@@ -233,7 +233,11 @@ function PostDetail({ user }) {
 
       {/* Interacción: Likes */}
       <div className="postdetail-like-row">
-        <button type="button" onClick={handleToggleLike} className="postdetail-like-button">
+        <button
+          type="button"
+          onClick={handleToggleLike}
+          className={`postdetail-like-button${isLiked ? " is-liked" : ""}`}
+        >
           {isLiked ? "💙 Quitar like" : "🤍 Me gusta"}
         </button>
         <span className="postdetail-like-count">
@@ -302,7 +306,7 @@ function PostDetail({ user }) {
             rows={3}
             className="community-textarea community-input"
           />
-          <button type="submit" disabled={commentLoading} className="btn-joblu">
+          <button type="submit" disabled={commentLoading} className="hero-cta btn-joblu">
             {commentLoading ? "Publicando..." : "Publicar comentario"}
           </button>
         </form>
