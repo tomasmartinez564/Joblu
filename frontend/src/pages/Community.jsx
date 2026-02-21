@@ -64,7 +64,7 @@ function Community({ user }) {
   // --- 3. Estados: Formulario de Nuevo Post ---
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [category, setCategory] = useState("General");
+  const [category, setCategory] = useState("General");  // coincide con id del catálogo
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // --- 4. Estados: Filtro de Categoría ---
