@@ -206,40 +206,69 @@ export default function Home({ user }) {
             <span className="home-paso-numero">1</span>
             <h3>Volcá tu talento</h3>
             <p>Nuestro formulario inteligente te guía paso a paso para que no olvides ningún detalle clave que buscan las empresas.</p>
+            <span className="paso-beneficio">Completá tu perfil en minutos.</span>
           </article>
           <article className="home-paso">
             <span className="home-paso-numero">2</span>
             <h3>Potenciá tu perfil</h3>
             <p>Nuestra IA integrada en <span className="brand-name">JOBLU</span> analiza tu rubro y sugiere mejoras de redacción.</p>
+            <span className="paso-beneficio">Recibí mejoras con IA para destacar.</span>
           </article>
           <article className="home-paso">
             <span className="home-paso-numero">3</span>
             <h3>Impactá en el mercado</h3>
             <p>Descargá un PDF con diseño profesional optimizado para sistemas ATS y destacate.</p>
+            <span className="paso-beneficio">Descargá un CV listo para postular.</span>
           </article>
         </div>
       </section>
 
+      <div className="section-divider-accent" aria-hidden="true" />
+
       <section className="home-sobre">
-        <h2 className="home-sobre-titulo">Nuestra Historia</h2>
+        <div className="home-sobre-header">
+          <span className="home-sobre-eyebrow">NUESTRA MISIÓN</span>
+          <h2 className="home-sobre-titulo">Nuestra Historia</h2>
+        </div>
         <div className="home-sobre-contenido">
-          <p>
-            Todo comenzó con una hoja en blanco y la frustración de no saber por dónde empezar. Como muchos jóvenes, nos encontramos armando nuestro primer currículum sin experiencia previa y sin nadie que nos enseñara cómo hacerlo. Probamos herramientas genéricas y palabras vacías, dándonos cuenta de que así nunca pasaríamos los filtros ATS que las empresas usan hoy.
-          </p>
-          <p>
-            Investigando, descubrimos que no estábamos solos: miles de adolescentes sentían la misma incertidumbre. Así nació <span className="brand-name">JOBLU</span>. No queríamos ser solo otra herramienta de diseño; queríamos crear el lugar donde realmente <strong>APRENDÉS</strong> a construir tu identidad profesional.
-          </p>
-          <p>
-            En <span className="brand-name">JOBLU</span>, te damos las herramientas para que armes tu CV según tus necesidades, con consejos personalizados de IA y una comunidad dispuesta a enseñarte. Estamos acá para que dejes de scrollear infinitamente y empieces a encontrar el trabajo que de verdad querés.
-          </p>
+          <div className="historia-bloque">
+            <h4 className="historia-subtitulo">El origen</h4>
+            <p>
+              Todo comenzó con <span className="highlight">una hoja en blanco</span> y la frustración de no saber por dónde empezar. Como muchos jóvenes, nos encontramos armando nuestro primer currículum sin experiencia previa y sin nadie que nos enseñara cómo hacerlo. Probamos herramientas genéricas y palabras vacías, dándonos cuenta de que así nunca pasaríamos los filtros ATS que las empresas usan hoy.
+            </p>
+          </div>
+          <div className="historia-bloque">
+            <h4 className="historia-subtitulo">El hallazgo</h4>
+            <p>
+              Investigando, descubrimos que <span className="highlight">no estábamos solos</span>: miles de adolescentes sentían la misma incertidumbre. Así nació <span className="brand-name">JOBLU</span>. No queríamos ser solo otra herramienta de diseño; queríamos crear el lugar donde realmente <strong>APRENDÉS</strong> a construir tu identidad profesional.
+            </p>
+          </div>
+          <div className="historia-bloque">
+            <h4 className="historia-subtitulo">La solución</h4>
+            <p>
+              En <span className="brand-name">JOBLU</span>, te damos las herramientas para que armes tu CV según tus necesidades, con consejos personalizados de IA y una comunidad dispuesta a enseñarte. Estamos acá para que dejes de scrollear infinitamente y empieces a <span className="highlight">encontrar el trabajo que de verdad querés</span>.
+            </p>
+          </div>
+
+          <blockquote className="historia-callout">
+            Por eso existe <span className="brand-name">JOBLU</span>: para que el talento no se pierda entre filtros, uniendo IA, comunidad y diseño profesional.
+          </blockquote>
         </div>
       </section>
 
       <section className="home-cta-final">
-        <h2>Empezá hoy a crear tu futuro profesional</h2>
-        <p>Unite a <span className="brand-name">JOBLU</span> y transformá tu forma de buscar trabajo.</p>
+        <h2>Empezá hoy a construir tu futuro profesional</h2>
+        <p>Unite a la plataforma que combina identidad, inteligencia artificial y comunidad en un solo lugar.</p>
+
+        <ul className="cta-benefits-row">
+          <li>✦ CV optimizado para postular</li>
+          <li>✦ Mejora con IA integrada</li>
+          <li>✦ Comunidad con consejos reales</li>
+        </ul>
+
         <div className="home-cta-botones">
           <Link to="/cv" className="hero-cta">Crear mi CV</Link>
+          <Link to="/comunidad" className="btn-link-secondary">Explorar comunidad →</Link>
         </div>
       </section>
     </main>
