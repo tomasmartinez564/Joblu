@@ -1,4 +1,5 @@
 import React from "react";
+import { FaEye, FaEyeSlash, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 // ==========================================
 // 📝 COMPONENTE: FORMULARIO DE CV (CvForm)
@@ -7,7 +8,8 @@ function CvForm({
     cvData,
     onChange,
     settings = {},
-    // sectionsVisible, // Ya no se usa para ocultar/mostrar secciones en acordeón
+    sectionsVisible = {},
+    onToggleSection,
     onPhotoChange,
     onRemovePhoto,
     onImprove,
@@ -87,9 +89,17 @@ function CvForm({
             <div className="cv-form-sectionHeader">
                 <h3 className="cv-form-sectionTitle">
                     {title}
-                    {onImprove && (
-                        <button type="button" className="cv-improve-btn animated" onClick={() => onImprove(key, cvData[key])} title={cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}>
-                            ✨
+                    {onToggleSection && (
+                        <button
+                            type="button"
+                            className={`cv-visibility-btn${sectionsVisible[key] === false ? ' cv-visibility-btn--hidden' : ''}`}
+                            onClick={() => onToggleSection(key)}
+                            title={sectionsVisible[key] === false
+                                ? (cvLanguage === "en" ? "Show in preview" : "Mostrar en vista previa")
+                                : (cvLanguage === "en" ? "Hide from preview" : "Ocultar de vista previa")
+                            }
+                        >
+                            {sectionsVisible[key] === false ? <FaEyeSlash /> : <FaEye />}
                         </button>
                     )}
                 </h3>
@@ -172,19 +182,20 @@ function CvForm({
             <div className="cv-form-navigation">
                 <button
                     type="button"
-                    className="cv-action-btn cv-nav-prev"
+                    className="cv-nav-arrow"
                     onClick={onPrev}
                     disabled={activeStep === 0}
+                    aria-label={cvLanguage === "en" ? "Previous" : "Anterior"}
                 >
-                    {cvLanguage === "en" ? "Previous" : "Anterior"}
+                    <FaChevronLeft />
                 </button>
 
                 {activeStep < steps.length - 1 ? (
-                    <button type="button" className="cv-action-btn cv-nav-next" onClick={onNext}>
-                        {cvLanguage === "en" ? "Next" : "Siguiente"}
+                    <button type="button" className="cv-nav-arrow" onClick={onNext} aria-label={cvLanguage === "en" ? "Next" : "Siguiente"}>
+                        <FaChevronRight />
                     </button>
                 ) : (
-                    <div className="cv-nav-spacer"></div> // Espaciador si es el último paso, o mostrar botón "Finalizar"
+                    <div className="cv-nav-spacer"></div>
                 )}
             </div>
         </div>

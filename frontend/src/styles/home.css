@@ -138,6 +138,39 @@
   margin-top: 0.25rem;
 }
 
+/* --- CHECKLIST DE PROGRESO --- */
+.progress-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.progress-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.checklist-icon {
+  font-size: 0.85rem;
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.checklist-done {
+  color: #16a34a;
+}
+
+.checklist-pending {
+  color: var(--joblu-text-muted, #9ca3af);
+}
+
 /* --- SECCIÓN UNIFICADA: OPORTUNIDADES Y COMUNIDAD --- */
 .unified-dashboard-section {
   background: var(--joblu-surface);

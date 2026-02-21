@@ -561,8 +561,8 @@
 
 .cv-actions-secondary .save-btn,
 .cv-actions-secondary .download-btn {
-  background: transparent;
-  color: var(--joblu-primary);
+  background: var(--joblu-primary);
+  color: #ffffff;
   border: 2px solid var(--joblu-primary);
   flex: 1;
   text-align: center;
@@ -572,8 +572,8 @@
 
 .cv-actions-secondary .save-btn:hover,
 .cv-actions-secondary .download-btn:hover {
-  background: var(--joblu-primary);
-  color: #ffffff;
+  background: transparent;
+  color: var(--joblu-primary);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(99, 55, 183, 0.25);
 }
@@ -606,30 +606,40 @@
   box-shadow: 0 2px 8px rgba(33, 219, 210, 0.25);
 }
 
-/* ── Botones Ghost/Outline: Navegación Anterior/Siguiente ── */
-.cv-nav-prev,
-.cv-nav-next {
-  background: transparent;
+/* ── Flechas de Navegación (estilo carrusel) ── */
+.cv-nav-arrow {
+  width: 64px;
+  height: 40px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid var(--joblu-border-soft);
   color: var(--joblu-primary);
-  border: 2px solid var(--joblu-primary);
-  flex: 0 0 auto;
-  min-width: 120px;
-  text-align: center;
+  box-shadow: var(--joblu-shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease,
+    box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.cv-nav-prev:hover,
-.cv-nav-next:hover {
+.cv-nav-arrow:hover:not(:disabled) {
   background: var(--joblu-primary);
   color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(99, 55, 183, 0.25);
+  box-shadow: 0 6px 16px rgba(99, 55, 183, 0.3);
+  transform: scale(1.05);
+}
+
+.cv-nav-arrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .cv-actions .save-btn:disabled,
 .cv-actions .download-btn:disabled,
-.cv-actions .ai-btn:disabled,
-.cv-nav-prev:disabled,
-.cv-nav-next:disabled {
+.cv-actions .ai-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
@@ -1250,58 +1260,38 @@
 }
 
 /* ===========================
-   ✨ Botón Mejorar con IA (Acento de marca)
+   👁️ Botón Ocultar/Mostrar sección
    =========================== */
-.cv-improve-btn {
-  background: linear-gradient(135deg, var(--joblu-primary-accent, #21dbd2) 0%, #17b9b1 100%);
-  color: #0f172a;
+.cv-visibility-btn {
+  background: transparent;
+  color: var(--joblu-primary, #6337b7);
   border: none;
   border-radius: 999px;
-  padding: 0.4rem 0.75rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  font-family: var(--font-subtitle);
-  margin-left: 0.75rem;
+  padding: 0.3rem;
+  font-size: 0.9rem;
+  margin-left: 0.6rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.3rem;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(33, 219, 210, 0.3);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
+  transition: all 0.2s ease;
   line-height: 1;
+  opacity: 0.7;
 }
 
-.cv-improve-btn:hover {
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 8px 20px rgba(33, 219, 210, 0.4);
-  filter: brightness(1.05);
+.cv-visibility-btn:hover {
+  opacity: 1;
+  transform: scale(1.15);
 }
 
-.cv-improve-btn:active {
-  transform: translateY(0) scale(0.97);
-  box-shadow: 0 2px 6px rgba(33, 219, 210, 0.2);
+.cv-visibility-btn--hidden {
+  color: #9ca3af;
+  opacity: 0.5;
 }
 
-/* Animación sutil de brillo */
-@keyframes shine {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.cv-improve-btn.animated {
-  background-size: 200% 200%;
-  animation: shine 3s ease infinite;
+.cv-visibility-btn--hidden:hover {
+  color: var(--joblu-primary, #6337b7);
+  opacity: 0.85;
 }
 
 /* ===========================

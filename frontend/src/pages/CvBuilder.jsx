@@ -589,6 +589,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
             onChange={handleChange}
             settings={settings}
             sectionsVisible={sectionsVisible}
+            onToggleSection={toggleSection}
             onPhotoChange={handlePhotoChange}
             onRemovePhoto={handleRemovePhoto}
             onImprove={handleOpenAiForSection}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 // --- Contexto y Estilos ---
@@ -14,6 +15,7 @@ function Login({ onLogin }) {
   // --- 1. Estados ---
   const [isRegistering, setIsRegistering] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -36,47 +38,47 @@ function Login({ onLogin }) {
     });
   };
 
-/**
- * Gestiona el envío del formulario para Login o Registro.
- */
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
+  /**
+   * Gestiona el envío del formulario para Login o Registro.
+   */
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-  // Usamos API_BASE_URL para que coincida con la configuración global
-  const endpoint = isRegistering 
-    ? `${API_BASE_URL}/api/auth/register` 
-    : `${API_BASE_URL}/api/auth/login`;
+    // Usamos API_BASE_URL para que coincida con la configuración global
+    const endpoint = isRegistering
+      ? `${API_BASE_URL}/api/auth/register`
+      : `${API_BASE_URL}/api/auth/login`;
 
-  try {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
-    });
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.error || 'Ocurrió un error inesperado');
+      if (!response.ok) {
+        throw new Error(data.error || 'Ocurrió un error inesperado');
+      }
+
+      if (isRegistering) {
+        // Éxito en registro: notificamos y pasamos a modo login
+        addToast('¡Cuenta creada! Ahora iniciá sesión.', 'success');
+        setIsRegistering(false);
+      } else {
+        // Éxito en login: notificamos y actualizamos estado global
+        addToast(`Bienvenido de nuevo, ${data.user.name} 👋`, 'success');
+        onLogin(data.user, data.token); // Pasamos user y token a App.jsx
+      }
+
+    } catch (error) {
+      addToast(error.message, 'error');
+    } finally {
+      setIsLoading(false);
     }
-
-    if (isRegistering) {
-      // Éxito en registro: notificamos y pasamos a modo login
-      addToast('¡Cuenta creada! Ahora iniciá sesión.', 'success');
-      setIsRegistering(false);
-    } else {
-      // Éxito en login: notificamos y actualizamos estado global
-      addToast(`Bienvenido de nuevo, ${data.user.name} 👋`, 'success');
-      onLogin(data.user, data.token); // Pasamos user y token a App.jsx
-    }
-
-  } catch (error) {
-    addToast(error.message, 'error');
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
   // --- 4. Renderizado ---
   return (
     <div className="login-page">
@@ -86,8 +88,8 @@ const handleSubmit = async (e) => {
           {isRegistering ? 'Crear cuenta en JOBLU' : 'Iniciar Sesión'}
         </h2>
         <p className="login-subtitle">
-          {isRegistering 
-            ? 'Unite a la comunidad y potenciá tu carrera.' 
+          {isRegistering
+            ? 'Unite a la comunidad y potenciá tu carrera.'
             : 'Accedé a tus CVs y empleos guardados.'}
         </p>
 
@@ -123,24 +125,35 @@ const handleSubmit = async (e) => {
 
           <div className="form-group">
             <label htmlFor="password">Contraseña</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowPassword(prev => !prev)}
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                tabIndex={-1}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
 
-          <button 
-            type="submit" 
-            className="login-submit" 
+          <button
+            type="submit"
+            className="login-submit"
             disabled={isLoading}
           >
-            {isLoading 
-              ? 'Procesando...' 
+            {isLoading
+              ? 'Procesando...'
               : (isRegistering ? 'Registrarme' : 'Ingresar')
             }
           </button>
@@ -150,8 +163,8 @@ const handleSubmit = async (e) => {
         <div className="login-footer">
           <p>
             {isRegistering ? '¿Ya tenés cuenta?' : '¿No tenés cuenta?'}
-            <button 
-              type="button" 
+            <button
+              type="button"
               className="login-toggle"
               onClick={() => setIsRegistering(!isRegistering)}
             >

@@ -5,7 +5,8 @@ import TEMPLATES from "../data/templates";
 // --- Estilos ---
 import "../styles/home.css";
 
-// --- Configuración y Servicios ---
+// --- Contexto y Servicios ---
+import { useToast } from '../context/ToastContext';
 import API_BASE_URL from "../config/api";
 import cvService from "../services/cvService";
 
@@ -20,6 +21,7 @@ const JOBLU_TIPS = [
 
 export default function Home({ user }) {
   const navigate = useNavigate();
+  const { addToast } = useToast();
   const [recommendedJobs, setRecommendedJobs] = useState([]);
   const [latestPost, setLatestPost] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -91,6 +93,24 @@ export default function Home({ user }) {
               <p className="stat-hint">
                 {progress < 100 ? "Seguí completando datos para mejorar tu visibilidad." : "¡Tu perfil está impecable!"}
               </p>
+              {progress < 100 && (
+                <ul className="progress-checklist">
+                  {[
+                    { key: 'nombre', label: 'Nombre completo' },
+                    { key: 'email', label: 'Email' },
+                    { key: 'telefono', label: 'Teléfono' },
+                    { key: 'ubicacion', label: 'Ubicación' },
+                    { key: 'experiencias', label: 'Experiencia laboral' },
+                    { key: 'educacion', label: 'Educación' },
+                    { key: 'habilidades', label: 'Habilidades' },
+                  ].map(item => (
+                    <li key={item.key} className={cvData[item.key] ? 'checklist-done' : 'checklist-pending'}>
+                      <span className="checklist-icon">{cvData[item.key] ? '✓' : '○'}</span>
+                      {item.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <button onClick={() => navigate(lastCv ? `/cv/${lastCv._id}` : '/cv')} className="hero-cta">
               {lastCv ? "Editar CV" : "Empezar CV"}
@@ -212,8 +232,7 @@ export default function Home({ user }) {
                 if (canUse) {
                   navigate('/cv', { state: { templateId: tpl.id } });
                 } else {
-                  // Stub: preparado para pasarela de pago
-                  alert(`¡Próximamente! Desbloqueá "${tpl.name}" para usarla en tu CV.`);
+                  addToast(`¡Próximamente! Desbloqueá "${tpl.name}" para usarla en tu CV.`, 'info');
                 }
               };
 
@@ -247,8 +266,8 @@ export default function Home({ user }) {
                   </div>
                   <button
                     className={`home-template-cta${isActual ? ' home-template-cta--inuse'
-                        : !canUse ? ' home-template-cta--unlock'
-                          : ''
+                      : !canUse ? ' home-template-cta--unlock'
+                        : ''
                       }`}
                     onClick={handleTemplateAction}
                     disabled={isActual}
