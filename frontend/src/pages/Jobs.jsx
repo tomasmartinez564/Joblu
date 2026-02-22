@@ -173,7 +173,7 @@ function Jobs() {
             <div className="jobs-list-tabs">
               <button className={"jobs-tab" + (activeTab === "all" ? " jobs-tab-active" : "")} onClick={() => setActiveTab("all")}>Todos</button>
               <button className={"jobs-tab" + (activeTab === "recent" ? " jobs-tab-active" : "")} onClick={() => setActiveTab("recent")}>Recientes</button>
-              <button className={"jobs-tab" + (activeTab === "featured" ? " jobs-tab-active" : "")} onClick={() => setActiveTab("featured")}>Destacados</button>
+              <button className={"jobs-tab" + (activeTab === "featured" ? " jobs-tab-active" : "")} onClick={() => setActiveTab("featured")}>Destacados ✨</button>
             </div>
           </div>
         </div>
@@ -247,7 +247,11 @@ function Jobs() {
                       {job.tags?.slice(0, 3).map(t => <span key={t} className="job-tag-badge">{t}</span>)}
                     </div>
 
-                    <div className="job-card-meta"><FaMapMarkerAlt className="meta-icon" /> {job.location || "Remoto"} &nbsp;&bull;&nbsp; <FaBriefcase className="meta-icon" /> {formatJobType(job.type)}</div>
+                    <div className="job-card-meta">
+                      <span className="job-meta-item"><FaMapMarkerAlt className="meta-icon" /> {job.location || "Remoto"}</span>
+                      <span className="job-meta-divider">&bull;</span>
+                      <span className="job-meta-item"><FaBriefcase className="meta-icon" /> {formatJobType(job.type)}</span>
+                    </div>
 
                     <div
                       className="job-card-description"
@@ -256,8 +260,8 @@ function Jobs() {
 
                     <div className="job-card-footer">
                       <div className="job-card-footer-left">
-                        <button className="job-card-icon-btn" onClick={() => handleShare(job._id)}>
-                          {copiedId === job._id ? <FaCheck /> : <FaLink />}
+                        <button className="job-card-secondary-btn" onClick={() => handleShare(job._id)}>
+                          {copiedId === job._id ? <><FaCheck className="meta-icon" style={{ color: 'inherit' }} /> ¡Copiado!</> : <><FaLink className="meta-icon" style={{ color: 'inherit' }} /> Copiar link</>}
                         </button>
                       </div>
                       <Link to={`/jobs/${job._id}`} className="job-card-cta">Ver oferta</Link>

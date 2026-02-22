@@ -7,40 +7,50 @@
 
 
 
+.job-detail-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
 .job-detail-card {
   background: var(--joblu-surface);
   border-radius: 1rem;
   border: 1px solid var(--joblu-border-soft);
-  padding: 1.5rem;
+  box-shadow: var(--joblu-shadow-md);
+  padding: 2rem;
 }
 
 .job-detail-header {
   display: flex;
   flex-direction: column;
-  /* Default column for easier organization */
-  gap: 0.5rem;
-  margin-top: 1.5rem;
+  gap: 1rem;
 }
 
 .job-header-top {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .job-logo {
-  width: 60px;
-  height: 60px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 12px;
   background: #fff;
   flex-shrink: 0;
+  border: 1px solid var(--joblu-border-soft);
+  padding: 4px;
 }
 
 .job-title {
   margin: 0;
-  font-size: 1.8rem;
-  line-height: 1.2;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--joblu-text-main);
+  line-height: 1.15;
 }
 
 .job-detail-sub {
@@ -50,6 +60,12 @@
   font-size: 0.95rem;
   color: var(--joblu-text-muted);
   align-items: center;
+  margin-top: 0.25rem;
+}
+
+.company-name {
+  font-weight: 600;
+  color: var(--joblu-primary);
 }
 
 .company-name,
@@ -57,13 +73,18 @@
 .type {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.45rem;
+}
+
+.job-meta-divider {
+  color: #cbd5e1;
 }
 
 /* Icono SVG inline en el detalle de empleo */
 .meta-icon {
   font-size: 0.9rem;
   flex-shrink: 0;
+  color: var(--joblu-primary);
 }
 
 /* Mobile Responsive */
@@ -121,7 +142,44 @@
   font-size: 0.9rem;
 }
 
-/* Tags de empleo */
+/* Contenido HTML de la oferta */
+.job-detail-content {
+  line-height: 1.7;
+  color: var(--joblu-text-main);
+  font-size: 1rem;
+}
+
+.job-detail-content h2,
+.job-detail-content h3 {
+  color: var(--joblu-primary);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.job-detail-content h2 {
+  font-size: 1.35rem;
+}
+
+.job-detail-content h3 {
+  font-size: 1.15rem;
+}
+
+.job-detail-content p {
+  margin-bottom: 1rem;
+}
+
+.job-detail-content ul,
+.job-detail-content ol {
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.job-detail-content li {
+  margin-bottom: 0.5rem;
+}
+
+/* Tags de empleo (manteniendo estética JOBLU) */
 .job-detail-tags {
   margin-top: 1rem;
   display: flex;
@@ -129,13 +187,16 @@
   flex-wrap: wrap;
 }
 
-.tag-badge {
-  background: #e0e7ff;
-  color: #4338ca;
-  padding: 4px 12px;
-  border-radius: 99px;
-  font-size: 0.85rem;
-  white-space: nowrap;
+/* Usamos class abstracta heredada si es que no se carga,
+   pero acá reescribimos el fondo claro por si las moscas */
+.job-tag-badge {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
 }
 
 /* Mobile: Scroll vertical limitado para tags */

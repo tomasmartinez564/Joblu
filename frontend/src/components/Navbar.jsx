@@ -1,4 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
+import { FaUser, FaSignOutAlt } from "react-icons/fa";
 
 // ==========================================
 // 🧭 COMPONENTE: NAVBAR
@@ -109,7 +110,11 @@ export default function Navbar({
 
             {/* Menú Desplegable Desktop */}
             <div className={`account-menu ${isAccountMenuOpen ? "open" : ""}`}>
-
+              <div className="account-menu-header">
+                <p className="account-menu-name">{user.name}</p>
+                <p className="account-menu-email">{user.email}</p>
+              </div>
+              <hr className="account-menu-divider" />
 
               <button
                 type="button"
@@ -118,18 +123,18 @@ export default function Navbar({
                   goToAccount();
                 }}
               >
-                Mi cuenta
+                <FaUser className="account-menu-icon" /> Mi cuenta
               </button>
 
               <button
                 type="button"
-                className="account-menu-item"
+                className="account-menu-item account-menu-logout"
                 onClick={() => {
                   setIsAccountMenuOpen(false);
                   handleLogout();
                 }}
               >
-                Cerrar sesión
+                <FaSignOutAlt className="account-menu-icon" /> Cerrar sesión
               </button>
             </div>
           </div>
