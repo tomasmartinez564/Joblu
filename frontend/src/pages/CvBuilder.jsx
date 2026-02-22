@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { FaLinkedin, FaGithub, FaGlobe, FaCog, FaTrashAlt, FaExclamationTriangle } from "react-icons/fa";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import TEMPLATES from "../data/templates";
+import OnboardingTour, { LS_KEY } from "../components/cv/OnboardingTour";
 
 
 // --- Estilos ---
@@ -88,10 +89,8 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   const [aiTone, setAiTone] = useState("Professional");
   const [aiGoal, setAiGoal] = useState("improve");
 
-  // --- 5. Estados: Tutorial (Onboarding) ---
-  const [tutorialActivo, setTutorialActivo] = useState(false);
-  const [pasoTutorial, setPasoTutorial] = useState(0);
-  const [posicionPaso, setPosicionPaso] = useState(null);
+  // --- 5. Estados: Onboarding Tour ---
+  const [tourActive, setTourActive] = useState(false);
 
   // --- 6. Estados: Navegación por Pasos (Slides) ---
   const [activeStep, setActiveStep] = useState(0);
@@ -113,8 +112,6 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   const refTextareaPerfil = useRef(null);
   const refBtnIA = useRef(null);
   const refVistaPrevia = useRef(null);
-  const refTutorialModal = useRef(null);
-  const pasoTutorialRef = useRef(pasoTutorial);
 
   // ... (Efectos y lógica de carga se mantienen igual) ...
 
@@ -278,113 +275,23 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   // 🎓 LÓGICA DEL TUTORIAL (Onboarding)
   // ==========================================
 
-  const pasos = [
-    { titulo: "Elegí la configuración del CV", descripcion: "Acá podés seleccionar el rubro/estilo del CV.", ref: refBtnConfiguracion, activeStepTarget: 0 },
-    { titulo: "Completá tu perfil profesional", descripcion: "Escribí un resumen breve y claro de quién sos.", ref: refTextareaPerfil, activeStepTarget: 1 },
-    { titulo: "Mejoralo con IA", descripcion: "Usá la IA para hacerlo más profesional.", ref: refBtnIA, activeStepTarget: 1 },
-    { titulo: "Revisá la vista previa", descripcion: "Se actualiza en tiempo real mientras completás los datos.", ref: refVistaPrevia, activeStepTarget: null },
-  ];
 
-  const pasoActual = pasos[pasoTutorial];
-
+  // Auto-launch tour on first visit
   useEffect(() => {
-    pasoTutorialRef.current = pasoTutorial;
-    if (!tutorialActivo) return;
-
-    const paso = pasos[pasoTutorial];
-    if (!paso) return;
-
-    // Asegurar que el activeStep esté sincronizado antes de intentar acceder al ref
-    if (paso.activeStepTarget !== null && paso.activeStepTarget !== undefined) {
-      setActiveStep(paso.activeStepTarget);
+    const seen = localStorage.getItem(LS_KEY);
+    if (!seen) {
+      // slight delay so the layout is rendered
+      const t = setTimeout(() => setTourActive(true), 600);
+      return () => clearTimeout(t);
     }
+  }, []);
 
-    // Delay para asegurar que el DOM se haya actualizado después del cambio de activeStep
-    const timeoutId = setTimeout(() => {
-      if (!paso?.ref?.current) {
-        // Si el ref aún no está disponible, intentar recalcular después de otro delay
-        setTimeout(() => {
-          if (paso?.ref?.current) {
-            paso.ref.current.scrollIntoView({ behavior: "auto", block: "center", inline: "nearest" });
-            calcularPosicionPaso(pasoTutorial);
-          }
-        }, 100);
-        return;
-      }
-
-      paso.ref.current.scrollIntoView({ behavior: "auto", block: "center", inline: "nearest" });
-
-      const recalc = () => calcularPosicionPaso(pasoTutorial);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(recalc);
-      });
-    }, 150);
-
-    const recalc = () => calcularPosicionPaso(pasoTutorial);
-    window.addEventListener("resize", recalc);
-
-    return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener("resize", recalc);
-    };
-  }, [tutorialActivo, pasoTutorial]);
-
-  const calcularPosicionPaso = (indicePaso) => {
-    const paso = pasos[indicePaso];
-    if (!paso?.ref?.current) return;
-
-    const rect = paso.ref.current.getBoundingClientRect();
-    const vh = window.innerHeight;
-    const vw = window.innerWidth;
-    const margen = 16;
-    const anchoModal = 520;
-
-    const ponerArriba = rect.top > (vh * 0.6);
-    const isMobile = vw <= 768;
-    const modalAtTopOnMobile = isMobile && ponerArriba;
-    let leftCalculado = rect.left + (rect.width / 2) - (anchoModal / 2);
-
-    if (leftCalculado < margen) leftCalculado = margen;
-    if (leftCalculado + anchoModal > vw - margen) leftCalculado = vw - anchoModal - margen;
-
-    setPosicionPaso({
-      top: rect.top, left: rect.left, width: rect.width, height: rect.height,
-      modalLeft: leftCalculado, ponerArriba,
-      anchorTop: rect.top - margen, anchorBottom: rect.bottom + margen,
-      modalAtTopOnMobile, isMobile,
-    });
-  };
-
-  const cerrarTutorial = () => {
-    setTutorialActivo(false);
-    localStorage.setItem("joblu_tutorial_cv_v1", "1");
-  };
-
-  const siguientePaso = () => {
-    if (pasoTutorial >= pasos.length - 1) {
-      cerrarTutorial();
-      return;
-    }
-
-    const siguienteIndice = pasoTutorial + 1;
-    const siguientePaso = pasos[siguienteIndice];
-
-    // Sincronizar activeStep antes de cambiar el paso del tutorial
-    if (siguientePaso?.activeStepTarget !== null && siguientePaso?.activeStepTarget !== undefined) {
-      setActiveStep(siguientePaso.activeStepTarget);
-    }
-
-    // Cambiar el paso del tutorial después de un pequeño delay para asegurar que activeStep se haya actualizado
-    setTimeout(() => {
-      setPasoTutorial(siguienteIndice);
-    }, 50);
-  };
-
+  // Re-launch tour on custom event (triggered by startCvOnboardingTour())
   useEffect(() => {
-    if (!showTips || localStorage.getItem("joblu_tutorial_cv_v1")) return;
-    setTutorialActivo(true);
-    setPasoTutorial(0);
-  }, [showTips]);
+    const handler = () => setTourActive(true);
+    window.addEventListener("joblu:start-tour", handler);
+    return () => window.removeEventListener("joblu:start-tour", handler);
+  }, []);
 
   // ==========================================
   // 🛠️ MANEJADORES DE NAVEGACIÓN (Slides)
@@ -472,41 +379,16 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   // 📦 RENDERIZADO (JSX)
   // ==========================================
   return (
-    <div className="cv-page">
-      {/* --- Tutorial Overlay --- */}
-      {tutorialActivo && pasoActual?.ref?.current && (
-        <div className="tutorial-overlay">
-          {posicionPaso && (
-            <div className="tutorial-highlight" style={{ top: posicionPaso.top, left: posicionPaso.left, width: posicionPaso.width, height: posicionPaso.height }} />
-          )}
-          <div
-            ref={refTutorialModal}
-            className={`tutorial-modal ${posicionPaso?.modalAtTopOnMobile ? "tutorial-modal-top" : ""}`}
-            style={posicionPaso && !posicionPaso.isMobile
-              ? {
-                left: posicionPaso.modalLeft,
-                top: posicionPaso.ponerArriba ? "auto" : posicionPaso.anchorBottom,
-                bottom: posicionPaso.ponerArriba ? window.innerHeight - posicionPaso.anchorTop : "auto",
-              }
-              : undefined}
-          >
-            <p className="tutorial-paso">Paso {pasoTutorial + 1} de {pasos.length}</p>
-            <h3 className="tutorial-titulo">{pasoActual.titulo}</h3>
-            <p className="tutorial-descripcion">{pasoActual.descripcion}</p>
-            <div className="tutorial-acciones">
-              <button type="button" className="tutorial-btn-secundario" onClick={cerrarTutorial}>Omitir</button>
-              <button type="button" className="tutorial-btn-principal" onClick={siguientePaso}>Siguiente</button>
-            </div>
-          </div>
-        </div>
-      )}
+    <div className="cv-page" data-tour="cv-layout">
+      {/* --- Onboarding Tour --- */}
+      <OnboardingTour active={tourActive} onClose={() => setTourActive(false)} />
 
       <section className="cv-builder">
         {/* --- Columna Formulario --- */}
         <div className="cv-column">
 
 
-          <div className="cv-header-row">
+          <div className="cv-header-row" data-tour="cv-header">
             <h2>Completa tu CV</h2>
             <div className="cv-header-actions">
               <button
@@ -570,7 +452,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
           )}
 
           {/* Indicador de Pasos */}
-          <div className="cv-steps-indicator">
+          <div className="cv-steps-indicator" data-tour="cv-step-navigation">
             <div className="steps-progress-bar">
               <div
                 className="steps-progress-fill"
@@ -582,38 +464,41 @@ function CvBuilder({ user, settings, onChangeSettings }) {
             </p>
           </div>
 
-          {showTips && <div className="cv-settings-tip"><strong>Preferencias JOBLU: </strong><span>{settingsSummary}</span></div>}
+          {showTips && <div className="cv-settings-tip" data-tour="cv-preferences"><strong>Preferencias JOBLU: </strong><span>{settingsSummary}</span></div>}
 
-          <CvForm
-            cvData={cvData}
-            onChange={handleChange}
-            settings={settings}
-            sectionsVisible={sectionsVisible}
-            onToggleSection={toggleSection}
-            onPhotoChange={handlePhotoChange}
-            onRemovePhoto={handleRemovePhoto}
-            onImprove={handleOpenAiForSection}
-            refs={{ refTextareaPerfil }}
-            activeStep={activeStep}
-            steps={STEPS}
-            onNext={handleNext}
-            onPrev={handlePrev}
-            onGoToStep={handleGoToStep}
-          />
+          <div data-tour="cv-form-fields">
+
+            <CvForm
+              cvData={cvData}
+              onChange={handleChange}
+              settings={settings}
+              sectionsVisible={sectionsVisible}
+              onToggleSection={toggleSection}
+              onPhotoChange={handlePhotoChange}
+              onRemovePhoto={handleRemovePhoto}
+              onImprove={handleOpenAiForSection}
+              refs={{ refTextareaPerfil }}
+              activeStep={activeStep}
+              steps={STEPS}
+              onNext={handleNext}
+              onPrev={handlePrev}
+              onGoToStep={handleGoToStep}
+            />
+          </div> {/* /cv-form-fields */}
 
           {/* Botones de Acción Globales */}
           <div className="cv-actions">
             {/* 1. IA — herramienta de asistencia, posición protagonista */}
-            <button ref={refBtnIA} type="button" className="cv-action-btn ai-btn" onClick={() => {
+            <button ref={refBtnIA} type="button" className="cv-action-btn ai-btn" data-tour="cv-ai-button" onClick={() => {
               const currentKey = STEPS[activeStep].key;
               const sectionToUse = currentKey === "datos" ? "perfil" : currentKey;
               handleOpenAiForSection(sectionToUse, cvData[sectionToUse]);
             }}>
-              ✨ {cvLanguage === "en" ? "Improve with IA" : "Mejorar con IA"}
+              ✨ {cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
             </button>
 
             {/* 2. Guardar y Descargar — acciones de cierre */}
-            <div className="cv-actions-secondary">
+            <div className="cv-actions-secondary" data-tour="cv-save-actions">
               <button type="button" className="cv-action-btn save-btn" onClick={handleSave} disabled={isSaving} style={{ opacity: isSaving ? 0.7 : 1, cursor: isSaving ? "wait" : "pointer" }}>
                 {isSaving ? "Guardando..." : (cvLanguage === "en" ? "Save CV" : "Guardar CV")}
               </button>
@@ -632,11 +517,12 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
         {/* --- Columna Vista Previa --- */}
         <div className="cv-column">
-          <div className="cv-preview-column-header">
+          <div className="cv-preview-column-header" data-tour="cv-preview">
             <h2>{cvLanguage === "en" ? "Preview" : "Vista previa"}</h2>
             <button
               type="button"
               className="cv-template-trigger-btn"
+              data-tour="cv-template-button"
               onClick={() => setShowTemplateModal(true)}
               title="Cambiar plantilla visual"
             >

@@ -1220,111 +1220,7 @@
   }
 }
 
-.tutorial-paso {
-  margin: 0 0 0.5rem;
-  font-size: 0.9rem;
-  opacity: 0.8;
-}
 
-.tutorial-titulo {
-  margin: 0 0 0.5rem;
-}
-
-.tutorial-descripcion {
-  margin: 0 0 1rem;
-  line-height: 1.6;
-}
-
-.tutorial-acciones {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
-
-.tutorial-btn-principal,
-.tutorial-btn-secundario {
-  border-radius: 12px;
-  padding: 0.75rem 1rem;
-  cursor: pointer;
-}
-
-.tutorial-btn-principal {
-  border: none;
-  background: #6337B7;
-  color: white;
-  font-weight: 600;
-}
-
-.tutorial-btn-secundario {
-  background: white;
-  border: 1px solid #e5e7eb;
-}
-
-.tutorial-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 99990;
-  background: rgba(0, 0, 0, 0.55);
-  pointer-events: auto;
-}
-
-/* Modal SIEMPRE en viewport - posición legible respecto al highlight */
-.tutorial-modal {
-  position: fixed;
-  background: white;
-  border-radius: 16px;
-  padding: 1.25rem;
-  width: min(520px, calc(100vw - 24px));
-  max-height: calc(100vh - 48px);
-  overflow-y: auto;
-  border: 1px solid #e5e7eb;
-  pointer-events: auto;
-  z-index: 99992;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  /* Evita que se salga del viewport en desktop */
-  transform: translateZ(0);
-}
-
-/* Highlight SIEMPRE visible y por encima del overlay */
-.tutorial-highlight {
-  position: fixed;
-  border-radius: 12px;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
-  pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  z-index: 99991;
-  border: 2px solid var(--joblu-primary, #6337b7);
-  outline: 2px solid rgba(255, 255, 255, 0.5);
-}
-
-/* ===========================
-   Tutorial - Mobile: modal fijo abajo para no tapar el campo
-   =========================== */
-@media (max-width: 768px) {
-  .tutorial-modal {
-    /* Fijar en la parte inferior para no tapar el campo que edita el usuario */
-    top: auto !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    max-width: none !important;
-    max-height: 45vh;
-    border-radius: 16px 16px 0 0;
-    margin: 0;
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
-  }
-}
-
-/* Alternativa: si el campo está abajo, modal arriba (se puede activar con clase) */
-@media (max-width: 768px) {
-  .tutorial-modal.tutorial-modal-top {
-    top: 0 !important;
-    bottom: auto !important;
-    border-radius: 0 0 16px 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  }
-}
 
 /* ===========================
    👁️ Botón Ocultar/Mostrar sección
@@ -1371,4 +1267,193 @@
 .cv-preview-header {
   page-break-inside: avoid;
   break-inside: avoid;
+}
+
+/* ============================================================
+   🎓 ONBOARDING TOUR — CvBuilder JOBLU
+   ============================================================ */
+
+.tour-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  /* NO background here — the spotlight's box-shadow IS the mask.
+     A separate background here causes double-darkening. */
+  pointer-events: none;
+}
+
+.tour-spotlight {
+  position: fixed;
+  z-index: 9001;
+  border-radius: 12px;
+  /* The box-shadow IS the overlay — its outer spread creates the dark mask.
+     Opacity 0.45 keeps bg readable while still focusing on the target. */
+  box-shadow:
+    0 0 0 3px rgba(33, 219, 210, 0.7),
+    /* turquoise accent border */
+    0 0 0 9999px rgba(8, 15, 35, 0.45);
+  /* dim mask — NOT too dark */
+  pointer-events: none;
+  transition: top 0.35s ease, left 0.35s ease, width 0.35s ease, height 0.35s ease;
+}
+
+.tour-tooltip {
+  position: fixed;
+  z-index: 9100;
+  width: 320px;
+  background: var(--joblu-surface, #ffffff);
+  border-radius: 16px;
+  padding: 1.25rem 1.4rem 1.1rem;
+  box-shadow:
+    0 0 0 2px rgba(33, 219, 210, 0.3),
+    0 20px 60px rgba(15, 23, 42, 0.22);
+  animation: tour-pop-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  pointer-events: auto;
+  /* ensure clicks land on buttons */
+}
+
+@keyframes tour-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.tour-tooltip--center {
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%);
+  width: 360px;
+}
+
+.tour-dots {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 0.65rem;
+}
+
+.tour-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.tour-dot--active {
+  background: var(--joblu-primary-accent, #21dbd2);
+  transform: scale(1.3);
+}
+
+.tour-step-label {
+  margin: 0 0 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--joblu-primary-accent, #21dbd2);
+  font-family: var(--font-subtitle);
+}
+
+.tour-title {
+  margin: 0 0 0.55rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-family: var(--font-subtitle);
+  color: var(--joblu-text-main, #0f172a);
+  line-height: 1.25;
+}
+
+.tour-body {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--joblu-text-muted, #64748b);
+  line-height: 1.55;
+}
+
+.tour-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+  gap: 0.5rem;
+}
+
+.tour-nav-btns {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.tour-btn-skip {
+  background: none;
+  border: none;
+  font-size: 0.8rem;
+  color: var(--joblu-text-muted, #9ca3af);
+  cursor: pointer;
+  padding: 0.25rem 0.1rem;
+  transition: color 0.15s ease;
+}
+
+.tour-btn-skip:hover {
+  color: #e11d48;
+}
+
+.tour-btn-secondary {
+  background: transparent;
+  border: 1.5px solid var(--joblu-primary, #6337b7);
+  color: var(--joblu-primary, #6337b7);
+  border-radius: 10px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--font-subtitle);
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.tour-btn-secondary:hover {
+  background: rgba(99, 55, 183, 0.08);
+}
+
+.tour-btn-primary {
+  background: var(--joblu-primary, #6337b7);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: var(--font-subtitle);
+  cursor: pointer;
+  transition: filter 0.18s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.tour-btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .tour-tooltip {
+    width: calc(100vw - 24px);
+    left: 12px !important;
+  }
+
+  .tour-tooltip--center {
+    top: auto !important;
+    bottom: 1rem !important;
+    left: 12px !important;
+    transform: none;
+  }
+
+  .tour-actions {
+    flex-wrap: wrap;
+  }
 }
