@@ -756,6 +756,28 @@
   box-shadow: var(--joblu-shadow-md);
 }
 
+/* Estado bloqueado (plantillas premium no adquiridas) */
+.home-template-card.locked {
+  cursor: not-allowed;
+  opacity: 0.85;
+  background: #f8fafc;
+}
+
+.home-template-card.locked:hover {
+  border-color: var(--joblu-border-soft);
+  box-shadow: var(--joblu-shadow-sm);
+  transform: none; /* Evitar la animación de hover */
+}
+
+.home-template-card-lock {
+  padding-bottom: 0.5rem;
+  font-size: 1.1rem;
+  color: #94a3b8; /* Gris suave */
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
 /* Área de la miniatura / color */
 .home-template-card-thumb {
   position: relative;
