@@ -1121,6 +1121,26 @@
   box-shadow: 0 0 0 2px rgba(33, 219, 210, 0.2);
 }
 
+/* Estado bloqueado */
+.templates-static-item.locked {
+  cursor: not-allowed;
+  opacity: 0.75;
+  background: #f8fafc;
+}
+
+.templates-static-item.locked:hover {
+  border-color: var(--joblu-border-soft);
+  box-shadow: none;
+  transform: none;
+}
+
+.locked-text {
+  color: #94a3b8 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Miniatura — llena el ancho de la columna */
 .templates-static-thumb {
   position: relative;
