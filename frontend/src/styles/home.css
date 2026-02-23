@@ -803,7 +803,7 @@
 
 /* Cuerpo de la card */
 .home-template-card-body {
-  padding: 1rem 1.25rem 0.75rem;
+  padding: 0.25rem 1.25rem 0.75rem;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -897,6 +897,46 @@
   opacity: 0.75;
 }
 
+ 
+.home-template-mobile-toggle {
+  display: flex;
+  flex-direction: column;
+  border: none;
+  background: transparent;
+  padding: 0;
+  width: 100%;
+  text-align: left;
+  cursor: default;
+}
+
+.home-template-mobile-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1rem 1.25rem 0.25rem;
+  width: 100%;
+}
+
+.home-template-mobile-summary-text {
+  display: contents;
+}
+
+.home-template-mobile-chevron {
+  display: none;
+}
+
+.home-template-collapsible {
+  display: block;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-template-collapsible-inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
 
 .home-template-category {
   margin: 0;
@@ -1185,4 +1225,126 @@
     flex: 0 0 72px;
     scroll-snap-align: start;
   }
+
+  .home-templates-grid {
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+  }
+
+  .home-template-card {
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  /* El header ahora sí se comporta como botón */
+  .home-template-mobile-toggle {
+    display: block;
+    cursor: pointer;
+  }
+
+  /* El body/header visible compacto */
+  .home-template-mobile-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    padding: 0.85rem 1rem 0.9rem;
+  }
+
+  .home-template-mobile-summary-text {
+    display: block;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .home-template-mobile-summary-text h4 {
+    margin: 0;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--joblu-text-main);
+  }
+
+  .home-template-mobile-summary-text .home-template-category {
+    margin-top: 0.15rem;
+    font-size: 0.78rem;
+  }
+
+  .home-template-mobile-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: rgba(99, 55, 183, 0.08);
+    color: var(--joblu-primary);
+    font-size: 0.95rem;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: transform 0.25s ease, background-color 0.2s ease;
+  }
+
+  .home-template-mobile-chevron.is-rotated {
+    transform: rotate(180deg);
+  }
+
+  .home-template-card.is-open .home-template-mobile-chevron {
+    background: rgba(99, 55, 183, 0.14);
+  }
+
+  /* Thumb más compacta en mobile */
+  .home-template-card-thumb {
+    height: 72px;
+  }
+
+  .home-template-card-icon {
+    font-size: 2rem;
+  }
+
+  /* Colapsable con animación */
+  .home-template-collapsible {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.28s ease;
+  }
+
+  .home-template-collapsible.is-open {
+    grid-template-rows: 1fr;
+  }
+
+  .home-template-collapsible-inner {
+    display: block;
+    overflow: hidden;
+  }
+
+  /* Compactamos el contenido para mobile */
+  .home-template-card-body {
+    padding: 0 1rem 0.5rem;
+    gap: 0.4rem;
+  }
+
+  .home-template-description {
+    margin-top: 0;
+    font-size: 0.8rem;
+    line-height: 1.35;
+  }
+
+  .home-template-features {
+    margin-top: 0.35rem;
+    gap: 0.35rem;
+  }
+
+  .home-template-tag {
+    font-size: 0.66rem;
+    padding: 0.14rem 0.45rem;
+  }
+
+  .home-template-cta {
+    margin: 0.5rem 1rem 1rem;
+    width: calc(100% - 2rem);
+  }
+
+
+
+
 }

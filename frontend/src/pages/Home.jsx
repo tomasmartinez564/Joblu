@@ -28,6 +28,7 @@ export default function Home({ user }) {
   const [loading, setLoading] = useState(true);
   const [lastCv, setLastCv] = useState(null);
   const [dailyTip, setDailyTip] = useState(null);
+  const [openMobileTemplateId, setOpenMobileTemplateId] = useState(null);
 
   const carouselRef = useRef(null);
 
@@ -36,6 +37,10 @@ export default function Home({ user }) {
       const scrollAmount = 300;
       carouselRef.current.scrollBy({ left: direction * scrollAmount, behavior: "smooth" });
     }
+  };
+
+  const toggleMobileTemplate = (templateId) => {
+    setOpenMobileTemplateId((prev) => (prev === templateId ? null : templateId));
   };
 
   useEffect(() => {
@@ -59,6 +64,19 @@ export default function Home({ user }) {
         .finally(() => setLoading(false));
     }
   }, [user]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        setOpenMobileTemplateId(null);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+
 
   const calculateProgress = (cv) => {
     if (!cv || !cv.data) return 0;
@@ -252,46 +270,74 @@ export default function Home({ user }) {
               return (
                 <article
                   key={tpl.id}
-                  className={`home-template-card${tpl.type === 'exclusive' ? ' home-template-card--exclusive' : ''}${!canUse ? ' locked' : ''}`}
+                  className={`home-template-card${tpl.type === 'exclusive' ? ' home-template-card--exclusive' : ''}${openMobileTemplateId === tpl.id ? ' is-open' : ''}`}
                 >
-                  <div className="home-template-card-thumb" style={{ background: `${tpl.color}18` }}>
-                    <span className="home-template-card-icon">{tpl.thumbnail}</span>
-                    <span className="home-template-dot" style={{ background: tpl.color }} />
-                    {tpl.type === 'exclusive' && !tpl.isAcquired && (
-                      <span className="badge-exclusive">🔒 Exclusiva</span>
-                    )}
-                    {tpl.isAcquired && tpl.type === 'exclusive' && (
-                      <span className="badge-acquired">✔ Adquirida</span>
-                    )}
-                    {isActual && (
-                      <span className="badge-actual">Actual</span>
-                    )}
-                  </div>
-                  <div className="home-template-card-body">
-                    <h4>{tpl.name}</h4>
-                    <p className="home-template-category">{tpl.category}</p>
-                    <p className="home-template-description">{tpl.description}</p>
-                    <div className="home-template-features">
-                      {tpl.features.map((f) => (
-                        <span key={f} className="home-template-tag">{f}</span>
-                      ))}
-                    </div>
-                  </div>
-                  {!canUse && (
-                    <div className="home-template-card-lock">
-                      <FaLock />
-                    </div>
-                  )}
+                  {/* Header visible siempre (mobile: funciona como accordion button) */}
                   <button
-                    className={`home-template-cta${isActual ? ' home-template-cta--inuse'
-                      : !canUse ? ' home-template-cta--unlock'
-                        : ''
-                      }`}
-                    onClick={handleTemplateAction}
-                    disabled={isActual}
+                    type="button"
+                    className="home-template-mobile-toggle"
+                    onClick={() => toggleMobileTemplate(tpl.id)}
+                    aria-expanded={openMobileTemplateId === tpl.id}
+                    aria-controls={`tpl-panel-${tpl.id}`}
                   >
-                    {isActual ? 'En uso' : canUse ? 'Usar plantilla' : 'Desbloquear'}
+                    <div className="home-template-card-thumb" style={{ background: `${tpl.color}18` }}>
+                      <span className="home-template-card-icon">{tpl.thumbnail}</span>
+                      <span className="home-template-dot" style={{ background: tpl.color }} />
+                      {tpl.type === 'exclusive' && !tpl.isAcquired && (
+                        <span className="badge-exclusive">🔒 Exclusiva</span>
+                      )}
+                      {tpl.isAcquired && tpl.type === 'exclusive' && (
+                        <span className="badge-acquired">✔ Adquirida</span>
+                      )}
+                      {isActual && (
+                        <span className="badge-actual">Actual</span>
+                      )}
+                    </div>
+
+                    <div className="home-template-mobile-summary">
+                      <div className="home-template-mobile-summary-text">
+                        <h4>{tpl.name}</h4>
+                        <p className="home-template-category">{tpl.category}</p>
+                      </div>
+
+                      {/* Chevron solo visual en mobile */}
+                      <span
+                        className={`home-template-mobile-chevron ${openMobileTemplateId === tpl.id ? 'is-rotated' : ''}`}
+                        aria-hidden="true"
+                      >
+                        ▾
+                      </span>
+                    </div>
                   </button>
+
+                  {/* Panel colapsable (mobile) / visible normal (desktop por CSS) */}
+                  <div
+                    id={`tpl-panel-${tpl.id}`}
+                    className={`home-template-collapsible ${openMobileTemplateId === tpl.id ? 'is-open' : ''}`}
+                  >
+                    <div className="home-template-collapsible-inner">
+                      <div className="home-template-card-body">
+                        <p className="home-template-description">{tpl.description}</p>
+
+                        <div className="home-template-features">
+                          {tpl.features.map((f) => (
+                            <span key={f} className="home-template-tag">{f}</span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <button
+                        className={`home-template-cta${isActual ? ' home-template-cta--inuse'
+                          : !canUse ? ' home-template-cta--unlock'
+                            : ''
+                          }`}
+                        onClick={handleTemplateAction}
+                        disabled={isActual}
+                      >
+                        {isActual ? 'En uso' : canUse ? 'Usar plantilla' : '🔒 Desbloquear'}
+                      </button>
+                    </div>
+                  </div>
                 </article>
               );
             })}
