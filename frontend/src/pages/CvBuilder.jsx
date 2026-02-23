@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Fragment } from "react";
 import { FaLinkedin, FaGithub, FaGlobe, FaCog, FaTrashAlt, FaExclamationTriangle } from "react-icons/fa";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import TEMPLATES from "../data/templates";
@@ -338,20 +338,25 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
   const handleDownloadPDF = async () => {
     if (!cvRef.current) return;
+
+    const htmlContent = cvRef.current.outerHTML;
+    const styleTags = Array.from(document.querySelectorAll('style, link[rel="stylesheet"], link[rel="preconnect"]'))
+      .map(tag => tag.outerHTML)
+      .join('\n');
+
     try {
-      const html2pdf = (await import("html2pdf.js")).default;
-      const opt = {
-        margin: [10, 10],
-        filename: `${cvData.nombre || "mi_cv"}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
-      };
-      html2pdf().set(opt).from(cvRef.current).save();
+      const blob = await cvService.generatePdf(htmlContent, styleTags);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${cvData.nombre ? cvData.nombre.replace(/\s+/g, "_") : "Mi_CV_Joblu"}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Error al cargar html2pdf:", error);
-      // Podrías mostrar un toast de error aquí si quisieras
+      console.error("Error al descargar PDF:", error);
+      alert("Hubo un error al generar el PDF.");
     }
   };
 
@@ -370,8 +375,8 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
   const settingsSummary = `Idioma: ${cvLanguage === "en" ? "Inglés" : "Español"} · Estilo: ${cvStyle === "visual" ? "Visual" : cvStyle === "balanceado" ? "Balanceado" : "Compatibilidad ATS"}${targetIndustry ? ` · Rubro: ${targetIndustry}` : ""}`;
 
-  const contactoLinea1 = [cvData.email, cvData.telefono, cvData.ubicacion].filter(Boolean).join(" · ") || (cvLanguage === "en" ? "email@example.com · +54 9 11 0000-0000 · Buenos Aires" : "email@ejemplo.com · +54 9 11 0000-0000 · Buenos Aires");
-  const contactoLinea2 = [cvData.linkedin, cvData.github, cvData.sitioWeb].filter(Boolean).join(" · ") || (cvLanguage === "en" ? "linkedin.com/in/user · github.com/user · portfolio.com" : "linkedin.com/in/usuario · github.com/usuario · portfolio.com");
+  const contactoLinea1 = [cvData.email, cvData.telefono, cvData.ubicacion].filter(Boolean).join(" · ") || (cvLanguage === "en" ? <span className="cv-placeholder">email@example.com · +54 9 11 0000-0000 · Buenos Aires</span> : <span className="cv-placeholder">email@ejemplo.com · +54 9 11 0000-0000 · Buenos Aires</span>);
+  const contactoLinea2 = [cvData.linkedin, cvData.github, cvData.sitioWeb].filter(Boolean).join(" · ") || (cvLanguage === "en" ? <span className="cv-placeholder">linkedin.com/in/user · github.com/user · portfolio.com</span> : <span className="cv-placeholder">linkedin.com/in/usuario · github.com/usuario · portfolio.com</span>);
 
   const socialLinks = [{ type: "linkedin", value: cvData.linkedin }, { type: "github", value: cvData.github }, { type: "web", value: cvData.sitioWeb }].filter(l => !!l.value && l.value.trim() !== "");
 
@@ -533,29 +538,37 @@ function CvBuilder({ user, settings, onChangeSettings }) {
             <div className={previewPaperClass} ref={cvRef}>
               <div className="cv-preview-header">
                 <div>
-                  <h1>{cvData.nombre || (cvLanguage === "en" ? "Name Surname" : "Nombre Apellido")}</h1>
-                  <p className="cv-preview-job-title">{cvData.puesto || (cvLanguage === "en" ? "Desired role / Job title" : "Puesto deseado / Rol profesional")}</p>
+                  <h1>{cvData.nombre || <span className="cv-placeholder">{cvLanguage === "en" ? "Name Surname" : "Nombre Apellido"}</span>}</h1>
+                  <p className="cv-preview-job-title">{cvData.puesto || <span className="cv-placeholder">{cvLanguage === "en" ? "Desired role / Job title" : "Puesto deseado / Rol profesional"}</span>}</p>
                 </div>
-                {includePhoto && (cvData.foto ? <img src={cvData.foto} alt="Foto" className="cv-photo-preview" /> : <div className="cv-photo-placeholder">{cvLanguage === "en" ? "Photo" : "Foto"}</div>)}
+                {includePhoto && (cvData.foto ? <img src={cvData.foto} alt="Foto" className="cv-photo-preview" /> : <div className="cv-photo-placeholder cv-placeholder">{cvLanguage === "en" ? "Photo" : "Foto"}</div>)}
               </div>
 
               <section className="cv-preview-contact">
                 <p>{contactoLinea1}</p>
                 {socialLinks.length > 0 ? (
                   <div className="cv-contact-social">
-                    {socialLinks.map(link => {
+                    {socialLinks.map((link, index) => {
                       const url = link.value.trim().startsWith("http") ? link.value.trim() : `https://${link.value.trim()}`;
+                      let label = link.value.trim();
+                      if (link.type === 'linkedin') label = 'LinkedIn';
+                      if (link.type === 'github') label = 'GitHub';
+                      if (link.type === 'web') label = 'Portfolio';
                       return (
-                        <a key={link.type} href={url} target="_blank" rel="noopener noreferrer" className="cv-contact-link">
-                          <span className="cv-contact-icon">
-                            {link.type === 'linkedin' ? <FaLinkedin size="1em" /> : link.type === 'github' ? <FaGithub size="1em" /> : <FaGlobe size="1em" />}
-                          </span>
-                          <span className="cv-contact-text">{link.value.trim()}</span>
-                        </a>
+                        <Fragment key={link.type}>
+                          <a href={url} target="_blank" rel="noopener noreferrer" className="cv-contact-link">
+                            <span className="cv-contact-icon">
+                              {link.type === 'linkedin' ? <FaLinkedin size="1em" /> : link.type === 'github' ? <FaGithub size="1em" /> : <FaGlobe size="1em" />}
+                            </span>
+                            <span className="cv-contact-text">{label}</span>
+                            {/* Salto invisible para forzar la separación en pdf-parse */}
+                            <span style={{ opacity: 0, position: "absolute", pointerEvents: "none", width: 0, overflow: "hidden" }}>{" \n "}</span>
+                          </a>
+                        </Fragment>
                       );
                     })}
                   </div>
-                ) : <p>{contactoLinea2}</p>}
+                ) : contactoLinea2 ? <p>{contactoLinea2}</p> : null}
               </section>
 
               <hr className="cv-preview-divider" />
@@ -565,7 +578,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
                 <section key={key} className="cv-preview-section">
                   <h4>{sectionLabels[key]}</h4>
                   <p className={`cv-preview-paragraph${['experiencias', 'educacion', 'proyectos', 'otros'].includes(key) ? '-preline' : ''}`}>
-                    {cvData[key] || (cvLanguage === "en" ? "Add details..." : "Agregá detalles...")}
+                    {cvData[key] || <span className="cv-placeholder">{cvLanguage === "en" ? "Add details..." : "Agregá detalles..."}</span>}
                   </p>
                 </section>
               ))}

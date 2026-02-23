@@ -1457,3 +1457,20 @@
     flex-wrap: wrap;
   }
 }
+
+.cv-contact-social { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+.cv-contact-link { display: inline-flex; align-items: center; gap: 6px; background-color: #f3f4f6; color: #374151; padding: 4px 12px; border-radius: 16px; text-decoration: none; font-size: 12px; font-weight: 500; transition: all 0.2s ease; border: 1px solid #e5e7eb; }
+.cv-contact-link:hover { background-color: #e5e7eb; transform: translateY(-1px); }
+.template-visual .cv-contact-link { background-color: rgba(255, 255, 255, 0.2); border-color: transparent; }
+
+/* Placeholders de CV */
+.cv-placeholder {
+  opacity: 0.5;
+  font-style: italic;
+}
+
+@media print {
+  .cv-placeholder {
+    display: none !important;
+  }
+}

@@ -4,7 +4,7 @@ import API_BASE_URL from "../config/api";
 // 🚀 SERVICIO: CV (Currículums)
 // ==========================================
 const cvService = {
-    
+
     // --- 1. Utilidades y Autenticación ---
 
     /**
@@ -139,6 +139,16 @@ const cvService = {
             throw new Error(err.error || "Error al conectar con la IA");
         }
         return await response.json();
+    },
+
+    generatePdf: async (htmlContent, styleTags) => {
+        const response = await fetch(`${API_BASE_URL}/api/cvs/generate-pdf`, {
+            method: "POST",
+            headers: cvService.getAuthHeaders(),
+            body: JSON.stringify({ htmlContent, styleTags }),
+        });
+        if (!response.ok) throw new Error("Error al generar el PDF");
+        return await response.blob();
     },
 };
 

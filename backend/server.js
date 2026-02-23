@@ -11,6 +11,7 @@ import { fileURLToPath } from "url";
 import { createRequire } from "module";
 import rateLimit from "express-rate-limit";
 import bcrypt from "bcryptjs"; // Importante para manejar contraseñas seguras
+import puppeteer from "puppeteer";
 
 // ==========================================
 // ⚙️ CONFIGURACIÓN Y VARIABLES DE ENTORNO
@@ -505,6 +506,7 @@ app.post("/api/cvs/import", authenticateToken, uploadCv.single("file"), async (r
                 "sitioWeb": "", "linkedin": "", "github": "", "perfil": "",
                 "experiencias": "", "educacion": "", "habilidades": "", "idiomas": "", "proyectos": "", "otros": ""
               }
+              ATENCIÓN: Si ves URLs o textos pegados por error del PDF (ej. "linkedin.com/in/usuariogithub.com/usuario" o "email@ejemplo.com+54911"), SEPÁRALOS con lógica y guárdalos en sus campos correspondientes.
               Devuelve solo JSON.`
             },
             {
@@ -600,6 +602,40 @@ app.get("/api/jobs/:id", async (req, res) => {
     res.json(job);
   } catch (err) {
     res.status(500).json({ error: "Error al obtener el empleo" });
+  }
+});
+
+app.post("/api/cvs/generate-pdf", authenticateToken, async (req, res) => {
+  try {
+    const { htmlContent, styleTags } = req.body;
+    const browser = await puppeteer.launch({ headless: "new", args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    const page = await browser.newPage();
+
+    const fullHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          ${styleTags}
+          <style>
+            @page { margin: 0; size: A4; } 
+            body { margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white; } 
+            .cv-preview-paper { box-shadow: none !important; margin: 0 !important; width: 100% !important; height: 100% !important; min-height: 297mm; box-sizing: border-box; }
+          </style>
+        </head>
+        <body>${htmlContent}</body>
+      </html>
+    `;
+
+    await page.setContent(fullHtml, { waitUntil: 'networkidle0' });
+    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '0', right: '0', bottom: '0', left: '0' } });
+    await browser.close();
+
+    res.set({ 'Content-Type': 'application/pdf', 'Content-Length': pdfBuffer.length });
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error("Error generando PDF con Puppeteer:", error);
+    res.status(500).json({ error: "Error al generar el PDF" });
   }
 });
 
