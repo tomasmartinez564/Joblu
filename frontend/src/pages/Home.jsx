@@ -12,9 +12,9 @@ import cvService from "../services/cvService";
 
 // Consejos para el "Tip del día"
 const JOBLU_TIPS = [
-  { text: "Usá verbos de acción como 'Lideré' o 'Desarrollé' en tu experiencia.", target: "experiencia" },
+  { text: "Usá verbos de acción como 'Lideré' o 'Desarrollé' en tu experiencia.", target: "experiencias" },
   { text: "Tu resumen profesional debe ser breve y captar la atención en 5 segundos.", target: "perfil" },
-  { text: "No olvides incluir links a tu portfolio o perfiles profesionales.", target: "contacto" },
+  { text: "No olvides incluir links a tu portfolio o perfiles profesionales.", target: "datos" },
   { text: "Agregá tus habilidades técnicas más importantes para superar filtros ATS.", target: "habilidades" },
   { text: "La educación más reciente siempre debe ir primero.", target: "educacion" }
 ];

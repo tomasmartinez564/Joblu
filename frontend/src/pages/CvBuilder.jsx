@@ -106,6 +106,37 @@ function CvBuilder({ user, settings, onChangeSettings }) {
     { key: "otros", label: "Información Adicional" }
   ];
 
+  const normalizeHashTarget = (hash) => {
+    if (!hash) return "";
+    return hash.replace(/^#/, "").toLowerCase().trim()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Limpia tildes
+      .replace(/\s+/g, "-");
+  };
+
+  const resolveStepKeyFromHash = (rawHash) => {
+    const normalized = normalizeHashTarget(rawHash);
+    const aliases = {
+      "experiencia": "experiencias",
+      "contacto": "datos",
+      "info-adicional": "otros",
+      "informacion-adicional": "otros"
+    };
+    return aliases[normalized] || normalized;
+  };
+
+  useEffect(() => {
+    if (location.hash) {
+      const resolvedKey = resolveStepKeyFromHash(location.hash);
+      const stepIndex = STEPS.findIndex(s => s.key === resolvedKey);
+      if (stepIndex >= 0) {
+        setActiveStep(stepIndex);
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 50);
+      }
+    }
+  }, [location.hash]); // Se ejecuta al montar y cada vez que cambia el hash
+
   // --- 7. Refs ---
   const cvRef = useRef(null);
   const refBtnConfiguracion = useRef(null);
