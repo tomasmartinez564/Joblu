@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { FaLock } from "react-icons/fa";
 import TEMPLATES from "../data/templates";
 
 // --- Estilos ---
@@ -127,11 +128,19 @@ export default function Home({ user }) {
               <div className="templates-static-grid">
                 {TEMPLATES.map((tpl) => {
                   const isActive = lastCv?.templateId === tpl.id;
+                  const canUse = tpl.type === 'free' || tpl.isAcquired;
+
                   return (
                     <button
                       key={tpl.id}
-                      className={`templates-static-item${isActive ? " templates-static-item--active" : ""}`}
-                      onClick={() => navigate('/cv', { state: { templateId: tpl.id } })}
+                      className={`templates-static-item${isActive ? " templates-static-item--active" : ""}${!canUse ? " locked" : ""}`}
+                      onClick={() => {
+                        if (canUse) {
+                          navigate('/cv', { state: { templateId: tpl.id } });
+                        } else {
+                          addToast(`¡Próximamente! Desbloqueá "${tpl.name}" para usarla en tu CV.`, 'info');
+                        }
+                      }}
                       title={tpl.description}
                     >
                       {isActive && <span className="templates-mini-badge">Actual</span>}
@@ -143,7 +152,11 @@ export default function Home({ user }) {
                         <span className="templates-mini-dot" style={{ background: tpl.color }} />
                       </span>
                       <span className="templates-static-name">{tpl.name}</span>
-                      <span className="templates-mini-use">Usar →</span>
+                      {canUse ? (
+                        <span className="templates-mini-use">Usar →</span>
+                      ) : (
+                        <span className="templates-mini-use locked-text"><FaLock style={{ marginRight: '4px' }} /> Bloqueado</span>
+                      )}
                     </button>
                   );
                 })}
@@ -239,7 +252,7 @@ export default function Home({ user }) {
               return (
                 <article
                   key={tpl.id}
-                  className={`home-template-card${tpl.type === 'exclusive' ? ' home-template-card--exclusive' : ''}`}
+                  className={`home-template-card${tpl.type === 'exclusive' ? ' home-template-card--exclusive' : ''}${!canUse ? ' locked' : ''}`}
                 >
                   <div className="home-template-card-thumb" style={{ background: `${tpl.color}18` }}>
                     <span className="home-template-card-icon">{tpl.thumbnail}</span>
@@ -264,6 +277,11 @@ export default function Home({ user }) {
                       ))}
                     </div>
                   </div>
+                  {!canUse && (
+                    <div className="home-template-card-lock">
+                      <FaLock />
+                    </div>
+                  )}
                   <button
                     className={`home-template-cta${isActual ? ' home-template-cta--inuse'
                       : !canUse ? ' home-template-cta--unlock'

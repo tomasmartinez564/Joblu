@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, Fragment } from "react";
-import { FaLinkedin, FaGithub, FaGlobe, FaCog, FaTrashAlt, FaExclamationTriangle } from "react-icons/fa";
+import { FaLinkedin, FaGithub, FaGlobe, FaCog, FaTrashAlt, FaExclamationTriangle, FaLock } from "react-icons/fa";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import TEMPLATES from "../data/templates";
 import OnboardingTour, { LS_KEY } from "../components/cv/OnboardingTour";
@@ -683,7 +683,8 @@ function CvBuilder({ user, settings, onChangeSettings }) {
                 <button
                   key={tpl.id}
                   type="button"
-                  className={`template-card${templateId === tpl.id ? " active" : ""}`}
+                  className={`template-card${templateId === tpl.id ? " active" : ""}${!tpl.isAcquired ? " locked" : ""}`}
+                  disabled={!tpl.isAcquired}
                   onClick={() => { setTemplateId(tpl.id); setShowTemplateModal(false); }}
                 >
                   {templateId === tpl.id && (
@@ -702,6 +703,11 @@ function CvBuilder({ user, settings, onChangeSettings }) {
                       <span key={f} className="template-feature-tag">{f}</span>
                     ))}
                   </div>
+                  {!tpl.isAcquired && (
+                    <div className="template-card-lock">
+                      <FaLock />
+                    </div>
+                  )}
                 </button>
               ))}
             </div>
