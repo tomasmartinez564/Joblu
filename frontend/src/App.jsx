@@ -36,7 +36,6 @@ const LS_USER_KEY = 'joblu_user'
 const LS_SETTINGS_KEY = 'joblu_settings'
 const LS_CVS_KEY = 'joblu_savedCvs'
 const LS_SAVED_JOBS_KEY = 'joblu_savedJobs'
-const LS_ONBOARDING_KEY = 'joblu_onboarding_done'
 
 const defaultSettings = {
   cvLanguage: 'es',
@@ -46,25 +45,6 @@ const defaultSettings = {
   showTips: true,
   darkMode: false,
 }
-
-const onboardingSteps = [
-  {
-    title: "Bienvenido a JOBLU",
-    text: "Acá vas a poder crear tu currículum de forma rápida, con vista previa y ayuda de inteligencia artificial.",
-  },
-  {
-    title: "Crear CV y Mis CVs",
-    text: "En la sección “Crear CV” completás tus datos. En “Mis CVs” vas a ver y gestionar los CVs que guardes.",
-  },
-  {
-    title: "Comunidad",
-    text: "En la Comunidad podés compartir experiencias, hacer preguntas y leer posteos de otros usuarios.",
-  },
-  {
-    title: "Bolsa de trabajo",
-    text: "En la Bolsa de trabajo vas a encontrar empleos filtrados por tipo, modalidad y categoría para postular con tu CV.",
-  },
-];
 
 // ==========================================
 // 🏗️ DISEÑO PRINCIPAL (AppLayout)
@@ -90,7 +70,7 @@ function AppLayout() {
     } catch { return [] }
   })
 
-  // --- Estados: Preferencias y Onboarding ---
+  // --- Estados: Preferencias ---
   const [settings, setSettings] = useState(() => {
     try {
       const raw = localStorage.getItem(LS_SETTINGS_KEY)
@@ -99,8 +79,6 @@ function AppLayout() {
       return { ...defaultSettings, ...parsed }
     } catch { return defaultSettings }
   })
-  const [showOnboarding, setShowOnboarding] = useState(false)
-  const [onboardingStep, setOnboardingStep] = useState(0)
 
   // --- Effects (Persistencia y Lógica de Interfaz) ---
   useEffect(() => {
@@ -137,12 +115,6 @@ function AppLayout() {
     try {
       if (token) localStorage.setItem('joblu_token', token)
       localStorage.setItem(LS_USER_KEY, JSON.stringify(userData))
-
-      const done = localStorage.getItem(LS_ONBOARDING_KEY) === 'done'
-      if (!done) {
-        setOnboardingStep(0)
-        setShowOnboarding(true)
-      }
     } catch { }
     navigate('/cv')
   }
@@ -150,7 +122,6 @@ function AppLayout() {
   const handleLogout = () => {
     setUser(null)
     setIsAccountMenuOpen(false)
-    setShowOnboarding(false)
     try {
       localStorage.removeItem('joblu_token')
       localStorage.removeItem(LS_USER_KEY)
@@ -165,6 +136,7 @@ function AppLayout() {
   }
 
   const handleCreateCv = () => navigate('/cv')
+
   const goToAccount = () => {
     setIsAccountMenuOpen(false)
     navigate('/cuenta')
@@ -174,20 +146,6 @@ function AppLayout() {
     setSavedJobs((prev) =>
       prev.includes(jobId) ? prev.filter(id => id !== jobId) : [...prev, jobId]
     )
-  }
-
-  // --- Handlers: Onboarding ---
-  const finishOnboarding = () => {
-    setShowOnboarding(false)
-    try { localStorage.setItem(LS_ONBOARDING_KEY, 'done') } catch { }
-  }
-
-  const handleNextOnboarding = () => {
-    if (onboardingStep + 1 < onboardingSteps.length) {
-      setOnboardingStep(onboardingStep + 1)
-    } else {
-      finishOnboarding()
-    }
   }
 
   // --- Renderizado ---
@@ -206,44 +164,57 @@ function AppLayout() {
         onCreateCv={handleCreateCv}
       />
 
-      {user && showOnboarding && (
-        <div className="onboarding-backdrop">
-          <div className="onboarding-modal">
-            <h2 className="onboarding-title">{onboardingSteps[onboardingStep].title}</h2>
-            <p className="onboarding-text">{onboardingSteps[onboardingStep].text}</p>
-            <div className="onboarding-actions">
-              <button type="button" className="onboarding-secondary" onClick={finishOnboarding}>Cerrar</button>
-              <button type="button" className="onboarding-primary" onClick={handleNextOnboarding}>
-                {onboardingStep + 1 < onboardingSteps.length ? 'Siguiente' : 'Empezar a usar JOBLU'}
-              </button>
-            </div>
-            <div className="onboarding-dots">
-              {onboardingSteps.map((_, index) => (
-                <span key={index} className={'onboarding-dot' + (index === onboardingStep ? ' onboarding-dot-active' : '')} />
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       <main className="app-main">
         <Suspense fallback={<div style={{ padding: "2rem", textAlign: "center" }}>Cargando...</div>}>
           <Routes>
             <Route path="/" element={<Home user={user} />} />
-            <Route path="/cv" element={<ProtectedRoute user={user}><CvBuilder user={user} settings={settings} onChangeSettings={setSettings} /></ProtectedRoute>} />
-            <Route path="/cv/:id" element={<ProtectedRoute user={user}><CvBuilder user={user} settings={settings} onChangeSettings={setSettings} /></ProtectedRoute>} />
+            <Route
+              path="/cv"
+              element={
+                <ProtectedRoute user={user}>
+                  <CvBuilder user={user} settings={settings} onChangeSettings={setSettings} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cv/:id"
+              element={
+                <ProtectedRoute user={user}>
+                  <CvBuilder user={user} settings={settings} onChangeSettings={setSettings} />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/comunidad" element={<Community user={user} />} />
             <Route path="/comunidad/:id" element={<PostDetail user={user} />} />
             <Route path="/jobs" element={<Jobs savedJobs={savedJobs} toggleSavedJob={toggleSavedJob} />} />
             <Route path="/jobs/:id" element={<JobDetail savedJobs={savedJobs} toggleSavedJob={toggleSavedJob} />} />
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
-
-            <Route path="/mis-cvs" element={<ProtectedRoute user={user}><MyCvs user={user} /></ProtectedRoute>} />
-            <Route path="/cuenta" element={<ProtectedRoute user={user}><AccountSettings user={user} onUpdateUser={handleUpdateUser} settings={settings} onChangeSettings={setSettings} /></ProtectedRoute>} />
+            <Route
+              path="/mis-cvs"
+              element={
+                <ProtectedRoute user={user}>
+                  <MyCvs user={user} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cuenta"
+              element={
+                <ProtectedRoute user={user}>
+                  <AccountSettings
+                    user={user}
+                    onUpdateUser={handleUpdateUser}
+                    settings={settings}
+                    onChangeSettings={setSettings}
+                  />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </main>
+
       <Footer />
     </div>
   )
