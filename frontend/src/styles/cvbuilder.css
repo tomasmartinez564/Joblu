@@ -378,7 +378,7 @@
   margin-top: auto; /* Empuja el candado al fondo de la card */
   padding-top: 0.5rem;
   font-size: 1.1rem;
-  color: #94a3b8; /* Gris suave */
+  color: var(--joblu-primary);
   display: flex;
   justify-content: center;
   width: 100%;

@@ -51,12 +51,14 @@ if (!MONGODB_URI) {
 // 📦 MODELOS DE DATOS
 // ==========================================
 
-// 1. Usuario
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   avatar: { type: String },
+  jobType: { type: String, default: "remoto" },
+  seniority: { type: String, default: "ssr" },
+  areas: { type: [String], default: ["Software Development"] },
 }, { timestamps: true });
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);
@@ -292,6 +294,60 @@ app.post("/api/user/upload-avatar", authenticateToken, uploadAvatar.single("avat
   } catch (err) {
     console.error("Error subiendo avatar:", err);
     res.status(500).json({ error: "Error al procesar la imagen." });
+  }
+});
+
+// Actualizar Perfil y Preferencias
+app.put("/api/user/profile", authenticateToken, async (req, res) => {
+  try {
+    const { name, jobType, seniority, areas } = req.body;
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    if (name !== undefined) user.name = name;
+    if (jobType !== undefined) user.jobType = jobType;
+    if (seniority !== undefined) user.seniority = seniority;
+    if (areas !== undefined) user.areas = areas;
+
+    await user.save();
+
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    res.json(userObj);
+  } catch (err) {
+    console.error("Error actualizando perfil:", err);
+    res.status(500).json({ error: "Error al actualizar perfil" });
+  }
+});
+
+
+// --- Sección: Usuarios (Público) ---
+
+app.get("/api/users/profile/:email", authenticateToken, async (req, res) => {
+  try {
+    const email = req.params.email;
+    const user = await User.findOne({ email }).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    res.json({
+      name: user.name,
+      avatar: user.avatar,
+      preferences: {
+        jobType: user.jobType,
+        seniority: user.seniority,
+        areas: user.areas
+      }
+    });
+  } catch (err) {
+    console.error("Error obteniendo perfil de usuario:", err);
+    res.status(500).json({ error: "Error al obtener el perfil" });
   }
 });
 

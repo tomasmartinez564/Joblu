@@ -25,18 +25,41 @@ function AccountSettings({ user, onUpdateUser }) {
   const [newPassword, setNewPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
 
-  // --- 3. Estados: Preferencias JOBLU (Mock Local) ---
-  const [jobType, setJobType] = useState("remoto");
-  const [seniority, setSeniority] = useState("ssr");
-  const [areas, setAreas] = useState(["Software Development"]);
+  // --- 3. Estados: Preferencias JOBLU ---
+  const [jobType, setJobType] = useState(user?.jobType || "remoto");
+  const [seniority, setSeniority] = useState(user?.seniority || "ssr");
+  const [areas, setAreas] = useState(user?.areas || ["Software Development"]);
 
   const toggleArea = (area) => {
     setAreas(prev => prev.includes(area) ? prev.filter(a => a !== area) : [...prev, area]);
   };
 
-  const handlePreferencesSubmit = (e) => {
+  const [isSavingPreferences, setIsSavingPreferences] = useState(false);
+
+  const handlePreferencesSubmit = async (e) => {
     e.preventDefault();
-    addToast("Preferencias guardadas (Demo local).", "success");
+    setIsSavingPreferences(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("joblu_token")}`,
+        },
+        body: JSON.stringify({ jobType, seniority, areas }),
+      });
+
+      if (!response.ok) throw new Error("Error al guardar");
+
+      const updatedUser = await response.json();
+      onUpdateUser(updatedUser);
+      addToast("Preferencias guardadas correctamente.", "success");
+    } catch (err) {
+      console.error(err);
+      addToast("Error al guardar las preferencias.", "error");
+    } finally {
+      setIsSavingPreferences(false);
+    }
   };
 
   // --- 4. Estados: Notificaciones (Mock Local) ---
@@ -54,6 +77,9 @@ function AccountSettings({ user, onUpdateUser }) {
     if (user) {
       setDisplayName(user.name || "");
       setAvatarPreview(user.avatar || "");
+      if (user.jobType) setJobType(user.jobType);
+      if (user.seniority) setSeniority(user.seniority);
+      if (user.areas) setAreas(user.areas);
     }
   }, [user]);
 
@@ -281,7 +307,9 @@ function AccountSettings({ user, onUpdateUser }) {
         </div>
 
         <div className="form-actions">
-          <button type="submit" className="btn-primary">Guardar Preferencias</button>
+          <button type="submit" className="btn-primary" disabled={isSavingPreferences}>
+            {isSavingPreferences ? "Guardando..." : "Guardar Preferencias"}
+          </button>
         </div>
       </form>
     </div>

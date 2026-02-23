@@ -7,9 +7,10 @@ import "../styles/postdetail.css";
 import "../styles/jobs-detail.css";
 import { formatDate } from "../utils/dateUtils";
 
-// --- Contexto y Configuración ---
 import { useToast } from "../context/ToastContext";
 import API_BASE_URL from "../config/api";
+import { userService } from "../services/userService";
+import UserProfilePopup from "../components/community/UserProfilePopup";
 
 // ==========================================
 // 📋 CONSTANTES Y HELPERS DE PERSISTENCIA
@@ -46,7 +47,12 @@ function PostDetail({ user }) {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  // --- 4. Lógica Derivada (Calculada) ---
+  // --- 4. Estados: Modal Perfil de Usuario ---
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [selectedProfileData, setSelectedProfileData] = useState(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+
+  // --- 5. Lógica Derivada (Calculada) ---
   const isLiked = post && user && post.likedBy?.includes(user.id);
   const likeCount = post ? (post.likedBy?.length || 0) : 0;
   const canDelete = user && post && post.authorEmail && user.email === post.authorEmail;
@@ -79,6 +85,29 @@ function PostDetail({ user }) {
   // ==========================================
   // 📡 MANEJADORES DE EVENTOS (Handlers)
   // ==========================================
+
+  /**
+   * Abre el perfil público del autor.
+   */
+  const handleAuthorClick = async (email) => {
+    if (!email) {
+      addToast("Usuario sin email asociado", "info");
+      return;
+    }
+
+    setIsProfileOpen(true);
+    setIsLoadingProfile(true);
+    setSelectedProfileData(null);
+    try {
+      const data = await userService.getPublicProfile(email);
+      setSelectedProfileData(data);
+    } catch (err) {
+      console.error(err);
+      addToast("Error al cargar el perfil del usuario.", "error");
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
 
   /**
    * Gestiona la lógica de dar/quitar like.
@@ -249,8 +278,13 @@ function PostDetail({ user }) {
 
       {/* Cabecera del Post */}
       <h2 className="postdetail-title">{post.title}</h2>
-      <p className="postdetail-meta">
-        por {post.authorName || "Usuario"} · {formatDate(post.createdAt)}
+      <p
+        className="postdetail-meta"
+        onClick={() => handleAuthorClick(post.authorEmail)}
+        style={{ cursor: "pointer", display: "inline-block" }}
+        title="Ver perfil"
+      >
+        por <strong>{post.authorName || "Usuario"}</strong> · {formatDate(post.createdAt)}
       </p>
 
       {/* Interacción: Likes */}
@@ -312,7 +346,14 @@ function PostDetail({ user }) {
                 <div className="postdetail-comment-row">
                   <div>
                     <p className="postdetail-comment-header">
-                      <span className="postdetail-comment-author">{c.authorName || "Usuario anónimo"}</span>
+                      <span
+                        className="postdetail-comment-author"
+                        onClick={() => handleAuthorClick(c.authorEmail)}
+                        style={{ cursor: "pointer" }}
+                        title="Ver perfil"
+                      >
+                        {c.authorName || "Usuario anónimo"}
+                      </span>
                       <span className="postdetail-comment-meta">{formatDate(c.createdAt)}</span>
                     </p>
                     <p className="postdetail-comment-body">{c.content}</p>
@@ -353,6 +394,14 @@ function PostDetail({ user }) {
           </button>
         </form>
       </section>
+
+      {/* Modal de Perfil de Usuario */}
+      <UserProfilePopup
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        profileData={selectedProfileData}
+        isLoading={isLoadingProfile}
+      />
     </section>
   );
 }

@@ -290,7 +290,7 @@ export default function Home({ user }) {
                     onClick={handleTemplateAction}
                     disabled={isActual}
                   >
-                    {isActual ? 'En uso' : canUse ? 'Usar plantilla' : '🔒 Desbloquear'}
+                    {isActual ? 'En uso' : canUse ? 'Usar plantilla' : 'Desbloquear'}
                   </button>
                 </article>
               );

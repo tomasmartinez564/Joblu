@@ -5,6 +5,8 @@ import { FaUser, FaHeart, FaRegHeart, FaComment, FaShareAlt, FaTrash } from "rea
 // --- Estilos y Utilidades ---
 import "../styles/community.css";
 import { formatDate } from "../utils/dateUtils";
+import { userService } from "../services/userService";
+import UserProfilePopup from "../components/community/UserProfilePopup";
 
 /**
  * Formatea una fecha a formato relativo simple (estilo Twitter).
@@ -71,6 +73,11 @@ function Community({ user }) {
   // --- 4. Estados: Filtro de Categoría ---
   const [selectedCategory, setSelectedCategory] = useState("all");
 
+  // --- 5. Estados: Modal Perfil de Usuario ---
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [selectedProfileData, setSelectedProfileData] = useState(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+
   // --- Derived: posts filtrados ---
   const filteredPosts = selectedCategory === "all"
     ? posts
@@ -101,8 +108,31 @@ function Community({ user }) {
   }, [addToast]);
 
   // ==========================================
-  // 📡 LÓGICA DE POSTS
+  // 📡 LÓGICA DE POSTS Y PERFILES
   // ==========================================
+
+  /**
+   * Abre el perfil público del autor.
+   */
+  const handleAuthorClick = async (email) => {
+    if (!email) {
+      addToast("Usuario sin email asociado", "info");
+      return;
+    }
+
+    setIsProfileOpen(true);
+    setIsLoadingProfile(true);
+    setSelectedProfileData(null);
+    try {
+      const data = await userService.getPublicProfile(email);
+      setSelectedProfileData(data);
+    } catch (err) {
+      console.error(err);
+      addToast("Error al cargar el perfil del usuario.", "error");
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
 
   /**
    * Crea una nueva publicación en la comunidad.
@@ -364,7 +394,12 @@ function Community({ user }) {
             <article key={post._id} className="community-post">
               <div className="community-post-header">
                 <span className="community-category-badge">{post.category || "General"}</span>
-                <span className="community-post-meta">
+                <span
+                  className="community-post-meta"
+                  onClick={() => handleAuthorClick(post.authorEmail)}
+                  style={{ cursor: "pointer" }}
+                  title="Ver perfil"
+                >
                   <FaUser className="action-icon" />
                   {post.authorName || "Anónimo"}
                   <span className="community-post-meta-sep">·</span>
@@ -436,6 +471,14 @@ function Community({ user }) {
           ))}
         </div>
       )}
+
+      {/* Modal de Perfil de Usuario */}
+      <UserProfilePopup
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        profileData={selectedProfileData}
+        isLoading={isLoadingProfile}
+      />
     </section>
   );
 }
