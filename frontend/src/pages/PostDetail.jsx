@@ -375,24 +375,33 @@ function PostDetail({ user }) {
         )}
 
         {/* Formulario de Comentarios */}
-        <form onSubmit={handleAddComment} className="community-form community-form--compact">
-          <textarea
-            placeholder="Escribí tu comentario..."
-            value={commentContent}
-            onChange={(e) => setCommentContent(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleAddComment(e);
-              }
-            }}
-            rows={3}
-            className="community-textarea community-input"
-          />
-          <button type="submit" disabled={commentLoading} className="hero-cta btn-joblu">
-            {commentLoading ? "Publicando..." : "Publicar comentario"}
-          </button>
-        </form>
+        {user ? (
+          <form onSubmit={handleAddComment} className="community-form community-form--compact">
+            <textarea
+              placeholder="Escribí tu comentario..."
+              value={commentContent}
+              onChange={(e) => setCommentContent(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleAddComment(e);
+                }
+              }}
+              rows={3}
+              className="community-textarea community-input"
+            />
+            <button type="submit" disabled={commentLoading} className="hero-cta btn-joblu">
+              {commentLoading ? "Publicando..." : "Publicar comentario"}
+            </button>
+          </form>
+        ) : (
+          <div className="community-empty" style={{ padding: "1.5rem", marginTop: "1rem" }}>
+            <p>Tenés que iniciar sesión para dejar un comentario.</p>
+            <Link to="/login" className="btn-primary" style={{ display: "inline-block", marginTop: "0.5rem" }}>
+              Iniciar sesión
+            </Link>
+          </div>
+        )}
       </section>
 
       {/* Modal de Perfil de Usuario */}
