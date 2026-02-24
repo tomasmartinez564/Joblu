@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaExclamationTriangle, FaTrash, FaHeart, FaRegHeart } from "react-icons/fa";
+import { FaExclamationTriangle, FaTrash, FaHeart, FaRegHeart, FaEdit } from "react-icons/fa";
 import { useParams, useNavigate, Link } from "react-router-dom";
 
 // --- Estilos y Utilidades ---
@@ -44,8 +44,14 @@ function PostDetail({ user }) {
   const [commentLoading, setCommentLoading] = useState(false);
 
   // --- 3. Estados: UI (Likes) ---
+  const [isLiking, setIsLiking] = useState(false); // Estado anti-doble tap para like
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  // --- Estados: Edición ---
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   // --- 4. Estados: Modal Perfil de Usuario ---
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -53,7 +59,7 @@ function PostDetail({ user }) {
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
   // --- 5. Lógica Derivada (Calculada) ---
-  const isLiked = post && user && post.likedBy?.includes(user.id);
+  const isLiked = post && user && post.likedBy?.some(uid => String(uid) === String(user._id || user.id));
   const likeCount = post ? (post.likedBy?.length || 0) : 0;
   const canDelete = user && post && post.authorEmail && user.email === post.authorEmail;
 
@@ -81,6 +87,21 @@ function PostDetail({ user }) {
 
     fetchPost();
   }, [id]);
+
+  // --- Efecto Adicional: Sincronizar Like Externo ---
+  useEffect(() => {
+    const handleLikeUpdate = (e) => {
+      const { postId, likedBy } = e.detail;
+      setPost(prev => {
+        if (prev && prev._id === postId) {
+          return { ...prev, likedBy };
+        }
+        return prev;
+      });
+    };
+    window.addEventListener("joblu:post-like-updated", handleLikeUpdate);
+    return () => window.removeEventListener("joblu:post-like-updated", handleLikeUpdate);
+  }, []);
 
   // ==========================================
   // 📡 MANEJADORES DE EVENTOS (Handlers)
@@ -110,22 +131,41 @@ function PostDetail({ user }) {
   };
 
   /**
-   * Gestiona la lógica de dar/quitar like.
+   * Gestiona la lógica de dar/quitar like explícitamente y sincroniza.
    */
-  const handleToggleLike = async () => {
+  const handleToggleLike = async (e) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+
     if (!post || !user) {
       if (!user) addToast("Debés iniciar sesión para dar like", "info");
       return;
     }
 
-    // Actualización Optimista
-    const alreadyLiked = post.likedBy?.includes(user.id);
-    let newLikedBy = post.likedBy ? [...post.likedBy] : [];
+    if (isLiking) {
+      console.log(`[PostDetail Like] Request ya en curso para post ${post._id}`);
+      return;
+    }
 
+    setIsLiking(true);
+
+    // Snapshot pre-optimistic
+    const prevPost = { ...post };
+
+    const userIdStr = String(user._id || user.id);
+    const alreadyLiked = post.likedBy?.some(uid => String(uid) === userIdStr);
+    const action = alreadyLiked ? "unlike" : "like";
+
+    console.log(`[PostDetail Like] PostId: ${post._id}, Action: ${action}, Current likedBy:`, post.likedBy);
+
+    // Actualización Optimista
+    let newLikedBy = post.likedBy ? [...post.likedBy] : [];
     if (alreadyLiked) {
-      newLikedBy = newLikedBy.filter(uid => uid !== user.id);
+      newLikedBy = newLikedBy.filter(uid => String(uid) !== userIdStr);
     } else {
-      newLikedBy.push(user.id);
+      newLikedBy.push(user._id || user.id);
     }
 
     setPost(prev => ({ ...prev, likedBy: newLikedBy }));
@@ -137,18 +177,27 @@ function PostDetail({ user }) {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${localStorage.getItem("joblu_token")}`
         },
-        body: JSON.stringify({ action: alreadyLiked ? "unlike" : "like" }),
+        body: JSON.stringify({ action }),
       });
 
       if (!res.ok) throw new Error("No se pudo actualizar el like.");
 
-      // Confirmamos con datos del servidor si es necesario, 
-      // pero el optimista suele ser suficiente para UX rápida.
+      const data = await res.json();
+
+      // Reconciliación con backend
+      setPost(prev => ({ ...prev, likedBy: data.likedBy }));
+
+      // Sincronizar el estado con Community Feed si está montado (o al volver)
+      window.dispatchEvent(
+        new CustomEvent("joblu:post-like-updated", { detail: data })
+      );
     } catch (err) {
       console.error(err);
       addToast("Hubo un problema al actualizar el like.", "error");
-      // Revertir en caso de error
-      setPost(prev => ({ ...prev, likedBy: post.likedBy }));
+      // Revertir
+      setPost(prevPost);
+    } finally {
+      setIsLiking(false);
     }
   };
 
@@ -192,6 +241,44 @@ function PostDetail({ user }) {
       addToast(err.message || "Hubo un problema al comentar.", "error");
     } finally {
       setCommentLoading(false);
+    }
+  };
+
+  const handleEditStart = () => {
+    setIsEditing(true);
+    setEditContent(post.content);
+  };
+
+  const handleEditCancel = () => {
+    setIsEditing(false);
+  };
+
+  const handleEditSave = async () => {
+    if (!editContent.trim()) {
+      addToast("El contenido no puede estar vacío", "info");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/community/posts/${post._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("joblu_token")}`
+        },
+        body: JSON.stringify({ content: editContent })
+      });
+      if (!res.ok) throw new Error("Error al editar");
+
+      const updatedPost = await res.json();
+      setPost(updatedPost);
+      setIsEditing(false);
+      addToast("Post editado con éxito", "success");
+    } catch (error) {
+      addToast("Hubo un error al editar el post", "error");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -285,6 +372,7 @@ function PostDetail({ user }) {
         title="Ver perfil"
       >
         por <strong>{post.authorName || "Usuario"}</strong> · {formatDate(post.createdAt)}
+        {post.isEdited && <span style={{ fontStyle: 'italic', marginLeft: '0.4rem' }}>(Editado)</span>}
       </p>
 
       {/* Interacción: Likes */}
@@ -293,6 +381,7 @@ function PostDetail({ user }) {
           type="button"
           onClick={handleToggleLike}
           className={`postdetail-like-button${isLiked ? " is-liked" : ""}`}
+          disabled={isLiking}
         >
           {isLiked ? <><FaHeart /> Quitar like</> : <><FaRegHeart /> Me gusta</>}
         </button>
@@ -302,15 +391,37 @@ function PostDetail({ user }) {
       </div>
 
       {/* Cuerpo del Post */}
-      <div className="postdetail-content">
-        {post.content}
-      </div>
+      {isEditing ? (
+        <div className="postdetail-content" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <textarea
+            className="community-textarea community-input"
+            value={editContent}
+            onChange={e => setEditContent(e.target.value)}
+            rows={4}
+          />
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button className="btn-joblu" disabled={isSaving} onClick={handleEditSave}>{isSaving ? "Guardando..." : "Guardar"}</button>
+            <button className="btn-secondary" disabled={isSaving} onClick={handleEditCancel}>Cancelar</button>
+          </div>
+        </div>
+      ) : (
+        <div className="postdetail-content">
+          {post.content}
+        </div>
+      )}
 
       {/* Acciones de Autor */}
       {canDelete && (
-        <button onClick={handleDelete} disabled={deleting} className="postdetail-delete-btn">
-          {deleting ? "Eliminando..." : "Eliminar post"}
-        </button>
+        <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1.25rem', alignItems: 'center' }}>
+          {!isEditing && (
+            <button onClick={handleEditStart} disabled={deleting} className="btn-secondary" style={{ padding: '0.35rem 0.9rem', fontSize: '0.85rem' }}>
+              <FaEdit style={{ marginRight: '0.3rem' }} /> Editar post
+            </button>
+          )}
+          <button onClick={handleDelete} disabled={deleting} className="postdetail-delete-btn" style={{ marginBottom: 0 }}>
+            {deleting ? "Eliminando..." : "Eliminar post"}
+          </button>
+        </div>
       )}
 
       {/* Modal Confirmación Eliminar Post */}

@@ -766,13 +766,15 @@
 .home-template-card.locked:hover {
   border-color: var(--joblu-border-soft);
   box-shadow: var(--joblu-shadow-sm);
-  transform: none; /* Evitar la animación de hover */
+  transform: none;
+  /* Evitar la animación de hover */
 }
 
 .home-template-card-lock {
   padding-bottom: 0.5rem;
   font-size: 1.1rem;
-  color: #94a3b8; /* Gris suave */
+  color: #94a3b8;
+  /* Gris suave */
   display: flex;
   justify-content: center;
   width: 100%;
@@ -897,7 +899,7 @@
   opacity: 0.75;
 }
 
- 
+
 .home-template-mobile-toggle {
   display: flex;
   flex-direction: column;

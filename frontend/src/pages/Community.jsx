@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FaUser, FaHeart, FaRegHeart, FaComment, FaShareAlt, FaTrash } from "react-icons/fa";
+import { FaUser, FaHeart, FaRegHeart, FaComment, FaShareAlt, FaTrash, FaEdit } from "react-icons/fa";
 
 // --- Estilos y Utilidades ---
 import "../styles/community.css";
@@ -88,6 +88,13 @@ function Community({ user }) {
   const [commentText, setCommentText] = useState({}); // { postId: string }
   const [submittingComment, setSubmittingComment] = useState({}); // { postId: boolean }
 
+  // --- Estados: Edición de Post ---
+  const [editingPostId, setEditingPostId] = useState(null);
+  const [editContent, setEditContent] = useState("");
+
+  // Nuevo estado para control de requests de like en curso (anti doble-click)
+  const [likingPosts, setLikingPosts] = useState(new Set());
+
   // --- 5. Efectos: Carga inicial ---
   useEffect(() => {
     const fetchPosts = async () => {
@@ -106,6 +113,18 @@ function Community({ user }) {
 
     fetchPosts();
   }, [addToast]);
+
+  // --- 6. Efecto: Sincronizar Likes globales ---
+  useEffect(() => {
+    const handleLikeUpdate = (e) => {
+      const { postId, likedBy } = e.detail;
+      setPosts((prev) => prev.map(p =>
+        p._id === postId ? { ...p, likedBy } : p
+      ));
+    };
+    window.addEventListener("joblu:post-like-updated", handleLikeUpdate);
+    return () => window.removeEventListener("joblu:post-like-updated", handleLikeUpdate);
+  }, []);
 
   // ==========================================
   // 📡 LÓGICA DE POSTS Y PERFILES
@@ -183,9 +202,15 @@ function Community({ user }) {
   };
 
   /**
-   * Gestiona los likes de forma optimista.
+   * Gestiona los likes de forma optimista y sincroniza con el backend.
    */
-  const handleLike = async (postId) => {
+  const handleLike = async (e, postId) => {
+    // 1) Prevenir bubbling por si está dentro de un elemento interactivo
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+
     if (!isLogged) {
       addToast("Debés iniciar sesión para dar like", "info");
       return;
@@ -197,14 +222,42 @@ function Community({ user }) {
       return;
     }
 
+    // 2) Guard: Evitar request duplicada si ya está en proceso
+    if (likingPosts.has(postId)) {
+      console.log(`[Community Like] Ignorado: ya hay un like en curso para post ${postId}`);
+      return;
+    }
+
+    // Marcar como en proceso
+    setLikingPosts(prev => {
+      const newSet = new Set(prev);
+      newSet.add(postId);
+      return newSet;
+    });
+
+    // Snapshot para revertir si falla
+    const previousPosts = [...posts];
+
+    // Determinar acción actual, normalizando IDs a String
+    const postToUpdate = posts.find((p) => String(p._id) === String(postId));
+    if (!postToUpdate) return;
+
+    const userIdStr = String(user._id || user.id);
+    const alreadyLiked = postToUpdate.likedBy?.some(uid => String(uid) === userIdStr);
+    const action = alreadyLiked ? "unlike" : "like";
+
+    console.log(`[Community Like] PostId: ${postId}, Action: ${action}, Current likedBy:`, postToUpdate.likedBy);
+
     // Actualización optimista en la UI
     setPosts((prevPosts) =>
       prevPosts.map((p) => {
-        if (p._id !== postId) return p;
-        const alreadyLiked = p.likedBy?.includes(user.id);
+        if (String(p._id) !== String(postId)) return p;
         let newLikedBy = p.likedBy ? [...p.likedBy] : [];
-        if (alreadyLiked) newLikedBy = newLikedBy.filter((uid) => uid !== user.id);
-        else newLikedBy.push(user.id);
+        if (alreadyLiked) {
+          newLikedBy = newLikedBy.filter((uid) => String(uid) !== userIdStr);
+        } else {
+          newLikedBy.push(user._id || user.id); // asumiendo que el id original se devuelve correctamente luego desde backend
+        }
         return { ...p, likedBy: newLikedBy };
       })
     );
@@ -216,12 +269,31 @@ function Community({ user }) {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
+        body: JSON.stringify({ action })
       });
       if (!res.ok) throw new Error("Error al dar like");
-      // La actualización optimista ya se encargó de la UI.
-      // Si quisieramos ser estrictos, podríamos confirmar con updatedData.likes
+
+      const data = await res.json();
+
+      // Reconciliación segura
+      setPosts((prev) => prev.map((p) =>
+        p._id === postId ? { ...p, likedBy: data.likedBy } : p
+      ));
+
+      // Emitir evento para otras vistas dependientes
+      window.dispatchEvent(
+        new CustomEvent("joblu:post-like-updated", { detail: data })
+      );
     } catch (error) {
       addToast("No pudimos registrar tu like", "error");
+      setPosts(previousPosts); // revertir optimista
+    } finally {
+      // Liberar lock de like
+      setLikingPosts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(postId);
+        return newSet;
+      });
     }
   };
 
@@ -275,6 +347,42 @@ function Community({ user }) {
       addToast("Error al enviar comentario", "error");
     } finally {
       setSubmittingComment(prev => ({ ...prev, [postId]: false }));
+    }
+  };
+
+  const handleEditStart = (post) => {
+    setEditingPostId(post._id);
+    setEditContent(post.content);
+  };
+
+  const handleEditCancel = () => {
+    setEditingPostId(null);
+    setEditContent("");
+  };
+
+  const handleEditSave = async (postId) => {
+    if (!editContent.trim()) {
+      addToast("El contenido no puede estar vacío", "info");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/community/posts/${postId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("joblu_token")}`
+        },
+        body: JSON.stringify({ content: editContent })
+      });
+      if (!res.ok) throw new Error("Error al editar");
+
+      const updatedPost = await res.json();
+      setPosts(prev => prev.map(p => p._id === postId ? updatedPost : p));
+      setEditingPostId(null);
+      addToast("Post editado con éxito", "success");
+    } catch (error) {
+      addToast("Hubo un error al editar el post", "error");
     }
   };
 
@@ -390,85 +498,119 @@ function Community({ user }) {
         </div>
       ) : (
         <div className="community-list">
-          {filteredPosts.map((post) => (
-            <article key={post._id} className="community-post">
-              <div className="community-post-header">
-                <span className="community-category-badge">{post.category || "General"}</span>
-                <span
-                  className="community-post-meta"
-                  onClick={() => handleAuthorClick(post.authorEmail)}
-                  style={{ cursor: "pointer" }}
-                  title="Ver perfil"
-                >
-                  <FaUser className="action-icon" />
-                  {post.authorName || "Anónimo"}
-                  <span className="community-post-meta-sep">·</span>
-                  {formatRelativeDate(post.createdAt)}
-                </span>
-              </div>
+          {filteredPosts.map((post) => {
+            const alreadyLiked = user && post.likedBy?.some(uid => String(uid) === String(user._id || user.id));
+            return (
+              <article key={post._id} className="community-post">
+                <div className="community-post-header">
+                  <span className="community-category-badge">{post.category || "General"}</span>
+                  <span
+                    className="community-post-meta"
+                    onClick={() => handleAuthorClick(post.authorEmail)}
+                    style={{ cursor: "pointer" }}
+                    title="Ver perfil"
+                  >
+                    <FaUser className="action-icon" />
+                    {post.authorName || "Anónimo"}
+                    <span className="community-post-meta-sep">·</span>
+                    {formatRelativeDate(post.createdAt)}
+                  </span>
+                </div>
 
-              <div className="post-main">
-                <Link to={`/comunidad/${post._id}`} className="community-post-title">{post.title}</Link>
-                <p className="community-post-excerpt">{post.content}</p>
-              </div>
-
-              {/* Acciones del Post */}
-              <div className="post-actions">
-                <button className={`action-btn ${user && post.likedBy?.includes(user.id) ? "liked" : ""}`} onClick={() => handleLike(post._id)}>
-                  <span className="action-icon">{user && post.likedBy?.includes(user.id) ? <FaHeart /> : <FaRegHeart />}</span>
-                  <span className="action-count">{post.likedBy?.length || 0}</span>
-                </button>
-                <button className="action-btn" onClick={() => toggleComments(post._id)}>
-                  <span className="action-icon"><FaComment /></span>
-                  <span className="action-count">{post.comments?.length || 0}</span>
-                </button>
-                <button className="action-btn" onClick={() => handleShare(post._id)} title="Compartir"><span className="action-icon"><FaShareAlt /></span></button>
-              </div>
-
-              {/* Sección de Comentarios Desplegable */}
-              {openComments[post._id] && (
-                <div className="community-comments-section">
-                  <div className="comments-list">
-                    {post.comments?.length > 0 ? (
-                      post.comments.map((comment, idx) => (
-                        <div key={comment._id || idx} className="comment-item">
-                          <div className="comment-item-content">
-                            <strong>{comment.authorName}</strong>: {comment.content}
-                          </div>
-                          {user && user.email === comment.authorEmail && (
-                            <button
-                              className="comment-delete-btn"
-                              onClick={() => handleDeleteComment(post._id, comment._id)}
-                              title="Eliminar comentario"
-                              aria-label="Eliminar comentario"
-                            >
-                              <FaTrash />
-                            </button>
-                          )}
-                        </div>
-                      ))
-                    ) : <p className="no-comments">Sé el primero en comentar.</p>}
+                <div className="post-main">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <Link to={`/comunidad/${post._id}`} className="community-post-title">{post.title}</Link>
+                    {user && user.email === post.authorEmail && (
+                      <button className="action-btn" onClick={() => handleEditStart(post)} title="Editar post">
+                        <FaEdit />
+                      </button>
+                    )}
                   </div>
 
-                  {isLogged && (
-                    <form onSubmit={(e) => handleCommentSubmit(e, post._id)} className="comment-form">
-                      <label htmlFor={`comment-input-${post._id}`} className="visually-hidden">Escribí un comentario</label>
-                      <input
-                        id={`comment-input-${post._id}`}
-                        type="text"
-                        placeholder="Escribí un comentario..."
-                        className="community-input comment-input"
-                        value={commentText[post._id] || ""}
-                        onChange={(e) => setCommentText(prev => ({ ...prev, [post._id]: e.target.value }))}
-                        disabled={submittingComment[post._id]}
+                  {editingPostId === post._id ? (
+                    <div className="community-edit-form" style={{ marginTop: '0.5rem' }}>
+                      <textarea
+                        className="community-textarea community-input"
+                        value={editContent}
+                        onChange={e => setEditContent(e.target.value)}
+                        rows={3}
                       />
-                      <button type="submit" className="btn-comment" disabled={submittingComment[post._id]}>Enviar</button>
-                    </form>
+                      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                        <button className="btn-joblu" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => handleEditSave(post._id)}>Guardar</button>
+                        <button className="btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={handleEditCancel}>Cancelar</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="community-post-excerpt">
+                      {post.content}
+                      {post.isEdited && <span className="community-post-meta" style={{ display: 'inline', marginLeft: '0.4rem', fontStyle: 'italic', fontSize: '0.75rem' }}>(Editado)</span>}
+                    </p>
                   )}
                 </div>
-              )}
-            </article>
-          ))}
+
+                {/* Acciones del Post */}
+                <div className="post-actions">
+                  <button
+                    className={`action-btn ${alreadyLiked ? "liked" : ""}`}
+                    onClick={(e) => handleLike(e, post._id)}
+                    aria-label="Me gusta"
+                    disabled={likingPosts.has(post._id)}
+                  >
+                    {alreadyLiked ? <FaHeart className="icon-liked" /> : <FaRegHeart />}
+                    <span className="action-count">{post.likedBy?.length || 0}</span>
+                  </button>
+                  <button className="action-btn" onClick={() => toggleComments(post._id)}>
+                    <span className="action-icon"><FaComment /></span>
+                    <span className="action-count">{post.comments?.length || 0}</span>
+                  </button>
+                  <button className="action-btn" onClick={() => handleShare(post._id)} title="Compartir"><span className="action-icon"><FaShareAlt /></span></button>
+                </div>
+
+                {/* Sección de Comentarios Desplegable */}
+                {openComments[post._id] && (
+                  <div className="community-comments-section">
+                    <div className="comments-list">
+                      {post.comments?.length > 0 ? (
+                        post.comments.map((comment, idx) => (
+                          <div key={comment._id || idx} className="comment-item">
+                            <div className="comment-item-content">
+                              <strong>{comment.authorName}</strong>: {comment.content}
+                            </div>
+                            {user && user.email === comment.authorEmail && (
+                              <button
+                                className="comment-delete-btn"
+                                onClick={() => handleDeleteComment(post._id, comment._id)}
+                                title="Eliminar comentario"
+                                aria-label="Eliminar comentario"
+                              >
+                                <FaTrash />
+                              </button>
+                            )}
+                          </div>
+                        ))
+                      ) : <p className="no-comments">Sé el primero en comentar.</p>}
+                    </div>
+
+                    {isLogged && (
+                      <form onSubmit={(e) => handleCommentSubmit(e, post._id)} className="comment-form">
+                        <label htmlFor={`comment-input-${post._id}`} className="visually-hidden">Escribí un comentario</label>
+                        <input
+                          id={`comment-input-${post._id}`}
+                          type="text"
+                          placeholder="Escribí un comentario..."
+                          className="community-input comment-input"
+                          value={commentText[post._id] || ""}
+                          onChange={(e) => setCommentText(prev => ({ ...prev, [post._id]: e.target.value }))}
+                          disabled={submittingComment[post._id]}
+                        />
+                        <button type="submit" className="btn-comment" disabled={submittingComment[post._id]}>Enviar</button>
+                      </form>
+                    )}
+                  </div>
+                )}
+              </article>
+            );
+          })}
         </div>
       )}
 

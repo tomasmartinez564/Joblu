@@ -371,11 +371,13 @@
 .template-card.locked:hover {
   border-color: var(--joblu-border-soft);
   box-shadow: var(--joblu-shadow-sm);
-  transform: none; /* Evitar la animación de hover */
+  transform: none;
+  /* Evitar la animación de hover */
 }
 
 .template-card-lock {
-  margin-top: auto; /* Empuja el candado al fondo de la card */
+  margin-top: auto;
+  /* Empuja el candado al fondo de la card */
   padding-top: 0.5rem;
   font-size: 1.1rem;
   color: var(--joblu-primary);
@@ -558,6 +560,23 @@
   resize: vertical;
 }
 
+/* Fix para DatePickers que se cortan: Permitir overflow visible en slides y contenedores */
+.cv-form {
+  overflow: visible !important;
+}
+
+.cv-form-slide {
+  overflow: visible !important;
+}
+
+/* Contenedor del formulario global (columna izquierda) */
+.cv-builder-form-panel {
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+  z-index: 10;
+}
+
 
 .cv-form input:focus,
 .cv-form textarea:focus {
@@ -610,6 +629,259 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 0.75rem;
+}
+
+/* ===== TARJETAS DE EXPERIENCIA ====== */
+
+.cv-experience-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cv-experience-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+  transition: box-shadow 0.2s, border-color 0.2s;
+  overflow: visible;
+  /* Fix DatePicker */
+}
+
+.cv-experience-card:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+  border-color: #d1d5db;
+}
+
+.cv-experience-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  user-select: none;
+  border-radius: 12px;
+  transition: background-color 0.2s;
+}
+
+.cv-experience-card-header:hover {
+  background-color: #f9fafb;
+}
+
+.cv-experience-card.is-open .cv-experience-card-header {
+  border-bottom: 1px solid #f3f4f6;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.cv-experience-card.is-closed .cv-experience-card-header {
+  border-bottom: none;
+}
+
+.cv-experience-card-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: accordionSlideDown 0.2s ease-out forwards;
+}
+
+@keyframes accordionSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cv-exp-accordion-icon {
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  transition: transform 0.2s;
+}
+
+.cv-experience-card-header h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--joblu-primary);
+  font-family: var(--font-subtitle);
+  font-weight: 700;
+}
+
+/* ===== TARJETAS DE CHIPS (Skills / Idiomas) ====== */
+
+.cv-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.cv-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: #374151;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.cv-chip:hover {
+  background-color: #e5e7eb;
+}
+
+.cv-chip button {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  transition: color 0.2s;
+}
+
+.cv-chip button:hover {
+  color: #ef4444;
+}
+
+.cv-chip-input-wrapper {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.cv-chip-input {
+  width: 100%;
+}
+
+.cv-chip-hint {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.35rem;
+}
+
+.cv-exp-remove-btn {
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid transparent;
+  font-size: 0.8rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.cv-exp-remove-btn:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.cv-exp-checkbox {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  font-size: 0.85rem !important;
+  color: #4b5563 !important;
+  cursor: pointer;
+  margin-top: -0.25rem;
+}
+
+.cv-exp-checkbox input[type="checkbox"] {
+  margin: 0 !important;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--joblu-primary);
+  cursor: pointer;
+}
+
+.cv-exp-add-btn {
+  margin-top: 0.5rem;
+  background: transparent;
+  color: var(--joblu-primary);
+  border: 2px dashed var(--joblu-primary);
+  opacity: 0.7;
+  padding: 0.75rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.cv-exp-add-btn:hover {
+  opacity: 1;
+  background: rgba(99, 55, 183, 0.05);
+  border-style: solid;
+}
+
+/* Fila de fechas responsiva */
+.cv-form-dates-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.cv-form-date-input {
+  flex: 1;
+  min-width: 0;
+  /* Previene overflow en flex items */
+}
+
+/* =========================================
+   📱 RESPONSIVE - CV BUILDER MOBILE
+   ========================================= */
+
+@media (max-width: 768px) {
+
+  /* Evitar overflow horizontal global en mobile */
+  .cv-form-group-inline {
+    grid-template-columns: 1fr;
+    /* Forzar 1 columna en mobile */
+    gap: 0.75rem;
+  }
+
+  .cv-form-dates-row {
+    flex-direction: column;
+    /* Apilar fechas en mobile */
+    gap: 0.75rem;
+  }
+
+  .cv-experience-card-body {
+    padding: 1rem;
+    /* Menos padding interior en mobile */
+  }
+
+  .cv-experience-card-header {
+    padding: 0.85rem 1rem;
+  }
 }
 
 /* ===== FIX DEFINITIVO BOTONES CV (al final del CSS) ===== */
@@ -1004,6 +1276,23 @@
 .cv-preview-paragraph-preline {
   margin-top: 0.25rem;
   white-space: pre-line;
+}
+
+.cv-preview-chip-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.cv-preview-chip {
+  display: inline-block;
+  background-color: rgba(99, 55, 183, 0.08);
+  color: var(--joblu-primary-dark, #3b82f6);
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 
@@ -1497,10 +1786,37 @@
   }
 }
 
-.cv-contact-social { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
-.cv-contact-link { display: inline-flex; align-items: center; gap: 6px; background-color: #f3f4f6; color: #374151; padding: 4px 12px; border-radius: 16px; text-decoration: none; font-size: 12px; font-weight: 500; transition: all 0.2s ease; border: 1px solid #e5e7eb; }
-.cv-contact-link:hover { background-color: #e5e7eb; transform: translateY(-1px); }
-.template-visual .cv-contact-link { background-color: rgba(255, 255, 255, 0.2); border-color: transparent; }
+.cv-contact-social {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.cv-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f3f4f6;
+  color: #374151;
+  padding: 4px 12px;
+  border-radius: 16px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid #e5e7eb;
+}
+
+.cv-contact-link:hover {
+  background-color: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+.template-visual .cv-contact-link {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: transparent;
+}
 
 /* Placeholders de CV */
 .cv-placeholder {

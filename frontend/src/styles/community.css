@@ -121,6 +121,8 @@
   cursor: pointer;
   transition: filter 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
   white-space: nowrap;
+  width: fit-content;
+  align-self: flex-end;
 }
 
 .community-form button[type="submit"]:hover:not(:disabled) {
@@ -479,6 +481,11 @@ body.dark-mode .community-post {
   .community-chip {
     font-size: 0.78rem;
     padding: 0.25rem 0.65rem;
+  }
+
+  .community-form button[type="submit"] {
+    width: 100%;
+    align-self: center;
   }
 }
 

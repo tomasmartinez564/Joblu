@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import { FaUser, FaSignOutAlt } from "react-icons/fa";
+import UserAvatar from "./common/UserAvatar";
 
 // ==========================================
 // 🧭 COMPONENTE: NAVBAR
@@ -99,13 +100,13 @@ export default function Navbar({
               type="button"
               className="account-avatar-button"
               onClick={() => setIsAccountMenuOpen((prev) => !prev)}
-              style={{ padding: user.avatar ? "0" : "" }}
+              style={{ padding: 0 }}
             >
-              {user.avatar ? (
-                <img src={user.avatar} alt={user.name} className="nav-avatar-img" />
-              ) : (
-                user.name?.charAt(0)?.toUpperCase()
-              )}
+              <UserAvatar
+                src={user.avatar}
+                name={user.name}
+                className="nav-avatar-img"
+              />
             </button>
 
             {/* Menú Desplegable Desktop */}
@@ -164,11 +165,11 @@ export default function Navbar({
               }}
             >
               <div className="drawer-avatar">
-                {user.avatar ? (
-                  <img src={user.avatar} alt={user.name} className="nav-avatar-img" />
-                ) : (
-                  user.name?.charAt(0)?.toUpperCase()
-                )}
+                <UserAvatar
+                  src={user.avatar}
+                  name={user.name}
+                  className="nav-avatar-img"
+                />
               </div>
               <div className="drawer-user-info">
                 <p className="drawer-username">{user.name}</p>

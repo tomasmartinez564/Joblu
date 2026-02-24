@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import API_BASE_URL from "../config/api";
 import "../styles/account.css";
 import { useToast } from "../context/ToastContext";
+import UserAvatar from "../components/common/UserAvatar";
 
 // ==========================================
 // 👤 PÁGINA: AJUSTES DE CUENTA (AccountSettings)
@@ -160,10 +161,11 @@ function AccountSettings({ user, onUpdateUser }) {
             className={`avatar-wrapper ${isUploading ? "uploading" : ""}`}
             onClick={handleAvatarClick}
           >
-            <img
-              src={avatarPreview || "/logo.png"}
-              alt="Avatar"
+            <UserAvatar
+              src={avatarPreview}
+              name={displayName || user?.name}
               className="user-avatar-lg"
+              alt="Avatar"
             />
             <div className="avatar-overlay">Cambiar</div>
           </div>

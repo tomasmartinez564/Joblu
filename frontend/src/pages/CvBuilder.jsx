@@ -30,10 +30,13 @@ const emptyCv = {
   linkedin: "",
   github: "",
   perfil: "",
-  experiencias: "",
+  experiencias: "", // Obsoleto, mantenido por compatibilidad
+  experience: [], // Nueva estructura
   educacion: "",
-  habilidades: "",
-  idiomas: "",
+  habilidades: "", // Obsoleto
+  skills: [], // Nueva estructura
+  idiomas: "", // Obsoleto
+  languages: [], // Nueva estructura
   proyectos: "",
   otros: "",
   foto: "",
@@ -64,7 +67,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
     experiencias: true,
     educacion: true,
     habilidades: true,
-    idiomas: false,
+    idiomas: true, // Cambiado de false a true
     proyectos: true,
     otros: true,
   });
@@ -174,6 +177,44 @@ function CvBuilder({ user, settings, onChangeSettings }) {
       // Restaurar templateId guardado
       if (response.templateId) setTemplateId(response.templateId);
 
+      // Restaurar estado de visibilidad de secciones si existe
+      if (response.data && response.data.sectionsVisible) {
+        setSectionsVisible((prev) => ({ ...prev, ...response.data.sectionsVisible }));
+      }
+
+      // Retrocompatibilidad: Si hay texto en 'experiencias' y 'experience' está vacío
+      if (!Array.isArray(mergedData.experience)) {
+        mergedData.experience = [];
+      }
+
+      if (mergedData.experiencias && typeof mergedData.experiencias === 'string' && mergedData.experiencias.trim() !== "" && mergedData.experience.length === 0) {
+        mergedData.experience = [{
+          id: Date.now().toString(),
+          position: "",
+          company: "",
+          location: "",
+          startDate: "",
+          endDate: "",
+          current: false,
+          description: mergedData.experiencias
+        }];
+        // mergedData.experiencias = ""; // Opcional: borrar el viejo
+      }
+
+      // Retrocompatibilidad Habilidades
+      if (!Array.isArray(mergedData.skills)) mergedData.skills = [];
+      if (typeof mergedData.habilidades === 'string' && mergedData.habilidades.trim() !== "" && mergedData.skills.length === 0) {
+        mergedData.skills = mergedData.habilidades.split(',').map(s => s.trim()).filter(s => s);
+        mergedData.habilidades = ""; // Limpiar para que no gane en futuros guardados
+      }
+
+      // Retrocompatibilidad Idiomas
+      if (!Array.isArray(mergedData.languages)) mergedData.languages = [];
+      if (typeof mergedData.idiomas === 'string' && mergedData.idiomas.trim() !== "" && mergedData.languages.length === 0) {
+        mergedData.languages = mergedData.idiomas.split(',').map(s => s.trim()).filter(s => s);
+        mergedData.idiomas = ""; // Limpiar para que no gane en futuros guardados
+      }
+
       // Sanitización simplificada (se mantiene la lógica existente)
       // ... (código de sanitización omitido por brevedad, se asume que sigue igual) ...
       // Nota: Si no incluimos la sanitización completa aquí, asegúrate de no borrarla si no se muestra en el original.
@@ -182,6 +223,9 @@ function CvBuilder({ user, settings, onChangeSettings }) {
       // Re-copiaré la lógica de sanitización para estar seguro.
 
       Object.keys(mergedData).forEach(key => {
+        // Las nuevas estructuras en array y estados anidados se mantienen nativos
+        if (['experience', 'skills', 'languages', 'sectionsVisible'].includes(key)) return;
+
         const val = mergedData[key];
         if (typeof val === 'object' && val !== null) {
           if (Array.isArray(val)) {
@@ -231,7 +275,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
       const payload = {
         title: cvData.nombre || "CV sin nombre",
         puesto: cvData.puesto || "",
-        data: cvData,
+        data: { ...cvData, sectionsVisible }, // Persistir la visibilidad
         templateId,
       };
 
@@ -366,6 +410,19 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   const handleRemovePhoto = () => setCvData((prev) => ({ ...prev, foto: "" }));
 
   const toggleSection = (key) => setSectionsVisible((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  // --- Helpers de Colecciones ---
+  const handleExperienceChange = (experiences) => {
+    setCvData((prev) => ({ ...prev, experience: experiences }));
+  };
+
+  const handleSkillsChange = (skillsList) => {
+    setCvData((prev) => ({ ...prev, skills: skillsList }));
+  };
+
+  const handleLanguagesChange = (languagesList) => {
+    setCvData((prev) => ({ ...prev, languages: languagesList }));
+  };
 
   const handleDownloadPDF = async () => {
     if (!cvRef.current) return;
@@ -507,6 +564,9 @@ function CvBuilder({ user, settings, onChangeSettings }) {
             <CvForm
               cvData={cvData}
               onChange={handleChange}
+              onExperienceChange={handleExperienceChange}
+              onSkillsChange={handleSkillsChange}
+              onLanguagesChange={handleLanguagesChange}
               settings={settings}
               sectionsVisible={sectionsVisible}
               onToggleSection={toggleSection}
@@ -605,14 +665,94 @@ function CvBuilder({ user, settings, onChangeSettings }) {
               <hr className="cv-preview-divider" />
 
               {/* Secciones del CV */}
-              {Object.entries(sectionsVisible).map(([key, visible]) => visible && (
-                <section key={key} className="cv-preview-section">
-                  <h4>{sectionLabels[key]}</h4>
-                  <p className={`cv-preview-paragraph${['experiencias', 'educacion', 'proyectos', 'otros'].includes(key) ? '-preline' : ''}`}>
-                    {cvData[key] || <span className="cv-placeholder">{cvLanguage === "en" ? "Add details..." : "Agregá detalles..."}</span>}
-                  </p>
-                </section>
-              ))}
+              {Object.entries(sectionsVisible).map(([key, visible]) => {
+                if (!visible) return null;
+
+                // Renderizado Especial: Experiencias Estructuradas
+                if (key === 'experiencias') {
+                  const hasStructuredOld = cvData.experience && cvData.experience.length > 0;
+                  const hasPlainOld = !!cvData.experiencias;
+
+                  if (!hasStructuredOld && !hasPlainOld) {
+                    return (
+                      <section key={key} className="cv-preview-section">
+                        <h4>{sectionLabels[key]}</h4>
+                        <p className="cv-preview-paragraph-preline"><span className="cv-placeholder">{cvLanguage === "en" ? "Add details..." : "Agregá detalles..."}</span></p>
+                      </section>
+                    )
+                  }
+
+                  return (
+                    <section key={key} className="cv-preview-section">
+                      <h4>{sectionLabels[key]}</h4>
+                      {cvData.experience && cvData.experience.length > 0 ? (
+                        <div className="cv-preview-experience-list">
+                          {cvData.experience.map((exp, idx) => (
+                            <div key={exp.id || idx} className="cv-preview-exp-item" style={{ marginBottom: "1rem" }}>
+                              <div className="cv-preview-exp-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                                <strong>{exp.position || <span className="cv-placeholder">Puesto</span>}</strong>
+                                <span className="cv-preview-exp-date" style={{ fontSize: "0.9em", color: "var(--cv-text-secondary)" }}>
+                                  {exp.startDate ? new Date(exp.startDate + "-01").toLocaleDateString(cvLanguage === 'en' ? 'en-US' : 'es-ES', { month: 'short', year: 'numeric' }) : ""}
+                                  {exp.startDate && (exp.endDate || exp.current) ? " - " : ""}
+                                  {exp.current ? (cvLanguage === "en" ? "Present" : "Actualidad") : (exp.endDate ? new Date(exp.endDate + "-01").toLocaleDateString(cvLanguage === 'en' ? 'en-US' : 'es-ES', { month: 'short', year: 'numeric' }) : "")}
+                                </span>
+                              </div>
+                              <div className="cv-preview-exp-subheader" style={{ fontSize: "0.95em", fontStyle: "italic", marginBottom: "0.3rem" }}>
+                                {[exp.company, exp.location].filter(Boolean).join(" · ")}
+                              </div>
+                              {exp.description && (
+                                <p className="cv-preview-paragraph-preline" style={{ marginTop: "0.2rem" }}>{exp.description}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="cv-preview-paragraph-preline">{cvData.experiencias}</p>
+                      )}
+                    </section>
+                  );
+                }
+
+                if (key === 'habilidades' || key === 'idiomas') {
+                  const arrKey = key === 'habilidades' ? 'skills' : 'languages';
+                  const fallbackKey = key;
+                  const dataArr = Array.isArray(cvData[arrKey]) ? cvData[arrKey] : [];
+                  const hasData = dataArr.length > 0 || !!cvData[fallbackKey];
+
+                  if (!hasData) {
+                    return (
+                      <section key={key} className="cv-preview-section">
+                        <h4>{sectionLabels[key]}</h4>
+                        <p className="cv-preview-paragraph"><span className="cv-placeholder">{cvLanguage === "en" ? "Add details..." : "Agregá detalles..."}</span></p>
+                      </section>
+                    );
+                  }
+
+                  return (
+                    <section key={key} className="cv-preview-section">
+                      <h4>{sectionLabels[key]}</h4>
+                      {dataArr.length > 0 ? (
+                        <div className="cv-preview-chip-container">
+                          {dataArr.map((item, idx) => (
+                            <span key={idx} className="cv-preview-chip">{item}</span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="cv-preview-paragraph">{cvData[fallbackKey]}</p>
+                      )}
+                    </section>
+                  );
+                }
+
+                return (
+                  <section key={key} className="cv-preview-section">
+                    <h4>{sectionLabels[key]}</h4>
+                    <p className={`cv-preview-paragraph${['educacion', 'proyectos', 'otros'].includes(key) ? '-preline' : ''}`}>
+                      {cvData[key] || <span className="cv-placeholder">{cvLanguage === "en" ? "Add details..." : "Agregá detalles..."}</span>}
+                    </p>
+                  </section>
+                )
+              })}
             </div>
           </div>
         </div>

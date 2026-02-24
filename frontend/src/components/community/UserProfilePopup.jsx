@@ -1,6 +1,7 @@
 import React from "react";
-import { FaUserCircle, FaMapMarkerAlt, FaBriefcase, FaStar, FaTimes } from "react-icons/fa";
+import { FaMapMarkerAlt, FaBriefcase, FaStar, FaTimes } from "react-icons/fa";
 import "../../styles/community.css"; // Ensure styles are defined here
+import UserAvatar from "../common/UserAvatar";
 
 const UserProfilePopup = ({ isOpen, onClose, profileData, isLoading }) => {
     if (!isOpen) return null;
@@ -39,11 +40,11 @@ const UserProfilePopup = ({ isOpen, onClose, profileData, isLoading }) => {
                 ) : profileData ? (
                     <div className="profile-popup-body">
                         <div className="profile-popup-header">
-                            {profileData.avatar ? (
-                                <img src={profileData.avatar} alt={profileData.name} className="profile-popup-avatar" />
-                            ) : (
-                                <FaUserCircle className="profile-popup-avatar-placeholder" />
-                            )}
+                            <UserAvatar
+                                src={profileData.avatar}
+                                name={profileData.name}
+                                className="profile-popup-avatar"
+                            />
                             <h2 className="profile-popup-name">{profileData.name}</h2>
                         </div>
 

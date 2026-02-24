@@ -88,7 +88,8 @@ const postSchema = new mongoose.Schema({
   content: { type: String, required: true },
   category: { type: String, default: "General" },
   comments: [commentSchema],
-  likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
+  likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  isEdited: { type: Boolean, default: false }
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
@@ -396,6 +397,31 @@ app.post("/api/community/posts", authenticateToken, async (req, res) => {
   }
 });
 
+app.put("/api/community/posts/:id", authenticateToken, async (req, res) => {
+  try {
+    const { content } = req.body;
+    if (!content || !content.trim()) {
+      return res.status(400).json({ error: "El contenido no puede estar vacío" });
+    }
+
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: "Post no encontrado" });
+
+    if (post.authorEmail !== req.user.email) {
+      return res.status(403).json({ error: "No tienes permiso para editar este post" });
+    }
+
+    post.content = content.trim();
+    post.isEdited = true;
+    await post.save();
+
+    res.json(post);
+  } catch (err) {
+    console.error("Error editando post:", err);
+    res.status(500).json({ error: "Error al editar el post" });
+  }
+});
+
 app.delete("/api/community/posts/:id", authenticateToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -463,13 +489,39 @@ app.post("/api/community/posts/:id/like", authenticateToken, async (req, res) =>
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ error: "Post no encontrado" });
 
-    const index = post.likedBy.indexOf(req.user.id);
-    if (index === -1) post.likedBy.push(req.user.id);
-    else post.likedBy.splice(index, 1);
+    const { action } = req.body || {};
+    // Normalizamos ids con String() por seguridad ante nulls u ObjectIds
+    const userIdStr = String(req.user.id);
+    const index = post.likedBy.findIndex(id => String(id) === userIdStr);
+    const alreadyLiked = index !== -1;
+
+    console.log(`[Like API] Post: ${post._id}, User: ${userIdStr}, Action received: ${action}, Already liked: ${alreadyLiked}`);
+
+    if (action === "like") {
+      if (!alreadyLiked) post.likedBy.push(req.user.id);
+    } else if (action === "unlike") {
+      if (alreadyLiked) post.likedBy.splice(index, 1);
+    } else {
+      // Toggle automático (compatibilidad)
+      if (alreadyLiked) post.likedBy.splice(index, 1);
+      else post.likedBy.push(req.user.id);
+    }
 
     await post.save();
-    res.json({ likes: post.likedBy.length, userHasLiked: index === -1 });
+
+    // Recalcular índice para JSON de respuesta
+    const newIndex = post.likedBy.findIndex(id => String(id) === userIdStr);
+
+    console.log(`[Like API] Success, LikedBy length: ${post.likedBy.length}`);
+
+    res.json({
+      postId: post._id,
+      likes: post.likedBy.length,
+      userHasLiked: newIndex !== -1,
+      likedBy: post.likedBy
+    });
   } catch (err) {
+    console.error(`[Like API] Error en post ${req.params.id}:`, err);
     res.status(500).json({ error: "Error al actualizar like" });
   }
 });
