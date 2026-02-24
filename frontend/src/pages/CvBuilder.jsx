@@ -446,15 +446,43 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   const handleDownloadPDF = async () => {
     if (!cvRef.current) return;
 
-    const htmlContent = cvRef.current.outerHTML;
-    const styleTags = Array.from(document.querySelectorAll('style, link[rel="stylesheet"], link[rel="preconnect"]'))
-      .map(tag => tag.outerHTML)
-      .join('\n');
+    const getInlineStylesForPdf = () => {
+      let cssText = "";
+
+      // 1) CSS de stylesheets cargadas en la página (Vite / Tailwind / etc.)
+      for (const sheet of Array.from(document.styleSheets)) {
+        try {
+          const rules = sheet.cssRules;
+          if (!rules) continue;
+
+          for (const rule of Array.from(rules)) {
+            cssText += rule.cssText + "\n";
+          }
+        } catch (err) {
+          // Ignorar hojas no accesibles por CORS (por si hubiera externas)
+          console.warn("No se pudo leer stylesheet para PDF:", sheet.href, err);
+        }
+      }
+
+      // 2) (opcional) Asegura colores de impresión
+      cssText += `
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    `;
+
+      return `<style>${cssText}</style>`;
+    };
 
     try {
+      const htmlContent = cvRef.current.outerHTML;
+      const styleTags = getInlineStylesForPdf(); // ✅ ESTA LÍNEA FALTABA
+
       const blob = await cvService.generatePdf(htmlContent, styleTags);
+
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = `${cvData.nombre ? cvData.nombre.replace(/\s+/g, "_") : "Mi_CV_Joblu"}.pdf`;
       document.body.appendChild(link);
