@@ -122,7 +122,35 @@ const Job = mongoose.models.Job || mongoose.model("Job", jobSchema);
 // 🛠️ MIDDLEWARES Y UTILIDADES
 // ==========================================
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  origin: function (origin, callback) {
+    // Permitir requests sin origen explícito (ej. herramientas de línea de comandos, etc.)
+    if (!origin) return callback(null, true);
+
+    // Permitir el frontend principal configurado en .env (limpiar la barra diagonal final si existe)
+    if (process.env.FRONTEND_URL && origin.startsWith(process.env.FRONTEND_URL.replace(/\/$/, ""))) {
+      return callback(null, true);
+    }
+
+    // Permitir cualquier entorno de preview/producción de Vercel
+    if (origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+
+    // Permitir tests locales
+    if (origin.startsWith('http://localhost:')) {
+      return callback(null, true);
+    }
+
+    // Permitir Render
+    if (origin.endsWith('.onrender.com')) {
+      return callback(null, true);
+    }
+
+    // Opcional: ignorar el error y permitir provisionalmente 
+    // pero loguearlo si prefieren mantener la app abierta
+    console.warn(`[CORS] Intento de acceso desde origen no listado: ${origin}`);
+    return callback(null, true); // En producción restrictiva, cambiar a: callback(new Error('No permitido por CORS'))
+  },
   credentials: true,
 }));
 app.use(express.json({ limit: "50mb" }));
