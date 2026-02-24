@@ -53,21 +53,68 @@ function CvForm({
             </div>
             <div className="cv-form-group-inline">
                 <label>
-                    {cvLanguage === "en" ? "Location:" : "Ubicación:"}
+                    <div className="cv-form-label-with-visibility">
+                        {cvLanguage === "en" ? "Location:" : "Ubicación:"}
+                    </div>
                     <input type="text" name="ubicacion" value={cvData.ubicacion} onChange={onChange} placeholder={cvLanguage === "en" ? "e.g. Buenos Aires, Argentina" : "Ej: Buenos Aires, Argentina"} />
                 </label>
                 <label>
-                    {cvLanguage === "en" ? "Website / Portfolio:" : "Sitio web / Portfolio:"}
+                    <div className="cv-form-label-with-visibility">
+                        {cvLanguage === "en" ? "Website / Portfolio:" : "Sitio web / Portfolio:"}
+                        {onToggleSection && (
+                            <button
+                                type="button"
+                                className={`cv-visibility-btn-inline${sectionsVisible['sitioWeb'] === false ? ' cv-visibility-btn--hidden' : ''}`}
+                                onClick={(e) => { e.preventDefault(); onToggleSection('sitioWeb'); }}
+                                title={sectionsVisible['sitioWeb'] === false
+                                    ? (cvLanguage === "en" ? "Show in preview" : "Mostrar en vista previa")
+                                    : (cvLanguage === "en" ? "Hide from preview" : "Ocultar de vista previa")
+                                }
+                            >
+                                {sectionsVisible['sitioWeb'] === false ? <FaEyeSlash size="0.9em" /> : <FaEye size="0.9em" />}
+                            </button>
+                        )}
+                    </div>
                     <input type="text" name="sitioWeb" value={cvData.sitioWeb} onChange={onChange} placeholder={cvLanguage === "en" ? "e.g. myportfolio.com" : "Ej: miportfolio.com"} />
                 </label>
             </div>
             <div className="cv-form-group-inline">
                 <label>
-                    LinkedIn:
+                    <div className="cv-form-label-with-visibility">
+                        LinkedIn:
+                        {onToggleSection && (
+                            <button
+                                type="button"
+                                className={`cv-visibility-btn-inline${sectionsVisible['linkedin'] === false ? ' cv-visibility-btn--hidden' : ''}`}
+                                onClick={(e) => { e.preventDefault(); onToggleSection('linkedin'); }}
+                                title={sectionsVisible['linkedin'] === false
+                                    ? (cvLanguage === "en" ? "Show in preview" : "Mostrar en vista previa")
+                                    : (cvLanguage === "en" ? "Hide from preview" : "Ocultar de vista previa")
+                                }
+                            >
+                                {sectionsVisible['linkedin'] === false ? <FaEyeSlash size="0.9em" /> : <FaEye size="0.9em" />}
+                            </button>
+                        )}
+                    </div>
                     <input type="text" name="linkedin" value={cvData.linkedin} onChange={onChange} placeholder={cvLanguage === "en" ? "e.g. linkedin.com/in/user" : "Ej: linkedin.com/in/usuario"} />
                 </label>
                 <label>
-                    GitHub:
+                    <div className="cv-form-label-with-visibility">
+                        GitHub:
+                        {onToggleSection && (
+                            <button
+                                type="button"
+                                className={`cv-visibility-btn-inline${sectionsVisible['github'] === false ? ' cv-visibility-btn--hidden' : ''}`}
+                                onClick={(e) => { e.preventDefault(); onToggleSection('github'); }}
+                                title={sectionsVisible['github'] === false
+                                    ? (cvLanguage === "en" ? "Show in preview" : "Mostrar en vista previa")
+                                    : (cvLanguage === "en" ? "Hide from preview" : "Ocultar de vista previa")
+                                }
+                            >
+                                {sectionsVisible['github'] === false ? <FaEyeSlash size="0.9em" /> : <FaEye size="0.9em" />}
+                            </button>
+                        )}
+                    </div>
                     <input type="text" name="github" value={cvData.github} onChange={onChange} placeholder={cvLanguage === "en" ? "e.g. github.com/user" : "Ej: github.com/usuario"} />
                 </label>
             </div>

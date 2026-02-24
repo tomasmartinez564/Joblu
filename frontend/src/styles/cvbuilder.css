@@ -624,6 +624,69 @@
   border-color: #bfdbfe;
 }
 
+/* Toggles de visibilidad con icono ojo */
+.cv-visibility-btn {
+  background: transparent;
+  border: none;
+  color: var(--joblu-primary);
+  opacity: 0.8;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cv-visibility-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.cv-visibility-btn--hidden {
+  color: #9ca3af;
+  opacity: 0.6;
+}
+
+.cv-visibility-btn--hidden:hover {
+  color: #6b7280;
+}
+
+/* Estilos para el botón de visibilidad dentro de los labels de inputs (inline) */
+.cv-form-label-with-visibility {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.cv-visibility-btn-inline {
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin-left: 0.5rem;
+}
+
+.cv-visibility-btn-inline:hover {
+  color: var(--joblu-primary);
+  transform: scale(1.1);
+}
+
+.cv-visibility-btn-inline.cv-visibility-btn--hidden {
+  color: #d1d5db;
+}
+
+.cv-visibility-btn-inline.cv-visibility-btn--hidden:hover {
+  color: #9ca3af;
+}
+
 /* Filas con inputs en columnas */
 .cv-form-group-inline {
   display: grid;

@@ -73,12 +73,14 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   });
   const [sectionsVisible, setSectionsVisible] = useState({
     perfil: true,
-    experiencias: true,
     educacion: true,
     habilidades: true,
     idiomas: true, // Cambiado de false a true
     proyectos: true,
     otros: true,
+    linkedin: true, // Visibilidad específica del link
+    github: true,   // Visibilidad específica del link
+    sitioWeb: true, // Visibilidad específica del link
   });
 
   // --- 3. Estados: Interfaz (UI) ---
@@ -511,9 +513,28 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   const settingsSummary = `Idioma: ${cvLanguage === "en" ? "Inglés" : "Español"} · Estilo: ${cvStyle === "visual" ? "Visual" : cvStyle === "balanceado" ? "Balanceado" : "Compatibilidad ATS"}${targetIndustry ? ` · Rubro: ${targetIndustry}` : ""}`;
 
   const contactoLinea1 = [cvData.email, cvData.telefono, cvData.ubicacion].filter(Boolean).join(" · ") || (cvLanguage === "en" ? <span className="cv-placeholder">email@example.com · +54 9 11 0000-0000 · Buenos Aires</span> : <span className="cv-placeholder">email@ejemplo.com · +54 9 11 0000-0000 · Buenos Aires</span>);
-  const contactoLinea2 = [cvData.linkedin, cvData.github, cvData.sitioWeb].filter(Boolean).join(" · ") || (cvLanguage === "en" ? <span className="cv-placeholder">linkedin.com/in/user · github.com/user · portfolio.com</span> : <span className="cv-placeholder">linkedin.com/in/usuario · github.com/usuario · portfolio.com</span>);
 
-  const socialLinks = [{ type: "linkedin", value: cvData.linkedin }, { type: "github", value: cvData.github }, { type: "web", value: cvData.sitioWeb }].filter(l => !!l.value && l.value.trim() !== "");
+  // Filtrar links sociales basados en si tienen texto Y si están visibles en sectionsVisible (por defecto true si es undefined)
+  const socialLinksParams = [
+    { type: "linkedin", value: cvData.linkedin, visible: sectionsVisible.linkedin !== false },
+    { type: "github", value: cvData.github, visible: sectionsVisible.github !== false },
+    { type: "web", value: cvData.sitioWeb, visible: sectionsVisible.sitioWeb !== false }
+  ];
+  const socialLinks = socialLinksParams.filter(l => !!l.value && l.value.trim() !== "" && l.visible);
+
+  // Textos para fallback placeholder cuando el array está vacío
+  let contactoLinea2 = null;
+  // Solo mostramos placeholder de los links que están vacíos PERO que SÍ están visibles
+  if (socialLinks.length === 0) {
+    const placeholders = [];
+    if (sectionsVisible.linkedin !== false) placeholders.push(cvLanguage === "en" ? "linkedin.com/in/user" : "linkedin.com/in/usuario");
+    if (sectionsVisible.github !== false) placeholders.push(cvLanguage === "en" ? "github.com/user" : "github.com/usuario");
+    if (sectionsVisible.sitioWeb !== false) placeholders.push("portfolio.com");
+
+    if (placeholders.length > 0) {
+      contactoLinea2 = <span className="cv-placeholder">{placeholders.join(" · ")}</span>;
+    }
+  }
 
   // ==========================================
   // 📦 RENDERIZADO (JSX)
@@ -714,6 +735,8 @@ function CvBuilder({ user, settings, onChangeSettings }) {
               {/* Secciones del CV */}
               {Object.entries(sectionsVisible).map(([key, visible]) => {
                 if (!visible) return null;
+                // Evitar que las flags individuales de links se rendericen como "secciones" con títulos al fondo.
+                if (['linkedin', 'github', 'sitioWeb'].includes(key)) return null;
 
                 // Renderizado Especial: Experiencias Estructuradas
                 if (key === 'experiencias') {
