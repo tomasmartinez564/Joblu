@@ -800,7 +800,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
                 </div>
               </div>
               <div className="cv-ai-footer">
-                <button type="button" className="cv-ai-apply" onClick={applyAiSection} disabled={!aiSuggestion}>Aplicar sugerencia</button>
+                <button type="button" className="cv-ai-apply" onClick={applyAiSection} disabled={!aiSuggestion || aiLoading}>Aplicar sugerencia</button>
               </div>
             </div>
           </>

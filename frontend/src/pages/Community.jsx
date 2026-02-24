@@ -501,12 +501,17 @@ function Community({ user }) {
           {filteredPosts.map((post) => {
             const alreadyLiked = user && post.likedBy?.some(uid => String(uid) === String(user._id || user.id));
             return (
-              <article key={post._id} className="community-post">
+              <article
+                key={post._id}
+                className="community-post"
+                onClick={() => window.location.href = `/comunidad/${post._id}`}
+                style={{ cursor: "pointer" }}
+              >
                 <div className="community-post-header">
-                  <span className="community-category-badge">{post.category || "General"}</span>
+                  <span className="community-category-badge" onClick={(e) => e.stopPropagation()}>{post.category || "General"}</span>
                   <span
                     className="community-post-meta"
-                    onClick={() => handleAuthorClick(post.authorEmail)}
+                    onClick={(e) => { e.stopPropagation(); handleAuthorClick(post.authorEmail); }}
                     style={{ cursor: "pointer" }}
                     title="Ver perfil"
                   >
@@ -521,14 +526,14 @@ function Community({ user }) {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <Link to={`/comunidad/${post._id}`} className="community-post-title">{post.title}</Link>
                     {user && user.email === post.authorEmail && (
-                      <button className="action-btn" onClick={() => handleEditStart(post)} title="Editar post">
+                      <button className="action-btn" onClick={(e) => { e.stopPropagation(); handleEditStart(post); }} title="Editar post">
                         <FaEdit />
                       </button>
                     )}
                   </div>
 
                   {editingPostId === post._id ? (
-                    <div className="community-edit-form" style={{ marginTop: '0.5rem' }}>
+                    <div className="community-edit-form" style={{ marginTop: '0.5rem' }} onClick={(e) => e.stopPropagation()}>
                       <textarea
                         className="community-textarea community-input"
                         value={editContent}
@@ -536,8 +541,8 @@ function Community({ user }) {
                         rows={3}
                       />
                       <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                        <button className="btn-joblu" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => handleEditSave(post._id)}>Guardar</button>
-                        <button className="btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={handleEditCancel}>Cancelar</button>
+                        <button className="btn-joblu" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={(e) => { e.stopPropagation(); handleEditSave(post._id); }}>Guardar</button>
+                        <button className="btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={(e) => { e.stopPropagation(); handleEditCancel(); }}>Cancelar</button>
                       </div>
                     </div>
                   ) : (
@@ -549,26 +554,26 @@ function Community({ user }) {
                 </div>
 
                 {/* Acciones del Post */}
-                <div className="post-actions">
+                <div className="post-actions" onClick={(e) => e.stopPropagation()}>
                   <button
                     className={`action-btn ${alreadyLiked ? "liked" : ""}`}
-                    onClick={(e) => handleLike(e, post._id)}
+                    onClick={(e) => { e.stopPropagation(); handleLike(e, post._id); }}
                     aria-label="Me gusta"
                     disabled={likingPosts.has(post._id)}
                   >
                     {alreadyLiked ? <FaHeart className="icon-liked" /> : <FaRegHeart />}
                     <span className="action-count">{post.likedBy?.length || 0}</span>
                   </button>
-                  <button className="action-btn" onClick={() => toggleComments(post._id)}>
+                  <button className="action-btn" onClick={(e) => { e.stopPropagation(); toggleComments(post._id); }}>
                     <span className="action-icon"><FaComment /></span>
                     <span className="action-count">{post.comments?.length || 0}</span>
                   </button>
-                  <button className="action-btn" onClick={() => handleShare(post._id)} title="Compartir"><span className="action-icon"><FaShareAlt /></span></button>
+                  <button className="action-btn" onClick={(e) => { e.stopPropagation(); handleShare(post._id); }} title="Compartir"><span className="action-icon"><FaShareAlt /></span></button>
                 </div>
 
                 {/* Sección de Comentarios Desplegable */}
                 {openComments[post._id] && (
-                  <div className="community-comments-section">
+                  <div className="community-comments-section" onClick={(e) => e.stopPropagation()}>
                     <div className="comments-list">
                       {post.comments?.length > 0 ? (
                         post.comments.map((comment, idx) => (
