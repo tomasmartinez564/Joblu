@@ -11,8 +11,7 @@ import { fileURLToPath } from "url";
 import { createRequire } from "module";
 import rateLimit from "express-rate-limit";
 import bcrypt from "bcryptjs"; // Importante para manejar contraseñas seguras
-import puppeteer from "puppeteer";
-
+import puppeteer from "puppeteer"; // Importación de Puppeteer
 // ==========================================
 // ⚙️ CONFIGURACIÓN Y VARIABLES DE ENTORNO
 // ==========================================
