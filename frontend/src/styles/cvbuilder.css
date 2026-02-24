@@ -1516,7 +1516,7 @@
 /* Mobile chico */
 @media (max-width: 640px) {
   .cv-column {
-    padding: 0.75rem 0.5rem;
+    padding: 0.5rem 0;
   }
 
 
@@ -1534,11 +1534,14 @@
   }
 
   .cv-preview-wrapper {
-    padding: 0.75rem 0.5rem 1rem;
+    padding: 1rem 0;
+    background: transparent;
   }
 
   .cv-preview-paper {
-    padding: 1.25rem;
+    padding: 1.25rem 1rem;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
   }
 
   .cv-actions {

@@ -678,17 +678,25 @@
     right: 0;
   }
 
+  .home-dashboard {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .unified-dashboard-section {
+    padding: 1.5rem 1rem 4rem;
+  }
+
   /* Fix Carrusel Mobile: Scroll de borde a borde */
   .jobs-carousel-container {
-    margin-left: -1.5rem;
-    margin-right: -1.5rem;
+    margin-left: -1rem;
+    margin-right: -1rem;
   }
 
   .jobs-carousel-scroll {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
     scroll-snap-type: x mandatory;
-    scroll-padding-left: 1.5rem;
+    scroll-padding-left: 1rem;
     /* Para que el snap no quede pegado al borde izquierdo */
     gap: 1rem;
   }
