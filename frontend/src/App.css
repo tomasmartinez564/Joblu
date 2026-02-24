@@ -152,7 +152,7 @@
 /* Responsive */
 @media (max-width: 768px) {
   .app-main {
-    padding: 1rem;
+    padding: 1rem 0.5rem;
   }
 
   .cv-builder {
@@ -166,6 +166,11 @@
   }
 }
 
+@media (max-width: 480px) {
+  .app-main {
+    padding: 0.5rem 0.65rem;
+  }
+}
 /* Botón descargar dentro del form (si se usa ahí) */
 .download-btn {
   margin-top: 1.5rem;

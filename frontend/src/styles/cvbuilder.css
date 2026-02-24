@@ -1516,7 +1516,7 @@
 /* Mobile chico */
 @media (max-width: 640px) {
   .cv-column {
-    padding: 0.5rem 0;
+    padding: 1.75rem 1.85rem;
   }
 
 
