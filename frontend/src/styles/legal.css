@@ -1,0 +1,62 @@
+.legal-page {
+    background: #f7f8fb;
+    min-height: 70vh;
+    padding: 2rem 1rem;
+}
+
+.legal-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    border: 1px solid #ececf3;
+}
+
+.legal-container h1 {
+    margin: 0 0 0.4rem;
+    font-size: 2rem;
+    color: #2a2a3a;
+}
+
+.legal-updated {
+    margin: 0 0 1.5rem;
+    color: #6b6b84;
+    font-size: 0.95rem;
+}
+
+.legal-container h2 {
+    margin-top: 1.4rem;
+    margin-bottom: 0.6rem;
+    font-size: 1.2rem;
+    color: #5d39b7;
+    /* violeta JOBLU */
+}
+
+.legal-container p,
+.legal-container li {
+    color: #3e3e52;
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
+.legal-container ul {
+    padding-left: 1.2rem;
+    margin: 0.4rem 0 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .legal-container {
+        padding: 1.2rem;
+        border-radius: 12px;
+    }
+
+    .legal-container h1 {
+        font-size: 1.6rem;
+    }
+
+    .legal-container h2 {
+        font-size: 1.05rem;
+    }
+}

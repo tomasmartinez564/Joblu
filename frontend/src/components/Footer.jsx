@@ -29,9 +29,9 @@ export default function Footer() {
                 <div className="footer-section">
                     <h3 className="footer-title">Legal</h3>
                     <div className="footer-links">
-                        <Link to="#" className="footer-link">Términos y Condiciones</Link>
-                        <Link to="#" className="footer-link">Política de Privacidad</Link>
-                        <Link to="#" className="footer-link">Cookies</Link>
+                        <Link to="/terminos-y-condiciones" className="footer-link">Términos y Condiciones</Link>
+                        <Link to="/politica-de-privacidad" className="footer-link">Política de Privacidad</Link>
+                        <Link to="/cookies" className="footer-link">Cookies</Link>
                     </div>
                 </div>
 

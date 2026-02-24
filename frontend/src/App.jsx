@@ -5,6 +5,7 @@ import { Route, Routes, useNavigate } from 'react-router-dom'
 import './App.css'
 import "./styles/header.css"
 import "./styles/footer.css"
+import "./styles/legal.css"
 
 // --- Páginas (Estática para LCP) ---
 import Home from './pages/Home.jsx'
@@ -19,6 +20,9 @@ const AccountSettings = lazy(() => import('./pages/AccountSettings.jsx'))
 const JobDetail = lazy(() => import('./pages/JobDetail.jsx'))
 const PostDetail = lazy(() => import("./pages/PostDetail"))
 const NotFound = lazy(() => import('./pages/NotFound.jsx'))
+const Terms = lazy(() => import("./pages/Terms.jsx"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPage.jsx"));
+const CookiesPolicy = lazy(() => import("./pages/CookiesPage.jsx"));
 
 import Navbar from "./components/Navbar"
 import Footer from "./components/Footer"
@@ -211,6 +215,9 @@ function AppLayout() {
               }
             />
             <Route path="*" element={<NotFound />} />
+            <Route path="/terminos-y-condiciones" element={<Terms />} />
+            <Route path="/politica-de-privacidad" element={<PrivacyPolicy />} />
+            <Route path="/cookies" element={<CookiesPolicy />} />
           </Routes>
         </Suspense>
       </main>
