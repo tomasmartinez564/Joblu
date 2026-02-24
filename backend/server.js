@@ -597,28 +597,14 @@ app.post("/api/cvs/import", authenticateToken, uploadCv.single("file"), async (r
       extractedText = fs.readFileSync(req.file.path, "utf8");
     }
 
-    let parsedData = {
-      perfil: extractedText,
-      experiencias: "", educacion: "", habilidades: "", idiomas: "", proyectos: "", otros: "",
-      nombre: "", puesto: "", email: "", telefono: "", ubicacion: "", sitioWeb: "", linkedin: "", github: "",
-    };
+    let parsedData = { nombre: "", puesto: "", email: "", telefono: "", ubicacion: "", sitioWeb: "", linkedin: "", github: "", perfil: "", experience: [], educacion: "", skills: [], languages: [], proyectos: "", otros: "" };
 
     if (process.env.OPENAI_API_KEY) {
       try {
         const completion = await openai.chat.completions.create({
           model: "gpt-4o-mini",
           messages: [
-            {
-              role: "system",
-              content: `Eres un experto en reclutamiento. Extrae información de CVs a JSON estricto:
-              {
-                "nombre": "", "puesto": "", "email": "", "telefono": "", "ubicacion": "",
-                "sitioWeb": "", "linkedin": "", "github": "", "perfil": "",
-                "experiencias": "", "educacion": "", "habilidades": "", "idiomas": "", "proyectos": "", "otros": ""
-              }
-              ATENCIÓN: Si ves URLs o textos pegados por error del PDF (ej. "linkedin.com/in/usuariogithub.com/usuario" o "email@ejemplo.com+54911"), SEPÁRALOS con lógica y guárdalos en sus campos correspondientes.
-              Devuelve solo JSON.`
-            },
+            { role: "system", content: `Eres un experto en reclutamiento. Extrae la información del CV y devuélvela ESTRICTAMENTE en este formato JSON: { "nombre": "Nombre", "puesto": "Rol", "email": "correo@ej.com", "telefono": "Tel", "ubicacion": "Ciudad", "sitioWeb": "URL", "linkedin": "URL", "github": "URL", "perfil": "Resumen", "experience": [ { "id": "Genera un ID único como un timestamp en string", "position": "Puesto", "company": "Empresa", "location": "Ubicación", "startDate": "YYYY-MM", "endDate": "YYYY-MM o vacío", "current": true o false, "description": "Tareas y logros" } ], "educacion": "Texto plano", "skills": ["Hab 1", "Hab 2"], "languages": ["Id 1", "Id 2"], "proyectos": "Texto", "otros": "Texto" } ATENCIÓN: Separa cada trabajo distinto en un objeto dentro del array "experience". Extrae cada habilidad y cada idioma como elementos individuales de un array de strings ("skills" y "languages"). Si ves URLs pegadas por error, SEPÁRALAS lógicamente. Devuelve solo JSON.` },
             {
               role: "user",
               content: `Analiza este CV:\n\n${extractedText.substring(0, 15000)}`
