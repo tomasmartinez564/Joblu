@@ -61,7 +61,16 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   } = settings || {};
 
   // --- 2. Estados: Datos del CV ---
-  const [cvData, setCvData] = useState(emptyCv);
+  const [cvData, setCvData] = useState(() => {
+    const draftKey = `joblu_cv_draft_${id || "new"}`;
+    const saved = localStorage.getItem(draftKey);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) { }
+    }
+    return emptyCv;
+  });
   const [sectionsVisible, setSectionsVisible] = useState({
     perfil: true,
     experiencias: true,
@@ -154,15 +163,23 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   // ==========================================
 
   useEffect(() => {
-    if (id) loadCvForEdit(id);
-    else {
-      setCvData(emptyCv);
+    const draftKey = `joblu_cv_draft_${id || "new"}`;
+    if (id) {
+      if (!localStorage.getItem(draftKey)) loadCvForEdit(id);
+    } else {
+      if (!localStorage.getItem(draftKey)) setCvData(emptyCv);
       // Si viene del dashboard con una plantilla preseleccionada
       if (location.state?.templateId) {
         setTemplateId(location.state.templateId);
       }
     }
   }, [id]);
+
+  // Autoguardado en LocalStorage
+  useEffect(() => {
+    const draftKey = `joblu_cv_draft_${id || "new"}`;
+    localStorage.setItem(draftKey, JSON.stringify(cvData));
+  }, [cvData, id]);
 
   const loadCvForEdit = async (cvId) => {
     try {
@@ -282,9 +299,11 @@ function CvBuilder({ user, settings, onChangeSettings }) {
       if (id) {
         await cvService.update(id, payload);
         setSaveSuccess(cvLanguage === "en" ? "CV updated." : "CV actualizado correctamente.");
+        localStorage.removeItem(`joblu_cv_draft_${id}`);
       } else {
         const newCv = await cvService.create(payload);
         setSaveSuccess(cvLanguage === "en" ? "CV created." : "CV creado correctamente.");
+        localStorage.removeItem("joblu_cv_draft_new");
         navigate(`/cv/${newCv._id}`, { replace: true });
       }
     } catch (error) {
@@ -864,7 +883,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
             <p>{cvLanguage === "en" ? "This will delete all the text from your CV. This action cannot be undone." : "Esto va a borrar todo el texto de tu CV. Esta acción no se puede deshacer."}</p>
             <div className="job-apply-modal-actions">
               <button className="btn-secondary" onClick={() => setShowClearModal(false)}>{cvLanguage === "en" ? "Cancel" : "Cancelar"}</button>
-              <button className="cv-clear-confirm-btn" onClick={() => { setCvData(emptyCv); setShowClearModal(false); }}>
+              <button className="cv-clear-confirm-btn" onClick={() => { localStorage.removeItem(`joblu_cv_draft_${id || "new"}`); setCvData(emptyCv); setShowClearModal(false); }}>
                 {cvLanguage === "en" ? "Yes, clear all" : "Sí, borrar todo"}
               </button>
             </div>
