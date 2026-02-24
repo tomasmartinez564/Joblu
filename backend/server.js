@@ -134,6 +134,9 @@ if (!fs.existsSync(uploadDir)) {
 }
 app.use("/uploads", express.static(uploadDir));
 
+// Configurar "trust proxy" en 1 para que Render confíe en los proxies
+app.set("trust proxy", 1);
+
 // Limitador para rutas de IA
 const aiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
 
@@ -715,7 +718,14 @@ app.get("/api/jobs/:id", async (req, res) => {
 app.post("/api/cvs/generate-pdf", authenticateToken, async (req, res) => {
   try {
     const { htmlContent, styleTags } = req.body;
-    const browser = await puppeteer.launch({ headless: "new", args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+
+    console.log("[PDF] Starting browser launch...");
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+
+    console.log("[PDF] Browser launched. Open new page...");
     const page = await browser.newPage();
 
     const fullHtml = `
@@ -734,15 +744,25 @@ app.post("/api/cvs/generate-pdf", authenticateToken, async (req, res) => {
       </html>
     `;
 
+    console.log("[PDF] Setting content...");
     await page.setContent(fullHtml, { waitUntil: 'networkidle0' });
-    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '0', right: '0', bottom: '0', left: '0' } });
+
+    console.log("[PDF] Generating PDF buffer...");
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: { top: '0', right: '0', bottom: '0', left: '0' }
+    });
+
+    console.log("[PDF] Closing browser...");
     await browser.close();
 
+    console.log("[PDF] Success. Sending response.");
     res.set({ 'Content-Type': 'application/pdf', 'Content-Length': pdfBuffer.length });
     res.send(pdfBuffer);
   } catch (error) {
-    console.error("Error generando PDF con Puppeteer:", error);
-    res.status(500).json({ error: "Error al generar el PDF" });
+    console.error("[PDF] Error generando PDF con Puppeteer:", error);
+    res.status(500).json({ error: "Error al generar el PDF", details: error.message });
   }
 });
 

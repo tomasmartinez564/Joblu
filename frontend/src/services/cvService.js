@@ -147,7 +147,10 @@ const cvService = {
             headers: cvService.getAuthHeaders(),
             body: JSON.stringify({ htmlContent, styleTags }),
         });
-        if (!response.ok) throw new Error("Error al generar el PDF");
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.details || err.error || "Error al generar el PDF");
+        }
         return await response.blob();
     },
 };

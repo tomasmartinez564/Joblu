@@ -1,6 +1,10 @@
 const { join } = require("path");
 
-/** @type {import('puppeteer').Configuration} */
+/**
+ * @type {import("puppeteer").Configuration}
+ */
 module.exports = {
-    cacheDirectory: join(__dirname, "node_modules", ".puppeteer_cache"),
+    // En Render, descargar Chrome en una carpeta .cache persistente
+    // ayuda a evitar que se pierda el binario entre builds
+    cacheDirectory: join(__dirname, ".cache", "puppeteer"),
 };
