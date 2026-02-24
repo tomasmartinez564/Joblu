@@ -715,29 +715,105 @@ app.get("/api/jobs/:id", async (req, res) => {
   }
 });
 
+let pdfBrowser = null;
+let isGeneratingPdf = false;
+
+async function getPdfBrowser() {
+  if (pdfBrowser && pdfBrowser.isConnected()) return pdfBrowser;
+
+  console.log("[PDF] Launching shared browser...");
+  pdfBrowser = await puppeteer.launch({
+    headless: true,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--no-zygote",
+      "--disable-gpu"
+    ]
+  });
+
+  pdfBrowser.on("disconnected", () => {
+    console.log("[PDF] Browser disconnected. Resetting instance.");
+    pdfBrowser = null;
+  });
+
+  return pdfBrowser;
+}
+
+function logMemory(label) {
+  const m = process.memoryUsage();
+  console.log(`[MEM] ${label}`, {
+    rss: `${Math.round(m.rss / 1024 / 1024)} MB`,
+    heapUsed: `${Math.round(m.heapUsed / 1024 / 1024)} MB`,
+    heapTotal: `${Math.round(m.heapTotal / 1024 / 1024)} MB`
+  });
+}
+
 app.post("/api/cvs/generate-pdf", authenticateToken, async (req, res) => {
+  let page = null;
+
+  // Evita 2 generaciones al mismo tiempo (muy útil en Render Free/Standard)
+  if (isGeneratingPdf) {
+    return res.status(429).json({
+      error: "Ya se está generando un PDF. Intentá nuevamente en unos segundos."
+    });
+  }
+
   try {
+    isGeneratingPdf = true;
+
     const { htmlContent, styleTags } = req.body;
 
-    console.log("[PDF] Starting browser launch...");
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+    if (!htmlContent) {
+      return res.status(400).json({ error: "htmlContent es requerido" });
+    }
 
-    console.log("[PDF] Browser launched. Open new page...");
-    const page = await browser.newPage();
+    logMemory("Antes de generar PDF");
+
+    const browser = await getPdfBrowser();
+    console.log("[PDF] Opening new page...");
+    page = await browser.newPage();
+
+    // Reducir consumo: bloquear recursos externos pesados (opcional pero muy recomendado)
+    await page.setRequestInterception(true);
+    page.on("request", (request) => {
+      const resourceType = request.resourceType();
+      const url = request.url();
+
+      // Si tu HTML usa fuentes/imágenes remotas, esto evita cuelgues por networkidle
+      if (["media"].includes(resourceType)) {
+        return request.abort();
+      }
+
+      // Podés bloquear imágenes externas si NO son necesarias en el CV:
+      // if (resourceType === "image" && url.startsWith("http")) return request.abort();
+
+      request.continue();
+    });
 
     const fullHtml = `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="UTF-8">
-          ${styleTags}
+          ${styleTags || ""}
           <style>
-            @page { margin: 0; size: A4; } 
-            body { margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white; } 
-            .cv-preview-paper { box-shadow: none !important; margin: 0 !important; width: 100% !important; height: 100% !important; min-height: 297mm; box-sizing: border-box; }
+            @page { margin: 0; size: A4; }
+            html, body {
+              margin: 0;
+              padding: 0;
+              background: white;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .cv-preview-paper {
+              box-shadow: none !important;
+              margin: 0 !important;
+              width: 100% !important;
+              min-height: 297mm;
+              box-sizing: border-box;
+            }
           </style>
         </head>
         <body>${htmlContent}</body>
@@ -745,24 +821,48 @@ app.post("/api/cvs/generate-pdf", authenticateToken, async (req, res) => {
     `;
 
     console.log("[PDF] Setting content...");
-    await page.setContent(fullHtml, { waitUntil: 'networkidle0' });
+    await page.setContent(fullHtml, {
+      waitUntil: "domcontentloaded", // <- antes tenías networkidle0 (problemático)
+      timeout: 60000 // 60s
+    });
+
+    // pequeña pausa para layout/fonts locales (opcional)
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
     console.log("[PDF] Generating PDF buffer...");
     const pdfBuffer = await page.pdf({
-      format: 'A4',
+      format: "A4",
       printBackground: true,
-      margin: { top: '0', right: '0', bottom: '0', left: '0' }
+      preferCSSPageSize: true,
+      margin: { top: "0", right: "0", bottom: "0", left: "0" }
     });
 
-    console.log("[PDF] Closing browser...");
-    await browser.close();
-
     console.log("[PDF] Success. Sending response.");
-    res.set({ 'Content-Type': 'application/pdf', 'Content-Length': pdfBuffer.length });
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Length": pdfBuffer.length
+    });
     res.send(pdfBuffer);
+
+    logMemory("Después de generar PDF");
   } catch (error) {
     console.error("[PDF] Error generando PDF con Puppeteer:", error);
-    res.status(500).json({ error: "Error al generar el PDF", details: error.message });
+    res.status(500).json({
+      error: "Error al generar el PDF",
+      details: error.message
+    });
+  } finally {
+    // Cerrar la page SIEMPRE, aunque falle
+    if (page) {
+      try {
+        await page.close();
+        console.log("[PDF] Page closed.");
+      } catch (e) {
+        console.warn("[PDF] Error closing page:", e.message);
+      }
+    }
+
+    isGeneratingPdf = false;
   }
 });
 
