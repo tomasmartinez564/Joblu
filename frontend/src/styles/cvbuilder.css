@@ -142,7 +142,7 @@
 }
 
 .template-minimal-pro .cv-preview-header {
-  text-align: center;
+  text-align: left;
   padding-bottom: 0.75rem;
   margin-bottom: 0.5rem;
   border-bottom: 1px solid #e2e8f0;
@@ -166,14 +166,14 @@
 }
 
 .template-minimal-pro .cv-preview-contact {
-  justify-content: center;
+  justify-content: flex-start;
   color: #94a3b8;
   font-size: 0.8rem;
 }
 
 .template-minimal-pro .cv-preview-divider {
   border-top: none;
-  margin: 1.1rem auto;
+  margin: 1.1rem 0;
   width: 40px;
   height: 1px;
   background: #cbd5e1;
@@ -186,17 +186,17 @@
   color: #94a3b8;
   margin-bottom: 0.35rem;
   font-weight: 500;
-  text-align: center;
+  text-align: left;
 }
 
 .template-minimal-pro .cv-preview-paragraph,
 .template-minimal-pro .cv-preview-paragraph-preline {
-  text-align: center;
+  text-align: left;
 }
 
 .template-minimal-pro .cv-photo-placeholder,
 .template-minimal-pro .cv-photo-preview {
-  margin-left: auto;
+  margin-left: 0;
   margin-right: auto;
 }
 

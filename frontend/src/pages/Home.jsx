@@ -35,7 +35,21 @@ export default function Home({ user }) {
   const scrollCarousel = (direction) => {
     if (carouselRef.current) {
       const scrollAmount = 300;
-      carouselRef.current.scrollBy({ left: direction * scrollAmount, behavior: "smooth" });
+      const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
+
+      const maxScroll = scrollWidth - clientWidth;
+      const newScrollLeft = scrollLeft + direction * scrollAmount;
+
+      if (direction === 1 && newScrollLeft >= maxScroll - 10) {
+        // Llego al final (con un pequeño margen de 10px), volver al principio
+        carouselRef.current.scrollTo({ left: 0, behavior: "smooth" });
+      } else if (direction === -1 && newScrollLeft <= 10) {
+        // Llego al principio, ir al final
+        carouselRef.current.scrollTo({ left: maxScroll, behavior: "smooth" });
+      } else {
+        // Scroll normal
+        carouselRef.current.scrollBy({ left: direction * scrollAmount, behavior: "smooth" });
+      }
     }
   };
 

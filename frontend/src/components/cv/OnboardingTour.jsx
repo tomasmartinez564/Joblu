@@ -378,10 +378,8 @@ export function startCvOnboardingTour() {
 }
 
 // ── Dev helper (available in browser console) ─────────────────
-if (typeof window !== "undefined") {
-    window.resetCvOnboarding = () => {
-        localStorage.removeItem(LS_KEY);
-        console.log("[JOBLU] Onboarding reset. Reloading...");
-        window.location.reload();
-    };
-}
+window.resetCvOnboarding = () => {
+    localStorage.removeItem(LS_KEY);
+    console.log("[JOBLU] Onboarding reset. Reloading...");
+    window.location.reload();
+};
