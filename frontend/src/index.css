@@ -103,7 +103,7 @@ button {
 
 /* Identidad de Marca Global */
 .brand-name {
-  color: var(--joblu-primary, #6366f1);
+  color: inherit;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;

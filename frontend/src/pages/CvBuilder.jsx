@@ -12,6 +12,7 @@ import "../styles/jobs-detail.css";
 // --- Componentes y Páginas ---
 
 import CvForm from "../components/cv/CvForm";
+import { ClipLoader } from "react-spinners";
 
 // --- Servicios y Configuración ---
 import API_BASE_URL from "../config/api";
@@ -105,6 +106,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [templateId, setTemplateId] = useState("ats-classic");
   const [isSaving, setIsSaving] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [saveSuccess, setSaveSuccess] = useState("");
 
@@ -482,6 +484,8 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
   const handleDownloadPDF = async () => {
     if (!cvRef.current) return;
+    if (isDownloading) return;
+    setIsDownloading(true);
 
     const getInlineStylesForPdf = () => {
       let cssText = "";
@@ -529,6 +533,8 @@ function CvBuilder({ user, settings, onChangeSettings }) {
     } catch (error) {
       console.error("Error al descargar PDF:", error);
       alert("Hubo un error al generar el PDF.");
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -699,10 +705,12 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
             {/* 2. Guardar y Descargar — acciones de cierre */}
             <div className="cv-actions-secondary" data-tour="cv-save-actions">
-              <button type="button" className="cv-action-btn save-btn" onClick={handleSave} disabled={isSaving} style={{ opacity: isSaving ? 0.7 : 1, cursor: isSaving ? "wait" : "pointer" }}>
+              <button type="button" className="cv-action-btn save-btn" onClick={handleSave} disabled={isSaving || isDownloading} style={{ opacity: isSaving ? 0.7 : 1, cursor: isSaving ? "wait" : "pointer", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                {isSaving && <ClipLoader size={16} color="#fff" />}
                 {isSaving ? "Guardando..." : (cvLanguage === "en" ? "Save CV" : "Guardar CV")}
               </button>
-              <button type="button" className="cv-action-btn download-btn" onClick={handleDownloadPDF}>
+              <button type="button" className="cv-action-btn download-btn" onClick={handleDownloadPDF} disabled={isDownloading || isSaving} style={{ opacity: isDownloading ? 0.7 : 1, cursor: isDownloading ? "wait" : "pointer", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                {isDownloading && <ClipLoader size={16} color="#000" />}
                 {cvLanguage === "en" ? "Download PDF" : "Descargar PDF"}
               </button>
             </div>

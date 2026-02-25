@@ -8,6 +8,7 @@ import "../styles/mycvs.css";
 import cvService from "../services/cvService";
 import { useToast } from "../context/ToastContext";
 import { getAvailableTemplates } from "../data/templates";
+import { ClipLoader } from "react-spinners";
 
 // ==========================================
 // 🛠️ UTILIDADES (Helpers)
@@ -44,6 +45,7 @@ function MyCvs({ user }) {
   const [error, setError] = useState(null);
   const [cvToConfirm, setCvToConfirm] = useState(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(null);
 
   // --- 2. Efectos ---
   useEffect(() => {
@@ -76,6 +78,7 @@ function MyCvs({ user }) {
    * Gestiona la eliminación de un CV con actualización optimista.
    */
   const handleDelete = async (id) => {
+    setIsDeleting(id);
     const previousCvs = [...cvs];
 
     // Actualización optimista: removemos del estado antes de la respuesta del servidor
@@ -84,11 +87,13 @@ function MyCvs({ user }) {
 
     try {
       await cvService.delete(id);
+      setIsDeleting(null);
     } catch (err) {
       console.error("Error al eliminar CV:", err);
       // Revertimos cambios si falla la petición
       setCvs(previousCvs);
       addToast("Hubo un error al eliminar el CV.", "error");
+      setIsDeleting(null);
     }
   };
 
@@ -165,7 +170,9 @@ function MyCvs({ user }) {
           className="mycvs-import-btn"
           onClick={handleImportClick}
           disabled={isImporting}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
         >
+          {isImporting && <ClipLoader size={16} color="#000" />}
           {isImporting ? "Importando..." : "Importar CV (PDF)"}
         </button>
       </div>
@@ -203,6 +210,8 @@ function MyCvs({ user }) {
                 <button
                   type="button"
                   className="mycvs-card-btn danger"
+                  disabled={isDeleting === cv._id}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                   onClick={() => {
                     if (cvToConfirm === cv._id) {
                       handleDelete(cv._id);
@@ -211,6 +220,7 @@ function MyCvs({ user }) {
                     }
                   }}
                 >
+                  {isDeleting === cv._id && <ClipLoader size={16} color="#fff" />}
                   {cvToConfirm === cv._id ? "Confirmar eliminación" : "Eliminar"}
                 </button>
               </div>
