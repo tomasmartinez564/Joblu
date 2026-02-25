@@ -196,8 +196,8 @@
 
 .template-minimal-pro .cv-photo-placeholder,
 .template-minimal-pro .cv-photo-preview {
-  margin-left: 0;
-  margin-right: auto;
+  margin-left: auto;
+  margin-right: 0;
 }
 
 /* ====================================================
