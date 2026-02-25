@@ -1001,7 +1001,8 @@
 }
 
 .cv-actions-secondary .save-btn,
-.cv-actions-secondary .download-btn {
+.cv-actions-secondary .download-btn,
+.cv-actions .import-btn {
   background: var(--joblu-primary);
   color: #ffffff;
   border: 2px solid var(--joblu-primary);
@@ -1012,7 +1013,8 @@
 }
 
 .cv-actions-secondary .save-btn:hover,
-.cv-actions-secondary .download-btn:hover {
+.cv-actions-secondary .download-btn:hover,
+.cv-actions .import-btn:hover {
   background: transparent;
   color: var(--joblu-primary);
   transform: translateY(-1px);
@@ -1080,13 +1082,15 @@
 
 .cv-actions .save-btn:disabled,
 .cv-actions .download-btn:disabled,
-.cv-actions .ai-btn:disabled {
+.cv-actions .ai-btn:disabled,
+.cv-actions .import-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
   filter: none;
 }
+
 
 
 /* Tip con resumen de preferencias */

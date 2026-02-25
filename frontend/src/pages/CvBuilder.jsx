@@ -13,6 +13,7 @@ import "../styles/jobs-detail.css";
 
 import CvForm from "../components/cv/CvForm";
 import { ClipLoader } from "react-spinners";
+import { useToast } from "../context/ToastContext";
 
 // --- Servicios y Configuración ---
 import API_BASE_URL from "../config/api";
@@ -65,6 +66,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   const navigate = useNavigate();
   const location = useLocation();
   const isLogged = !!user;
+  const { addToast } = useToast();
 
   // --- 1. Desestructuración de Preferencias ---
   const {
@@ -107,8 +109,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   const [templateId, setTemplateId] = useState("ats-classic");
   const [isSaving, setIsSaving] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [saveError, setSaveError] = useState("");
-  const [saveSuccess, setSaveSuccess] = useState("");
+  const [isImporting, setIsImporting] = useState(false);
 
   // --- 4. Estados: Inteligencia Artificial ---
   const [aiOpen, setAiOpen] = useState(false);
@@ -314,11 +315,9 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
   const handleSave = async () => {
     if (isSaving) return;
-    setSaveError("");
-    setSaveSuccess("");
 
     if (!isLogged) {
-      setSaveError(cvLanguage === "en" ? "You need to log in to save your CVs." : "Tenés que iniciar sesión para guardar tus CVs.");
+      addToast(cvLanguage === "en" ? "You need to log in to save your CVs." : "Tenés que iniciar sesión para guardar tus CVs.", "error");
       return;
     }
 
@@ -333,18 +332,36 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
       if (id) {
         await cvService.update(id, payload);
-        setSaveSuccess(cvLanguage === "en" ? "CV updated." : "CV actualizado correctamente.");
+        addToast(cvLanguage === "en" ? "CV updated." : "CV actualizado correctamente.", "success");
         localStorage.removeItem(`joblu_cv_draft_${id}`);
       } else {
         const newCv = await cvService.create(payload);
-        setSaveSuccess(cvLanguage === "en" ? "CV created." : "CV creado correctamente.");
+        addToast(cvLanguage === "en" ? "CV created." : "CV creado correctamente.", "success");
         localStorage.removeItem("joblu_cv_draft_new");
         navigate(`/cv/${newCv._id}`, { replace: true });
       }
     } catch (error) {
-      setSaveError(error.message || "Error al guardar.");
+      addToast(error.message || "Error al guardar.", "error");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+
+    try {
+      const newCv = await cvService.importCv(file);
+      navigate(`/cv/${newCv._id}`, { replace: true });
+    } catch (err) {
+      console.error(err);
+      addToast(cvLanguage === "en" ? "Error importing CV. Try another file." : "Error al importar el CV. Intentá con otro archivo.", "error");
+    } finally {
+      setIsImporting(false);
+      e.target.value = '';
     }
   };
 
@@ -694,14 +711,34 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
           {/* Botones de Acción Globales */}
           <div className="cv-actions">
-            {/* 1. IA — herramienta de asistencia, posición protagonista */}
-            <button ref={refBtnIA} type="button" className="cv-action-btn ai-btn" data-tour="cv-ai-button" onClick={() => {
-              const currentKey = STEPS[activeStep].key;
-              const sectionToUse = currentKey === "datos" ? "perfil" : currentKey;
-              handleOpenAiForSection(sectionToUse, cvData[sectionToUse]);
-            }}>
-              ✨ {cvLanguage === "en" ? "Improve with AI" : "Mejorar con IA"}
-            </button>
+            <div className="cv-actions-primary-row" style={{ display: 'flex', gap: '0.75rem', width: '100%', flexDirection: 'row' }}>
+              <input
+                type="file"
+                id="import-cv-input-builder"
+                accept=".pdf,.txt"
+                style={{ display: "none" }}
+                onChange={handleFileChange}
+              />
+              <button
+                type="button"
+                className="cv-action-btn import-btn"
+                onClick={() => document.getElementById("import-cv-input-builder").click()}
+                disabled={isImporting || isSaving || isDownloading}
+                style={{ flex: 1, opacity: isImporting ? 0.7 : 1, cursor: isImporting ? "wait" : "pointer", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0' }}
+              >
+                {isImporting && <ClipLoader size={16} color="#fff" />}
+                {isImporting ? (cvLanguage === "en" ? "Importing..." : "Importando...") : (cvLanguage === "en" ? "Import CV" : "Importar CV")}
+              </button>
+
+              {/* 1. IA — herramienta de asistencia, posición protagonista */}
+              <button ref={refBtnIA} type="button" className="cv-action-btn ai-btn" data-tour="cv-ai-button" onClick={() => {
+                const currentKey = STEPS[activeStep].key;
+                const sectionToUse = currentKey === "datos" ? "perfil" : currentKey;
+                handleOpenAiForSection(sectionToUse, cvData[sectionToUse]);
+              }} style={{ flex: 1, padding: '0' }}>
+                ✨ {cvLanguage === "en" ? "Improve" : "Mejorar con IA"}
+              </button>
+            </div>
 
             {/* 2. Guardar y Descargar — acciones de cierre */}
             <div className="cv-actions-secondary" data-tour="cv-save-actions">
@@ -714,12 +751,6 @@ function CvBuilder({ user, settings, onChangeSettings }) {
                 {cvLanguage === "en" ? "Download PDF" : "Descargar PDF"}
               </button>
             </div>
-
-            {(saveError || saveSuccess) && (
-              <p className={"cv-save-message " + (saveError ? "cv-save-message--error" : "cv-save-message--success")}>
-                {saveError || saveSuccess}
-              </p>
-            )}
           </div>
         </div>
 

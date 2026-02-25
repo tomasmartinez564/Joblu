@@ -70,7 +70,7 @@ function Login({ onLogin }) {
       } else {
         // Éxito en login: notificamos y actualizamos estado global
         addToast(`Bienvenido de nuevo, ${data.user.name} 👋`, 'success');
-        onLogin(data.user, data.token); // Pasamos user y token a App.jsx
+        onLogin(data.user, data.token, '/'); // Pasamos user y token a App.jsx y redirigimos al inicio
       }
 
     } catch (error) {

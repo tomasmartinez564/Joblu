@@ -113,7 +113,7 @@ function AppLayout() {
   }, [settings])
 
   // --- Handlers: Autenticación ---
-  const handleLogin = (userData, token, redirectPath = '/cv') => {
+  const handleLogin = (userData, token, redirectPath = '/') => {
     setUser(userData)
     setIsAccountMenuOpen(false)
     try {
