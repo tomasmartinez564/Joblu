@@ -14,6 +14,7 @@ function CvForm({
     onRemovePhoto,
     onImprove,
     onExperienceChange,
+    onEducationChange,
     onSkillsChange,
     onLanguagesChange,
     refs = {},
@@ -294,6 +295,129 @@ function CvForm({
         );
     };
 
+    const renderEducation = () => {
+        const educationList = Array.isArray(cvData.education) ? cvData.education : [];
+        const [openEducationIndex, setOpenEducationIndex] = useState(educationList.length > 0 ? 0 : null);
+
+        const handleAdd = () => {
+            const newEdu = { id: Date.now().toString() + "-edu", degree: "", institution: "", location: "", startDate: "", endDate: "", current: false, description: "" };
+            onEducationChange([...educationList, newEdu]);
+            setOpenEducationIndex(educationList.length);
+        };
+
+        const handleRemove = (e, id) => {
+            e.stopPropagation();
+            onEducationChange(educationList.filter(edu => edu.id !== id));
+        };
+
+        const toggleAccordion = (index) => {
+            setOpenEducationIndex(prev => prev === index ? null : index);
+        };
+
+        const handleChangeEdu = (id, field, value) => {
+            onEducationChange(educationList.map(edu => edu.id === id ? { ...edu, [field]: value } : edu));
+        };
+
+        return (
+            <div className="cv-form-slide fade-in">
+                <div className="cv-form-sectionHeader">
+                    <h3 className="cv-form-sectionTitle">
+                        {cvLanguage === "en" ? "Education" : "Educación"}
+                        {onToggleSection && (
+                            <button
+                                type="button"
+                                className={`cv-visibility-btn${sectionsVisible['educacion'] === false ? ' cv-visibility-btn--hidden' : ''}`}
+                                onClick={() => onToggleSection('educacion')}
+                            >
+                                {sectionsVisible['educacion'] === false ? <FaEyeSlash /> : <FaEye />}
+                            </button>
+                        )}
+                    </h3>
+                </div>
+
+                <div className="cv-experience-list">
+                    {educationList.map((edu, index) => {
+                        const isOpen = openEducationIndex === index;
+                        const headerTitle = edu.degree || edu.institution
+                            ? [edu.degree, edu.institution].filter(Boolean).join(" en ")
+                            : `${cvLanguage === "en" ? "Education" : "Educación"} ${index + 1}`;
+
+                        return (
+                            <div key={edu.id || index} className={`cv-experience-card ${isOpen ? 'is-open' : 'is-closed'}`}>
+                                <div
+                                    className="cv-experience-card-header"
+                                    onClick={() => toggleAccordion(index)}
+                                    style={{ cursor: "pointer" }}
+                                >
+                                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                        <span className="cv-exp-accordion-icon">
+                                            {isOpen ? <FaChevronUp size="0.8em" /> : <FaChevronDown size="0.8em" />}
+                                        </span>
+                                        <h4 style={{ margin: 0 }}>{headerTitle}</h4>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={(e) => handleRemove(e, edu.id)}
+                                        className="cv-exp-remove-btn"
+                                        title={cvLanguage === "en" ? "Remove" : "Eliminar"}
+                                    >
+                                        ✖
+                                    </button>
+                                </div>
+
+                                {isOpen && (
+                                    <div className="cv-experience-card-body">
+                                        <div className="cv-form-group-inline">
+                                            <label>
+                                                {cvLanguage === "en" ? "Degree / Title *" : "Título / Carrera *"}
+                                                <input type="text" value={edu.degree} onChange={(e) => handleChangeEdu(edu.id, "degree", e.target.value)} placeholder={cvLanguage === "en" ? "e.g. B.S. in Computer Science" : "Ej: Analista de Sistemas"} required />
+                                            </label>
+                                            <label>
+                                                {cvLanguage === "en" ? "Institution *" : "Institución *"}
+                                                <input type="text" value={edu.institution} onChange={(e) => handleChangeEdu(edu.id, "institution", e.target.value)} placeholder={cvLanguage === "en" ? "e.g. University X" : "Ej: Universidad X"} required />
+                                            </label>
+                                        </div>
+
+                                        <div className="cv-form-group-inline">
+                                            <label>
+                                                {cvLanguage === "en" ? "Location" : "Ubicación"}
+                                                <input type="text" value={edu.location} onChange={(e) => handleChangeEdu(edu.id, "location", e.target.value)} placeholder={cvLanguage === "en" ? "e.g. New York, Remote..." : "Ej: Buenos Aires, Remoto..."} />
+                                            </label>
+                                            <div className="cv-form-dates-row">
+                                                <label className="cv-form-date-input">
+                                                    {cvLanguage === "en" ? "Start date *" : "Fecha inicio *"}
+                                                    <input type="month" value={edu.startDate} onChange={(e) => handleChangeEdu(edu.id, "startDate", e.target.value)} required />
+                                                </label>
+                                                <label className="cv-form-date-input" style={{ opacity: edu.current ? 0.5 : 1 }}>
+                                                    {cvLanguage === "en" ? "End date" : "Fecha fin"}
+                                                    <input type="month" value={edu.endDate} onChange={(e) => handleChangeEdu(edu.id, "endDate", e.target.value)} disabled={edu.current} required={!edu.current} />
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <label className="cv-exp-checkbox">
+                                            <input type="checkbox" checked={edu.current} onChange={(e) => handleChangeEdu(edu.id, "current", e.target.checked)} />
+                                            {cvLanguage === "en" ? "I currently study here" : "Estudio actualmente aquí"}
+                                        </label>
+
+                                        <label>
+                                            {cvLanguage === "en" ? "Description / Achievements" : "Descripción / Logros"}
+                                            <textarea rows="3" value={edu.description} onChange={(e) => handleChangeEdu(edu.id, "description", e.target.value)} placeholder={cvLanguage === "en" ? "Describe your studies..." : "Describí tus estudios y logros..."}></textarea>
+                                        </label>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <button type="button" onClick={handleAdd} className="cv-exp-add-btn">
+                    + {cvLanguage === "en" ? "Add education" : "Agregar educación"}
+                </button>
+            </div>
+        );
+    };
+
     const renderChipSection = (key, title, placeholder, items, onChangeItems) => {
         const [inputValue, setInputValue] = useState("");
 
@@ -381,12 +505,7 @@ function CvForm({
 
                 {isStep("experiencias") && renderWorkExperience()}
 
-                {isStep("educacion") && renderSection(
-                    "educacion",
-                    cvLanguage === "en" ? "Education" : "Educación",
-                    cvLanguage === "en" ? "University X · Web Development..." : "Universidad X · Tecnicatura...",
-                    6
-                )}
+                {isStep("educacion") && renderEducation()}
 
                 {isStep("habilidades") && renderChipSection(
                     "habilidades",

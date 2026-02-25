@@ -32,7 +32,8 @@ const emptyCv = {
   perfil: "",
   experiencias: "", // Obsoleto, mantenido por compatibilidad
   experience: [], // Nueva estructura
-  educacion: "",
+  educacion: "", // Obsoleto
+  education: [], // Nueva estructura
   habilidades: "", // Obsoleto
   skills: [], // Nueva estructura
   idiomas: "", // Obsoleto
@@ -40,6 +41,19 @@ const emptyCv = {
   proyectos: "",
   otros: "",
   foto: "",
+};
+
+// Helper: safe date formatting fallback for non YYYY-MM dates
+const formatMonthYear = (dateStr, lang) => {
+  if (!dateStr) return "";
+  const match = dateStr.match(/^(\d{4})-(\d{2})$/);
+  if (match) {
+    const d = new Date(parseInt(match[1]), parseInt(match[2]) - 1, 1);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString(lang === 'en' ? 'en-US' : 'es-ES', { month: 'short', year: 'numeric' });
+    }
+  }
+  return dateStr;
 };
 
 // ==========================================
@@ -73,6 +87,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   });
   const [sectionsVisible, setSectionsVisible] = useState({
     perfil: true,
+    experiencias: true,
     educacion: true,
     habilidades: true,
     idiomas: true, // Cambiado de false a true
@@ -220,6 +235,22 @@ function CvBuilder({ user, settings, onChangeSettings }) {
         // mergedData.experiencias = ""; // Opcional: borrar el viejo
       }
 
+      // Retrocompatibilidad Educación
+      if (!Array.isArray(mergedData.education)) mergedData.education = [];
+      if (typeof mergedData.educacion === 'string' && mergedData.educacion.trim() !== "" && mergedData.education.length === 0) {
+        mergedData.education = [{
+          id: Date.now().toString() + "-edu",
+          degree: "",
+          institution: "",
+          location: "",
+          startDate: "",
+          endDate: "",
+          current: false,
+          description: mergedData.educacion
+        }];
+        // mergedData.educacion = ""; 
+      }
+
       // Retrocompatibilidad Habilidades
       if (!Array.isArray(mergedData.skills)) mergedData.skills = [];
       if (typeof mergedData.habilidades === 'string' && mergedData.habilidades.trim() !== "" && mergedData.skills.length === 0) {
@@ -243,7 +274,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
 
       Object.keys(mergedData).forEach(key => {
         // Las nuevas estructuras en array y estados anidados se mantienen nativos
-        if (['experience', 'skills', 'languages', 'sectionsVisible'].includes(key)) return;
+        if (['experience', 'education', 'skills', 'languages', 'sectionsVisible'].includes(key)) return;
 
         const val = mergedData[key];
         if (typeof val === 'object' && val !== null) {
@@ -435,6 +466,10 @@ function CvBuilder({ user, settings, onChangeSettings }) {
   // --- Helpers de Colecciones ---
   const handleExperienceChange = (experiences) => {
     setCvData((prev) => ({ ...prev, experience: experiences }));
+  };
+
+  const handleEducationChange = (educationList) => {
+    setCvData((prev) => ({ ...prev, education: educationList }));
   };
 
   const handleSkillsChange = (skillsList) => {
@@ -633,6 +668,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
               cvData={cvData}
               onChange={handleChange}
               onExperienceChange={handleExperienceChange}
+              onEducationChange={handleEducationChange}
               onSkillsChange={handleSkillsChange}
               onLanguagesChange={handleLanguagesChange}
               settings={settings}
@@ -762,9 +798,9 @@ function CvBuilder({ user, settings, onChangeSettings }) {
                               <div className="cv-preview-exp-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                                 <strong>{exp.position || <span className="cv-placeholder">Puesto</span>}</strong>
                                 <span className="cv-preview-exp-date" style={{ fontSize: "0.9em", color: "var(--cv-text-secondary)" }}>
-                                  {exp.startDate ? new Date(exp.startDate + "-01").toLocaleDateString(cvLanguage === 'en' ? 'en-US' : 'es-ES', { month: 'short', year: 'numeric' }) : ""}
+                                  {formatMonthYear(exp.startDate, cvLanguage)}
                                   {exp.startDate && (exp.endDate || exp.current) ? " - " : ""}
-                                  {exp.current ? (cvLanguage === "en" ? "Present" : "Actualidad") : (exp.endDate ? new Date(exp.endDate + "-01").toLocaleDateString(cvLanguage === 'en' ? 'en-US' : 'es-ES', { month: 'short', year: 'numeric' }) : "")}
+                                  {exp.current ? (cvLanguage === "en" ? "Present" : "Actualidad") : formatMonthYear(exp.endDate, cvLanguage)}
                                 </span>
                               </div>
                               <div className="cv-preview-exp-subheader" style={{ fontSize: "0.95em", fontStyle: "italic", marginBottom: "0.3rem" }}>
@@ -778,6 +814,50 @@ function CvBuilder({ user, settings, onChangeSettings }) {
                         </div>
                       ) : (
                         <p className="cv-preview-paragraph-preline">{cvData.experiencias}</p>
+                      )}
+                    </section>
+                  );
+                }
+
+                if (key === 'educacion') {
+                  const hasStructuredOld = cvData.education && cvData.education.length > 0;
+                  const hasPlainOld = !!cvData.educacion;
+
+                  if (!hasStructuredOld && !hasPlainOld) {
+                    return (
+                      <section key={key} className="cv-preview-section">
+                        <h4>{sectionLabels[key]}</h4>
+                        <p className="cv-preview-paragraph-preline"><span className="cv-placeholder">{cvLanguage === "en" ? "Add details..." : "Agregá detalles..."}</span></p>
+                      </section>
+                    )
+                  }
+
+                  return (
+                    <section key={key} className="cv-preview-section">
+                      <h4>{sectionLabels[key]}</h4>
+                      {cvData.education && cvData.education.length > 0 ? (
+                        <div className="cv-preview-experience-list">
+                          {cvData.education.map((edu, idx) => (
+                            <div key={edu.id || idx} className="cv-preview-exp-item" style={{ marginBottom: "1rem" }}>
+                              <div className="cv-preview-exp-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                                <strong>{edu.degree || <span className="cv-placeholder">{cvLanguage === "en" ? "Degree" : "Título"}</span>}</strong>
+                                <span className="cv-preview-exp-date" style={{ fontSize: "0.9em", color: "var(--cv-text-secondary)" }}>
+                                  {formatMonthYear(edu.startDate, cvLanguage)}
+                                  {edu.startDate && (edu.endDate || edu.current) ? " - " : ""}
+                                  {edu.current ? (cvLanguage === "en" ? "Present" : "Actualidad") : formatMonthYear(edu.endDate, cvLanguage)}
+                                </span>
+                              </div>
+                              <div className="cv-preview-exp-subheader" style={{ fontSize: "0.95em", fontStyle: "italic", marginBottom: "0.3rem" }}>
+                                {[edu.institution, edu.location].filter(Boolean).join(" · ")}
+                              </div>
+                              {edu.description && (
+                                <p className="cv-preview-paragraph-preline" style={{ marginTop: "0.2rem" }}>{edu.description}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="cv-preview-paragraph-preline">{cvData.educacion}</p>
                       )}
                     </section>
                   );
@@ -817,7 +897,7 @@ function CvBuilder({ user, settings, onChangeSettings }) {
                 return (
                   <section key={key} className="cv-preview-section">
                     <h4>{sectionLabels[key]}</h4>
-                    <p className={`cv-preview-paragraph${['educacion', 'proyectos', 'otros'].includes(key) ? '-preline' : ''}`}>
+                    <p className={`cv-preview-paragraph${['proyectos', 'otros'].includes(key) ? '-preline' : ''}`}>
                       {cvData[key] || <span className="cv-placeholder">{cvLanguage === "en" ? "Add details..." : "Agregá detalles..."}</span>}
                     </p>
                   </section>

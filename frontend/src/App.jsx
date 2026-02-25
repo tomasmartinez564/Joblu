@@ -113,14 +113,14 @@ function AppLayout() {
   }, [settings])
 
   // --- Handlers: Autenticación ---
-  const handleLogin = (userData, token) => {
+  const handleLogin = (userData, token, redirectPath = '/cv') => {
     setUser(userData)
     setIsAccountMenuOpen(false)
     try {
       if (token) localStorage.setItem('joblu_token', token)
       localStorage.setItem(LS_USER_KEY, JSON.stringify(userData))
     } catch { }
-    navigate('/cv')
+    navigate(redirectPath)
   }
 
   const handleLogout = () => {

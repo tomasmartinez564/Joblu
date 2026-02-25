@@ -238,7 +238,22 @@ app.post("/api/auth/register", async (req, res) => {
     });
 
     await newUser.save();
-    res.status(201).json({ message: "Usuario creado con éxito" });
+
+    // Generar Token JWT
+    const token = jwt.sign(
+      { id: newUser._id, name: newUser.name, email: newUser.email },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    const userObj = newUser.toObject();
+    delete userObj.password;
+
+    res.status(201).json({
+      message: "Usuario creado con éxito",
+      token,
+      user: userObj
+    });
   } catch (err) {
     console.error("Error en registro:", err);
     res.status(500).json({ error: "Error al registrar el usuario" });
@@ -625,14 +640,14 @@ app.post("/api/cvs/import", authenticateToken, uploadCv.single("file"), async (r
       extractedText = fs.readFileSync(req.file.path, "utf8");
     }
 
-    let parsedData = { nombre: "", puesto: "", email: "", telefono: "", ubicacion: "", sitioWeb: "", linkedin: "", github: "", perfil: "", experience: [], educacion: "", skills: [], languages: [], proyectos: "", otros: "" };
+    let parsedData = { nombre: "", puesto: "", email: "", telefono: "", ubicacion: "", sitioWeb: "", linkedin: "", github: "", perfil: "", experience: [], educacion: "", education: [], skills: [], languages: [], proyectos: "", otros: "" };
 
     if (process.env.OPENAI_API_KEY) {
       try {
         const completion = await openai.chat.completions.create({
           model: "gpt-4o-mini",
           messages: [
-            { role: "system", content: `Eres un experto en reclutamiento. Extrae la información del CV y devuélvela ESTRICTAMENTE en este formato JSON: { "nombre": "Nombre", "puesto": "Rol", "email": "correo@ej.com", "telefono": "Tel", "ubicacion": "Ciudad", "sitioWeb": "URL", "linkedin": "URL", "github": "URL", "perfil": "Resumen", "experience": [ { "id": "Genera un ID único como un timestamp en string", "position": "Puesto", "company": "Empresa", "location": "Ubicación", "startDate": "YYYY-MM", "endDate": "YYYY-MM o vacío", "current": true o false, "description": "Tareas y logros" } ], "educacion": "Texto plano", "skills": ["Hab 1", "Hab 2"], "languages": ["Id 1", "Id 2"], "proyectos": "Texto", "otros": "Texto" } ATENCIÓN: Separa cada trabajo distinto en un objeto dentro del array "experience". Extrae cada habilidad y cada idioma como elementos individuales de un array de strings ("skills" y "languages"). Si ves URLs pegadas por error, SEPÁRALAS lógicamente. Devuelve solo JSON.` },
+            { role: "system", content: `Eres un experto en reclutamiento. Extrae la información del CV y devuélvela ESTRICTAMENTE en este formato JSON: { "nombre": "Nombre", "puesto": "Rol", "email": "correo@ej.com", "telefono": "Tel", "ubicacion": "Ciudad", "sitioWeb": "URL", "linkedin": "URL", "github": "URL", "perfil": "Resumen", "experience": [ { "id": "Genera un ID único", "position": "Puesto", "company": "Empresa", "location": "Ubicación", "startDate": "YYYY-MM o vacío", "endDate": "YYYY-MM o vacío", "current": true o false, "description": "Tareas y logros" } ], "education": [ { "id": "Genera un ID único", "degree": "Título", "institution": "Institución", "location": "Ubicación", "startDate": "YYYY-MM o vacío", "endDate": "YYYY-MM o vacío", "current": true o false, "description": "Detalles" } ], "skills": ["Hab 1", "Hab 2"], "languages": ["Id 1", "Id 2"], "proyectos": "Texto", "otros": "Texto" } ATENCIÓN: Separa cada trabajo y estudio en sus propios arrays. Extrae habilidades e idiomas como arrays de strings. Si ves URLs pegadas, SEPÁRALAS lógicamente. REGLA DE FECHAS: Si solo hay UNA fecha, asúmelo como fecha de finalización, colócalo en "endDate" y deja "startDate" vacío. REGLA DE TEXTO: Si notas que las palabras dentro del CV original fueron extraídas sin espacios por error del PDF (ej. 'Armadodepedidos', 'AtencionalCliente'), DETECTA ESTO y SEPÁRALAS lógicamente ('Armado de pedidos', 'Atención al Cliente') en todo el JSON. Devuelve solo JSON.` },
             {
               role: "user",
               content: `Analiza este CV:\n\n${extractedText.substring(0, 15000)}`

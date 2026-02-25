@@ -64,9 +64,9 @@ function Login({ onLogin }) {
       }
 
       if (isRegistering) {
-        // Éxito en registro: notificamos y pasamos a modo login
-        addToast('¡Cuenta creada! Ahora iniciá sesión.', 'success');
-        setIsRegistering(false);
+        // Éxito en registro: notificamos y logueamos automáticamente
+        addToast(`¡Cuenta creada con éxito! Bienvenido, ${data.user.name} 👋`, 'success');
+        onLogin(data.user, data.token, '/');
       } else {
         // Éxito en login: notificamos y actualizamos estado global
         addToast(`Bienvenido de nuevo, ${data.user.name} 👋`, 'success');
